@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
+import { useStorage } from '@vueuse/core'
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: null,
+    user: useStorage('user',{}),
   }),
 
   actions: {
@@ -21,9 +22,10 @@ export const useUserStore = defineStore("user", {
         body: JSON.stringify({ username, password }),
       });
       const user = await res.json()
-      this.user = user;
+      this.user.push(user);
     },
     async signIn(username, password) {
+      console.log('this.user')
       const res = await fetch(process.env.VUE_APP_API_HOST+ "/api/auth/login/", {
         method: "POST",
         headers: {
@@ -32,7 +34,12 @@ export const useUserStore = defineStore("user", {
         body: JSON.stringify({ username, password }),
       });
       const user = await res.json();
-      this.user = user;
+      if(res.ok){
+        this.user = user
+      }else{
+        console.log(user)
+      }
+      console.log(res.statusText)
     },
   }
 });
