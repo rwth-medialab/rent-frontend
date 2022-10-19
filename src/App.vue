@@ -3,7 +3,7 @@
     <div>
       <v-app-bar dense dark>
         <v-toolbar-title>
-          <v-btn href="/">Ausleihe</v-btn>
+          <v-btn href="/">{{siteName}}</v-btn>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon to="/account">
@@ -25,11 +25,19 @@
 </template>
 
 <script>
+import { useUserStore } from './store/user.js'
 export default {
-  data: function () {
+  setup() {
+    const userStore = useUserStore();
+    return { userStore };
+  },
+  data:  () => {
     return {
       loggedIn: false,
-    };
-  }
+      siteName: process.env.VUE_APP_NAME
+    }
+  },
+  mounted() {
+  } 
 }
 </script>

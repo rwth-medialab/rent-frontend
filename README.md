@@ -1,5 +1,8 @@
 # frontend
 
+## IMPORTANT
+Use Node<15. oterhwise you could run into problems with npm
+
 ## Project setup
 ```
 npm install
