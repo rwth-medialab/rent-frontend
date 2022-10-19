@@ -1,14 +1,15 @@
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
+import moment from 'moment'
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: useStorage('user',{}),
+    user: useStorage('user', {}),
   }),
 
   actions: {
     async fetchUser() {
-      const res = await fetch(process.env.VUE_APP_API_HOST+ "/user");
+      const res = await fetch(process.env.VUE_APP_API_HOST + "/user");
 
       const user = await res.json();
       this.user = user;
@@ -25,8 +26,7 @@ export const useUserStore = defineStore("user", {
       this.user.push(user);
     },
     async signIn(username, password) {
-      console.log('this.user')
-      const res = await fetch(process.env.VUE_APP_API_HOST+ "/api/auth/login/", {
+      const res = await fetch(process.env.VUE_APP_API_HOST + "/api/auth/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,12 +34,20 @@ export const useUserStore = defineStore("user", {
         body: JSON.stringify({ username, password }),
       });
       const user = await res.json();
-      if(res.ok){
+      if (res.ok) {
         this.user = user
-      }else{
+      } else {
         console.log(user)
       }
       console.log(res.statusText)
     },
+    checkCredentials() {
+      //check if expiry date is in future return true in that case
+      const valid = moment(this.user.expiry).isAfter()
+      if (!valid) {
+        this.user = null
+      }
+      return valid
+    }
   }
 });
