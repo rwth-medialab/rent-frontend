@@ -36,24 +36,24 @@ export default {
     const userStore = useUserStore();
     return { userStore };
   },
-  data:  () => {
+  data: () => {
     return {
       loggedIn: false,
       siteName: process.env.VUE_APP_NAME,
     }
   },
   methods: {
-    async logout(){
+    async logout() {
       await this.userStore.signOut()
       this.isCredentialsInvalid()
     },
-    async isCredentialsInvalid(){
+    async isCredentialsInvalid() {
       this.loggedIn = await this.userStore.checkCredentials()
     }
   },
   mounted() {
     this.isCredentialsInvalid()
-    document.title=this.siteName
-  } 
+    document.title = this.siteName
+  }
 }
 </script>
