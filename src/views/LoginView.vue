@@ -16,6 +16,9 @@ export default {
     const userStore = useUserStore();
     return { userStore };
   },
+  async mounted() {
+    this.userStore.checkCredentials 
+  },
   data() {
     return {
       user: "",
@@ -25,7 +28,11 @@ export default {
   methods: {
     async login() {
       await this.userStore.signIn(this.user, this.password);
+      this.goBack();
     },
+    goBack() {
+      window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
+    }
   },
 };
 </script>

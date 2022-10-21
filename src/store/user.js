@@ -41,13 +41,40 @@ export const useUserStore = defineStore("user", {
       }
       console.log(res.statusText)
     },
-    checkCredentials() {
-      //check if expiry date is in future return true in that case
-      const valid = moment(this.user.expiry).isAfter()
-      if (!valid) {
+    async signOut() {
+      const res = await fetch(process.env.VUE_APP_API_HOST + "/api/auth/logout/", {
+        method: "POST",
+        headers: {
+          "Authorization": "Token " + this.user.token,
+        },
+        //body: JSON.stringify({ username, password }),
+      });
+      if (res.ok) {
         this.user = null
+      } 
+    },
+    async checkCredentials() {
+      //check if expiry date is in future return true in that case
+      
+      try {
+        const valid = moment(this.user.expiry).isAfter()
+
+        const res = await fetch(process.env.VUE_APP_API_HOST + "/api/auth/checkcredentials/", {
+          method: "POST",
+          headers: {
+            "Authorization": "Token " + this.user.token,
+          },
+          //body: JSON.stringify({ username, password }),
+        });
+        if (!valid || res.status !=200) {
+          this.user = null
+          return false
+        }
+        return true
+      } catch (error) {
+        this.user = null
+        return false
       }
-      return valid
     }
   }
 });

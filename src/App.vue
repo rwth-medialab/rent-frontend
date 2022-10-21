@@ -11,9 +11,14 @@
             mdi-account
           </v-icon>
         </v-btn> |
-        <v-btn icon href="/login">
+        <v-btn v-if="!loggedIn" icon href="/login">
           <v-icon>
             mdi-login
+          </v-icon>
+        </v-btn>
+        <v-btn v-else icon @click="logout()">
+          <v-icon>
+            mdi-logout
           </v-icon>
         </v-btn>
       </v-app-bar>
@@ -34,10 +39,21 @@ export default {
   data:  () => {
     return {
       loggedIn: false,
-      siteName: process.env.VUE_APP_NAME
+      siteName: process.env.VUE_APP_NAME,
+    }
+  },
+  methods: {
+    async logout(){
+      await this.userStore.signOut()
+      this.isCredentialsInvalid()
+    },
+    async isCredentialsInvalid(){
+      this.loggedIn = await this.userStore.checkCredentials()
     }
   },
   mounted() {
+    this.isCredentialsInvalid()
+    document.title=this.siteName
   } 
 }
 </script>
