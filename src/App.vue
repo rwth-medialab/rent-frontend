@@ -5,6 +5,13 @@
         <v-toolbar-title>
           <v-btn href="/">{{siteName}}</v-btn>
         </v-toolbar-title>
+        <template v-slot:extension>
+          <v-tabs align-with-title >
+            <v-tab to="/">Geräte- und Lizenzverleih</v-tab>
+            <v-tab>Vor Ort Nutzung</v-tab>
+            <v-tab v-if="loggedIn">Tab 3</v-tab>
+          </v-tabs>
+        </template>
         <v-spacer></v-spacer>
         <v-btn icon to="/account">
           <v-icon>

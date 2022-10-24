@@ -5,8 +5,14 @@
       <v-text-field label="Password" type="password" v-model="password" required />
       <v-btn type="submit">Login</v-btn>
     </v-form>
-    {{userStore.user}}
+  <br/>
+
+  <v-alert :value="alert" type="error">
+      {{alertmessage}}
+    </v-alert>
+    {{ userStore.user }}
   </v-container>
+  
 </template>
 
 <script>
@@ -17,18 +23,26 @@ export default {
     return { userStore };
   },
   async mounted() {
-    this.userStore.checkCredentials 
+    this.userStore.checkCredentials
   },
   data() {
     return {
       user: "",
       password: "",
+      alert: false,
+      alertmessage: ""
     };
   },
   methods: {
     async login() {
-      await this.userStore.signIn(this.user, this.password);
-      this.goBack();
+      const isSuccessfull =await this.userStore.signIn(this.user, this.password);
+      console.log(isSuccessfull)
+      if(isSuccessfull) {
+        this.goBack();
+      }else{
+        this.alert = true
+        this.alertmessage = this.userStore.message
+      }
     },
     goBack() {
       window.history.length > 1 ? this.$router.go(-1) : this.$router.push('/')
