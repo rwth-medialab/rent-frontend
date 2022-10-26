@@ -27,8 +27,8 @@ export const useUserStore = defineStore("user", {
       this.user.push(user);
     },
     async signIn(username, password) {
-      if (username==''||password==''){
-        this.message = 'Weder Nutzername noch Passwort darf leer sein'
+      if (username==''||password==''|| username.includes(" ") || password.includes(" ")){
+        this.message = 'Weder Nutzername noch Passwort darf leer sein oder ein Leerzeichen enthalten'
         return false
       }
       const res = await fetch(process.env.VUE_APP_API_HOST + "/api/auth/login/", {
