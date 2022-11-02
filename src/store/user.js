@@ -16,6 +16,7 @@ export const useUserStore = defineStore("user", {
       this.user = user;
     },
     async signUp(username, password) {
+      //TODO Copy Pasta
       const res = await fetch(process.env.VUE_APP_API_HOST + "/api/user/register", {
         method: "POST",
         headers: {
@@ -27,7 +28,7 @@ export const useUserStore = defineStore("user", {
       this.user.push(user);
     },
     async signIn(username, password) {
-      if (username==''||password==''|| username.includes(" ") || password.includes(" ")){
+      if (username == '' || password == '' || username.includes(" ") || password.includes(" ")) {
         this.message = 'Weder Nutzername noch Passwort darf leer sein oder ein Leerzeichen enthalten'
         return false
       }
@@ -59,11 +60,11 @@ export const useUserStore = defineStore("user", {
       });
       if (res.ok) {
         this.user = null
-      } 
+      }
     },
     async checkCredentials() {
       //check if expiry date is in future return true in that case
-      
+
       try {
         const valid = moment(this.user.expiry).isAfter()
         const res = await fetch(process.env.VUE_APP_API_HOST + "/api/auth/checkcredentials/", {
@@ -73,7 +74,7 @@ export const useUserStore = defineStore("user", {
           },
           //body: JSON.stringify({ username, password }),
         });
-        if (!valid || res.status !=200) {
+        if (!valid || res.status != 200) {
           console.log('expected 401')
           this.user = null
           return false
@@ -83,6 +84,23 @@ export const useUserStore = defineStore("user", {
         this.user = null
         return false
       }
+    },
+    isStaff() {
+      return this.user.user.is_staff;
+    },
+    async getUrl(path) {
+      const res = await fetch(process.env.VUE_APP_API_HOST + path, {
+        method: "GET",
+        headers: {
+          "Authorization": "Token " + this.user.token,
+        },
+      });
+      if (res.ok) {
+        return await res.json()
+      } else {
+        return res
+      }
     }
-  }
+  },
+
 });
