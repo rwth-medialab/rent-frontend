@@ -15,5 +15,12 @@
       "dom.iterable",
       "scripthost"
     ]
-  }
+  },
+  "extensions": [
+    ".vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

@@ -1,78 +1,87 @@
 <template>
   <v-container my-5>
     <div class="devicemanagement">
-      <div v-for="category in categories" :key=(category.id)>
+      <div v-for="category in categories" :key="category.id">
         <div>
-        <h1>
-          {{ category.name }}
-        </h1>
-        <h4>
-          {{ category.description }}
-        </h4>
-      </div>
+          <h1>
+            {{ category.name }}
+          </h1>
+          <h4>
+            {{ category.description }}
+          </h4>
+        </div>
         <v-layout wrap>
-              <v-flex xs12 sm6 md4 lg3 v-for="(rentalobjecttype, index) in category.rentalobjecttypes" :key=index>
-              <v-card class="ma-3" outlined :href="'/admin/objects/'+rentalobjecttype.id">
-                <v-list-item three-line>
-                  <v-list-item-content>
-                    <v-list-item-title class="text-h5 mb-1">
-                      {{ rentalobjecttype.name }}
-                    </v-list-item-title>
-                    <v-list-item-subtitle>{{ rentalobjecttype.description }}</v-list-item-subtitle>
-                  </v-list-item-content>
+          <v-flex
+            xs12
+            sm6
+            md4
+            lg3
+            v-for="(rentalobjecttype, index) in category.rentalobjecttypes"
+            :key="index"
+          >
+            <v-card
+              class="ma-3"
+              outlined
+              :href="'/admin/objects/' + rentalobjecttype.id"
+            >
+              <v-list-item three-line>
+                <v-list-item-content>
+                  <v-list-item-title class="text-h5 mb-1">
+                    {{ rentalobjecttype.name }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle>{{
+                    rentalobjecttype.description
+                  }}</v-list-item-subtitle>
+                </v-list-item-content>
 
-                  <v-list-item-avatar tile size="80" color="grey">
-                    <v-img :src="rentalobjecttype.image" />
-                  </v-list-item-avatar>
-                </v-list-item>
+                <v-list-item-avatar tile size="80" color="grey">
+                  <v-img :src="rentalobjecttype.image" />
+                </v-list-item-avatar>
+              </v-list-item>
 
-                <v-card-actions>
-                </v-card-actions>
-              </v-card>
-            </v-flex>
+              <v-card-actions> </v-card-actions>
+            </v-card>
+          </v-flex>
         </v-layout>
-            </div>
-          </div>
+      </div>
+    </div>
   </v-container>
 </template>
 
 <script>
-import { useUserStore } from '@/store/user.js'
+import { useUserStore } from "@/store/user.js";
 export default {
   setup() {
     const userStore = useUserStore();
     return { userStore };
   },
-  name: 'DeviceManagementView',
+  name: "DeviceManagementView",
   data: () => {
     return {
-      categories:
-        [
-          { id: 1, name: 'placeholder', description: 'placeholdertext' },
-        ],
-      rentalobjecttypes:
-        [
-        ]
-    }
+      categories: [
+        { id: 1, name: "placeholder", description: "placeholdertext" },
+      ],
+      rentalobjecttypes: [],
+    };
   },
   methods: {
     async updateData() {
-      const targetUrl = '/api/categories/'
-      this.categories = await this.userStore.getUrl(targetUrl)
+      const targetUrl = "/api/categories/";
+      this.categories = await this.userStore.getUrl(targetUrl);
       for (const category of this.categories) {
-        const rentalobjecttypesarray = []
+        const rentalobjecttypesarray = [];
         for (const rentalobjecttype of category.rentalobjecttypes) {
-          const result = await this.userStore.getUrl('/api/rentalobjecttypes/' + rentalobjecttype + '/')
-          rentalobjecttypesarray.push(result)
+          const result = await this.userStore.getUrl(
+            "/api/rentalobjecttypes/" + rentalobjecttype + "/"
+          );
+          rentalobjecttypesarray.push(result);
         }
-        category.rentalobjecttypes=rentalobjecttypesarray
+        category.rentalobjecttypes = rentalobjecttypesarray;
       }
-    }
+    },
   },
   mounted() {
-    this.updateData()
-
+    this.updateData();
   },
-}
-
+};
 </script>

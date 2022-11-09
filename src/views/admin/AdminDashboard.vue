@@ -6,15 +6,10 @@
 
 <script>
 export default {
-  name: 'AccountView',
-  mounted() {
-
-  },
+  name: "AccountView",
+  mounted() {},
   methods: {
-    loggedInRedirect() {
-
-    }
+    loggedInRedirect() {},
   },
-}
-
+};
 </script>
