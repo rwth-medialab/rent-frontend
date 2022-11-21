@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
 import moment from "moment";
+import axios from "axios";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -62,6 +63,68 @@ export const useUserStore = defineStore("user", {
       this.message = user["non_field_errors"][0];
       return false;
     },
+    getReservations({
+      open = false,
+      unique = false,
+      from = null,
+      until = null,
+      operation_number = null,
+    }) {
+      let url = process.env.VUE_APP_API_HOST + "/api/reservations/?";
+
+      if (open) {
+        url += "open=true&";
+      }
+
+      if (unique) {
+        url += "unique=true&";
+      }
+
+      if (from != null) {
+        url += "from=" + from + "&";
+      }
+
+      if (operation_number != null) {
+        url += "operation_number=" + operation_number + "&";
+      }
+
+      if (until != null) {
+        url += "until=" + until;
+      }
+
+      return axios
+        .get(url, { headers: { Authorization: "Token " + this.user.token } })
+        .then(function (response) {
+          return response.data;
+        });
+    },
+    getObjects({ type = null }) {
+      let url = process.env.VUE_APP_API_HOST + "/api/rentalobjects/?";
+
+      if (type != null) {
+        url += "type=" + type + "&";
+      }
+
+      return axios
+        .get(url, { headers: { Authorization: "Token " + this.user.token } })
+        .then(function (response) {
+          return response.data;
+        });
+    },
+    getObjectTypes({ id = null }) {
+      let url = process.env.VUE_APP_API_HOST + "/api/rentalobjecttypes/";
+      if (id != null) {
+        url += id + "/";
+      } else {
+        url += "?";
+      }
+
+      return axios
+        .get(url, { headers: { Authorization: "Token " + this.user.token } })
+        .then(function (response) {
+          return response.data;
+        });
+    },
     async signOut() {
       const res = await fetch(
         process.env.VUE_APP_API_HOST + "/api/auth/logout/",
@@ -105,6 +168,27 @@ export const useUserStore = defineStore("user", {
     },
     isStaff() {
       return this.user.user.is_staff;
+    },
+    has_inventory_rights() {
+      return (
+        this.user.user.user_permissions.find(
+          (element) => element == "base.inventory_editing"
+        ) == "base.inventory_editing"
+      );
+    },
+    has_general_rights() {
+      return (
+        this.user.user.user_permissions.find(
+          (element) => element == "base.general_access"
+        ) == "base.general_access"
+      );
+    },
+    has_lending_rights() {
+      return (
+        this.user.user.user_permissions.find(
+          (element) => element == "base.lending_access"
+        ) == "base.lending_access"
+      );
     },
     async getUrl(path) {
       const res = await fetch(process.env.VUE_APP_API_HOST + path, {

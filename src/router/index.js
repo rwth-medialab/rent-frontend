@@ -7,6 +7,7 @@ import AdminObjectTypeView from "@/views/admin/AdminObjectTypeView.vue";
 import AdminObjectTypesView from "@/views/admin/AdminObjectTypesView.vue";
 import AdminCategoriesView from "@/views/admin/AdminCategoriesView.vue";
 import AdminCategoryView from "@/views/admin/AdminCategoryView.vue";
+import InventoryView from "@/views/admin/InventoryView.vue";
 
 Vue.use(VueRouter);
 
@@ -35,19 +36,17 @@ const routes = [
       import(/* webpackChunkName: "about" */ "../views/LoginView.vue"),
   },
   {
-    path: "/admin",
-    name: "adminarea",
-    meta: {
-      admin: true,
-    },
-  },
-  {
-    path: "/admin/dashboard",
-    name: "admindashboard",
+    path: "/admin/rental/dashboard",
+    name: "AdminDashboard",
     component: AdminDashboard,
   },
   {
-    path: "/admin/categories",
+    path: "/admin/inventory",
+    name: "admininventory",
+    component: InventoryView,
+  },
+  {
+    path: "/admin/inventory/categories",
     name: "admincategories",
     component: AdminCategoriesView,
   },

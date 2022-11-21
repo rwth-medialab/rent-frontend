@@ -1,0 +1,4 @@
+/* remove highlihting of to-buttons with no-active class */
+.v-btn--active.no-active::before {                                                                             
+    opacity: 0 !important;
+  }

@@ -53,13 +53,11 @@ export default {
   methods: {
     async login() {
       this.$v.$touch();
-      console.log(this.$v.$anyError);
       if (!this.$v.$anyError) {
         const isSuccessfull = await this.userStore.signIn(
           this.username,
           this.password
         );
-        console.log(isSuccessfull);
         if (isSuccessfull) {
           this.goBack();
         } else {
