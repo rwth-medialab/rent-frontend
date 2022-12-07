@@ -3,35 +3,48 @@ import { useStorage } from "@vueuse/core";
 import moment from "moment";
 import axios from "axios";
 
+const apiHost = import.meta.env.VITE_API_HOST;
+
+export type userType = {
+  expiry: string;
+  token: string;
+  user: {
+    email: string;
+    groups: [string];
+    is_staff: boolean;
+    is_admin: boolean;
+    user_permissions: [string];
+    username: string;
+  };
+};
+
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: useStorage("user", {}),
+    user: useStorage("user", {} as userType),
     message: "",
   }),
 
   actions: {
     async fetchUser() {
-      const res = await fetch(process.env.VUE_APP_API_HOST + "/user");
+      const res = await fetch(apiHost + "/user");
 
       const user = await res.json();
       this.user = user;
     },
-    async signUp(username, password) {
+    async signUp(username: string, password: string) {
       //TODO Copy Pasta
-      const res = await fetch(
-        process.env.VUE_APP_API_HOST + "/api/user/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      const res = await fetch(apiHost + "/api/user/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
       const user = await res.json();
-      this.user.push(user);
+      this.user = user;
     },
-    async signIn(username, password) {
+    async signIn(username: string, password: string) {
+      console.log("gell");
       if (
         username == "" ||
         password == "" ||
@@ -42,19 +55,18 @@ export const useUserStore = defineStore("user", {
           "Weder Nutzername noch Passwort darf leer sein oder ein Leerzeichen enthalten";
         return false;
       }
-      const res = await fetch(
-        process.env.VUE_APP_API_HOST + "/api/auth/login/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      const res = await fetch(apiHost + "/api/auth/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
       const user = await res.json();
       if (res.ok) {
+        console.log(user);
         this.user = user;
+        console.log(this.user);
         this.message = "Erfolgreich reingeloggt, du wirst jetzt umgeleitet";
         return true;
       } else {
@@ -70,7 +82,7 @@ export const useUserStore = defineStore("user", {
       until = null,
       operation_number = null,
     }) {
-      let url = process.env.VUE_APP_API_HOST + "/api/reservations/?";
+      let url = apiHost + "/api/reservations/?";
 
       if (open) {
         url += "open=true&";
@@ -99,7 +111,7 @@ export const useUserStore = defineStore("user", {
         });
     },
     getObjects({ type = null }) {
-      let url = process.env.VUE_APP_API_HOST + "/api/rentalobjects/?";
+      let url = apiHost + "/api/rentalobjects/?";
 
       if (type != null) {
         url += "type=" + type + "&";
@@ -112,7 +124,7 @@ export const useUserStore = defineStore("user", {
         });
     },
     getObjectTypes({ id = null }) {
-      let url = process.env.VUE_APP_API_HOST + "/api/rentalobjecttypes/";
+      let url = apiHost + "/api/rentalobjecttypes/";
       if (id != null) {
         url += id + "/";
       } else {
@@ -125,9 +137,9 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
-    postRentals(id, reservation_id) {
+    postRentals(id: string, reservation_id: string) {
       //TODO
-      let url = process.env.VUE_APP_API_HOST + "/api/rentalobjecttypes/";
+      const url = apiHost + "/api/rentalobjecttypes/";
       axios.post(url, {
         headers: { Authorization: "Token " + this.user.token },
         reservation_id: reservation_id,
@@ -135,35 +147,28 @@ export const useUserStore = defineStore("user", {
       });
     },
     async signOut() {
-      const res = await fetch(
-        process.env.VUE_APP_API_HOST + "/api/auth/logout/",
-        {
-          method: "POST",
-          headers: {
-            Authorization: "Token " + this.user.token,
-          },
-          //body: JSON.stringify({ username, password }),
-        }
-      );
+      const res = await fetch(apiHost + "/api/auth/logout/", {
+        method: "POST",
+        headers: {
+          Authorization: "Token " + this.user.token,
+        },
+        //body: JSON.stringify({ username, password }),
+      });
       if (res.ok) {
         this.user = null;
       }
     },
     async checkCredentials() {
       //check if expiry date is in future return true in that case
-
       try {
         const valid = moment(this.user.expiry).isAfter();
-        const res = await fetch(
-          process.env.VUE_APP_API_HOST + "/api/auth/checkcredentials/",
-          {
-            method: "POST",
-            headers: {
-              Authorization: "Token " + this.user.token,
-            },
-            //body: JSON.stringify({ username, password }),
-          }
-        );
+        const res = await fetch(apiHost + "/api/auth/checkcredentials/", {
+          method: "POST",
+          headers: {
+            Authorization: "Token " + this.user.token,
+          },
+          //body: JSON.stringify({ username, password }),
+        });
         if (!valid || res.status != 200) {
           console.log("expected 401");
           this.user = null;
@@ -199,8 +204,8 @@ export const useUserStore = defineStore("user", {
         ) == "base.lending_access"
       );
     },
-    async getUrl(path) {
-      const res = await fetch(process.env.VUE_APP_API_HOST + path, {
+    async getUrl(path: string) {
+      const res = await fetch(apiHost + path, {
         method: "GET",
         headers: {
           Authorization: "Token " + this.user.token,

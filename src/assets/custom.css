@@ -1,4 +1,5 @@
 /* remove highlihting of to-buttons with no-active class */
-.v-btn--active.no-active::before {                                                                             
-    opacity: 0 !important;
+.no-active > .v-btn__overlay {                                                                             
+    opacity: inherit !important;
+    background-color: inherit !important;
   }

@@ -1,12 +1,13 @@
-<template>
-  <div>TODO</div>
-</template>
-
-<script>
-// @ is an alias to /src
-
+<script lang="ts">
+import { useUserStore } from "@/stores/user";
 export default {
-  name: "HomeView",
-  components: {},
+  setup() {
+    const userStore = useUserStore();
+    return { userStore };
+  },
 };
 </script>
+
+<template>
+  <v-card>Filler</v-card>
+</template>
