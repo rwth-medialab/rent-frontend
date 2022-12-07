@@ -125,6 +125,15 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
+    postRentals(id, reservation_id) {
+      //TODO
+      let url = process.env.VUE_APP_API_HOST + "/api/rentalobjecttypes/";
+      axios.post(url, {
+        headers: { Authorization: "Token " + this.user.token },
+        reservation_id: reservation_id,
+        object_id: id,
+      });
+    },
     async signOut() {
       const res = await fetch(
         process.env.VUE_APP_API_HOST + "/api/auth/logout/",

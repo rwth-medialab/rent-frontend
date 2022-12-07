@@ -23,8 +23,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    component: () => import("../views/AboutView.vue"),
   },
   {
     path: "/login",
@@ -32,8 +31,33 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/LoginView.vue"),
+    component: () => import("@/views/LoginView.vue"),
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: () => import("@/views/RegisterView.vue"),
+  },
+  {
+    // redirect rental button to a default case in this case the rental dashboard
+    path: "/admin/rental",
+    redirect: () => {
+      return { path: "/admin/rental/dashboard" };
+    },
+  },
+  {
+    // default case
+    path: "/admin/settings",
+    redirect: () => {
+      return { path: "admin/settings/texts" };
+    },
+  },
+  {
+    //default case
+    path: "/admin/inventory",
+    redirect: () => {
+      return { path: "admin/inventory/categories" };
+    },
   },
   {
     path: "/admin/rental/dashboard",

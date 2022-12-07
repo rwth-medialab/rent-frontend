@@ -1,6 +1,30 @@
 <template>
   <v-container>
-    <v-form @submit.prevent="login">
+    <v-form @submit.prevent="register">
+      <v-text-field
+        label="Vorname"
+        type="firstname"
+        v-model="firstname"
+        :error-messages="usernameErrors"
+        required
+        autofocus
+      />
+      <v-text-field
+        label="Nachname"
+        type="lastname"
+        v-model="lastname"
+        :error-messages="usernameErrors"
+        required
+        autofocus
+      />
+      <v-text-field
+        label="Email"
+        type="email"
+        v-model="email"
+        :error-messages="emailErrors"
+        required
+        autofocus
+      />
       <v-text-field
         label="Username"
         type="username"
@@ -16,8 +40,7 @@
         :error-messages="passwordErrors"
         required
       />
-      <v-btn type="submit">Login</v-btn>
-      <v-btn class="ml-3" to="register">register</v-btn>
+      <v-btn type="submit">Register</v-btn>
     </v-form>
     <br />
 
@@ -30,7 +53,12 @@
 <script>
 import { useUserStore } from "@/store/user.js";
 import { validationMixin } from "vuelidate";
-import { required, maxLength, minLength } from "vuelidate/lib/validators";
+import {
+  required,
+  maxLength,
+  minLength,
+  email,
+} from "vuelidate/lib/validators";
 
 const mustNotContainSpace = (value) => value.indexOf(" ") < 0;
 
@@ -47,17 +75,24 @@ export default {
     return {
       username: "",
       password: "",
+      email: "",
+      firstname: "",
+      lastname: "",
       alert: false,
       alertmessage: "",
     };
   },
   methods: {
-    async login() {
+    async register() {
       this.$v.$touch();
       if (!this.$v.$anyError) {
-        const isSuccessfull = await this.userStore.signIn(
+        console.log(this.email);
+        const isSuccessfull = await this.userStore.register(
           this.username,
-          this.password
+          this.password,
+          this.email,
+          this.firstname,
+          this.lastname
         );
         if (isSuccessfull) {
           this.goBack();
@@ -79,6 +114,10 @@ export default {
       maxLength: maxLength(100),
       mustNotContainSpace,
     },
+    email: {
+      required,
+      email,
+    },
   },
   computed: {
     usernameErrors() {
@@ -86,10 +125,9 @@ export default {
       if (!this.$v.username.$dirty) return errors;
       !this.$v.username.minLength &&
         errors.push("Der Name muss mindestens 2 Zeichen lang sein");
-      !this.$v.username.required &&
-        errors.push("Nutzername darf nicht leer sein.");
+      !this.$v.username.required && errors.push("Darf nicht leer sein.");
       !this.$v.username.mustNotContainSpace &&
-        errors.push("Nutzername darf kein Leerzeichen enthalten.");
+        errors.push("Darf kein Leerzeichen enthalten.");
       return errors;
     },
     passwordErrors() {
@@ -101,6 +139,14 @@ export default {
         errors.push("Passwort darf nicht leer sein.");
       !this.$v.password.mustNotContainSpace &&
         errors.push("Passwort darf kein Leerzeichen enthalten.");
+      return errors;
+    },
+    emailErrors() {
+      const errors = [];
+      if (!this.$v.email.$dirty) return errors;
+      !this.$v.password.email &&
+        errors.push("Hat nicht das design einer Emailadresse");
+      !this.$v.password.required && errors.push("Email darf nicht leer sein.");
       return errors;
     },
   },

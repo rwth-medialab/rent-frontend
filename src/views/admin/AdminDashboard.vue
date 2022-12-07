@@ -36,17 +36,21 @@
               <v-card-text>
                 <v-container fluid>
                   <v-col
-                    v-for="(item, index) in toReserveTypes"
+                    v-for="(item, index) in toReserveReservations"
                     :key="item.id"
                     cols="12"
                   >
                     <v-autocomplete
                       v-model="selectedItemsForReservation[index]"
                       :items="toReserveObjects[index]"
-                      :label="toReserveNames[index]"
+                      :label="toReserveNames[index] + ' (' + item.count + ')'"
                       :item-text="
                         (item) =>
                           `${toReserveIdentifierPrefix[index]}${item.internal_identifier}`
+                      "
+                      :item-value="
+                        (item) =>
+                          `{object_id: ${item.id}, reservation_id: ${toReserveReservations[index].id}}`
                       "
                       dense
                       chips
@@ -103,11 +107,11 @@ export default {
   data() {
     return {
       editRequestDialog: false,
-      editReservationNumber: null,
-      toReserveTypes: [],
+      toReserveReservations: [],
       toReserveNames: [],
       toReserveObjects: [],
       toReserveIdentifierPrefix: [],
+      toReserveCommitable: false,
       selectedItemsForReservation: [],
       openHeaders: [
         {
@@ -144,6 +148,22 @@ export default {
     editRequestDialog(val) {
       val || this.closeReservationDialog();
     },
+    selectedItemsForReservation() {
+      console.log(this.selectedItemsForReservation);
+      let toReserveCommitable = true;
+      this.toReserveReservations.forEach((item, index) => {
+        if (
+          typeof this.selectedItemsForReservation[index] === "undefined" ||
+          !(item.count == this.selectedItemsForReservation[index].length)
+        ) {
+          toReserveCommitable = false;
+        }
+      });
+      this.selectedItemsForReservation.forEach((item) => {
+        console.log(item[0]);
+      });
+      this.toReserveCommitable = toReserveCommitable;
+    },
   },
   async mounted() {
     this.reservations = await this.userStore.getReservations({
@@ -157,16 +177,16 @@ export default {
       //TODO
     },
     async handleReservation(item) {
-      this.editReservationNumber = item.operation_number;
-      let toReserveTypes = await this.userStore.getReservations({
-        operation_number: this.editReservationNumber,
+      this.toReserveReservations = await this.userStore.getReservations({
+        operation_number: item.operation_number,
       });
-      await toReserveTypes.forEach(async (item, index) => {
+      console.log(this.toReserveReservations);
+      await this.toReserveReservations.forEach(async (item, index) => {
         let type = await this.userStore.getObjectTypes({ id: item.objecttype });
         console.log(type);
         this.toReserveNames.splice(index, 1, type.name);
         this.toReserveIdentifierPrefix.splice(index, 1, type.prefix_identifier);
-        this.toReserveObjects.splice(
+        await this.toReserveObjects.splice(
           index,
           1,
           await this.userStore.getObjects({
@@ -174,19 +194,19 @@ export default {
           })
         );
       });
-      this.toReserveTypes = await toReserveTypes;
-      console.log(toReserveTypes);
-      console.log(this.toReserveNames);
-      console.log(this.toReserveObjects);
       this.editRequestDialog = true;
     },
     closeReservationDialog() {
-      this.editReservationNumber = null;
+      this.selectedItemsForReservation = [];
       this.editRequestDialog = false;
     },
     saveReservationDialog() {
-      this.editReservationNumber = null;
-      this.editRequestDialog = true;
+      if (!this.toReserveCommitable) {
+        console.log("Not every object is selected");
+      } else {
+        console.log("commiting reservation");
+        this.editRequestDialog = true;
+      }
     },
     loggedInRedirect() {},
     getColor(item) {
