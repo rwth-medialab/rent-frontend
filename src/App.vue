@@ -17,7 +17,6 @@ export default {
   methods: {
     async isCredentialsInvalid() {
       this.loggedIn = await this.userStore.checkCredentials();
-      console.log(await this.userStore.checkCredentials());
       // check if user is a staff member and if so show admin button
       if (this.loggedIn) {
         this.staff = this.userStore.isStaff();
@@ -29,7 +28,6 @@ export default {
       }
     },
     getRouteLinks() {
-      console.log("reached");
       let val = [];
       Object.keys(this.links.admin).forEach((element) => {
         if (
@@ -182,7 +180,6 @@ export default {
       <v-spacer></v-spacer>
       <v-btn
         v-if="!$vuetify.display.mobile && staff"
-        class="no-active"
         id="adminbutton"
         to="/admin"
       >

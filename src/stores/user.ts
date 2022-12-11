@@ -3,7 +3,8 @@ import { useStorage } from "@vueuse/core";
 import moment from "moment";
 import axios from "axios";
 
-const apiHost = import.meta.env.VITE_API_HOST;
+//TODO CHANGE ENV
+const apiHost = import.meta.env.VITE_API_HOST + "/api";
 
 export type userType = {
   expiry: string;
@@ -31,20 +32,80 @@ export const useUserStore = defineStore("user", {
       const user = await res.json();
       this.user = user;
     },
-    async signUp(username: string, password: string) {
-      //TODO Copy Pasta
-      const res = await fetch(apiHost + "/api/user/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      const user = await res.json();
-      this.user = user;
+    async getFromURLWithAuth({ url = "", params = {} }) {
+      if(url.slice(0,1)!="/"){
+        url = "/" + url;
+      }
+      url = apiHost + url;
+      if (url.slice(-1) != "/") {
+        //strict ending in / is activated in Django
+        url += "/";
+      }
+      if (Object.keys(params).length > 0) {
+        const urlparams = new URLSearchParams(params);
+        url += "?${urlparams}";
+      }
+      return await axios
+        .get(url, {
+          headers: { Authorization: "Token " + this.user.token },
+        })
+        .then(function (response) {
+          return response.data;
+        });
+    },
+    async patchURLWithAuth({ url = "", params = {} }) {
+      if(url.slice(0,1)!="/"){
+        url = "/" + url;
+      }
+      url = apiHost + url;
+      if (url.slice(-1) != "/") {
+        //strict ending in / is activated in Django
+        url += "/";
+      }
+      return await axios
+        .patch(url, params,{
+          headers: { Authorization: "Token " + this.user.token },
+        })
+        .then(function (response) {
+          return response.data;
+        });
+    },
+    async deleteURLWithAuth({ url = "", params = {} }) {
+      if(url.slice(0,1)!="/"){
+        url = "/" + url;
+      }
+      url = apiHost + url;
+      if (url.slice(-1) != "/") {
+        //strict ending in / is activated in Django
+        url += "/";
+      }
+      return await axios
+        .delete(url, {
+          headers: { Authorization: "Token " + this.user.token },
+        })
+        .then(function (response) {
+          return response.data;
+        });
+    },
+    async postURLWithAuth({ url = "", params = {} }) {
+      if(url.slice(0,1)!="/"){
+        url = "/" + url;
+      }
+      url = apiHost + url;
+      if (url.slice(-1) != "/") {
+        //strict ending in / is activated in Django
+        url += "/";
+      }
+      console.log(url)
+      return await axios
+        .post(url, params,{
+          headers: { Authorization: "Token " + this.user.token },
+        })
+        .then(function (response) {
+          return response.data;
+        });
     },
     async signIn(username: string, password: string) {
-      console.log("gell");
       if (
         username == "" ||
         password == "" ||
@@ -55,7 +116,7 @@ export const useUserStore = defineStore("user", {
           "Weder Nutzername noch Passwort darf leer sein oder ein Leerzeichen enthalten";
         return false;
       }
-      const res = await fetch(apiHost + "/api/auth/login/", {
+      const res = await fetch(apiHost + "/auth/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,9 +125,7 @@ export const useUserStore = defineStore("user", {
       });
       const user = await res.json();
       if (res.ok) {
-        console.log(user);
         this.user = user;
-        console.log(this.user);
         this.message = "Erfolgreich reingeloggt, du wirst jetzt umgeleitet";
         return true;
       } else {
@@ -110,6 +169,21 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
+    getCategories() {
+      const targeturl = apiHost + "/api/categories/";
+      const params = new URLSearchParams({
+        type: null,
+        category: "adsbsd",
+        numbers: String(1),
+      });
+      return axios
+        .get(targeturl, {
+          headers: { Authorization: "Token " + this.user.token },
+        })
+        .then(function (response) {
+          return response.data;
+        });
+    },
     getObjects({ type = null }) {
       let url = apiHost + "/api/rentalobjects/?";
 
@@ -123,16 +197,24 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
-    getObjectTypes({ id = null }) {
+    getObjectTypes({ id = null, category = null }) {
       let url = apiHost + "/api/rentalobjecttypes/";
       if (id != null) {
         url += id + "/";
       } else {
         url += "?";
       }
+      let params = {};
+      if (category != null) {
+        params["category"] = category;
+      }
+
+      const urlparams = new URLSearchParams(params);
 
       return axios
-        .get(url, { headers: { Authorization: "Token " + this.user.token } })
+        .get(url + "${urlsparams}", {
+          headers: { Authorization: "Token " + this.user.token },
+        })
         .then(function (response) {
           return response.data;
         });
@@ -147,7 +229,7 @@ export const useUserStore = defineStore("user", {
       });
     },
     async signOut() {
-      const res = await fetch(apiHost + "/api/auth/logout/", {
+      const res = await fetch(apiHost + "/auth/logout/", {
         method: "POST",
         headers: {
           Authorization: "Token " + this.user.token,
@@ -162,7 +244,7 @@ export const useUserStore = defineStore("user", {
       //check if expiry date is in future return true in that case
       try {
         const valid = moment(this.user.expiry).isAfter();
-        const res = await fetch(apiHost + "/api/auth/checkcredentials/", {
+        const res = await fetch(apiHost + "/auth/checkcredentials/", {
           method: "POST",
           headers: {
             Authorization: "Token " + this.user.token,
@@ -203,19 +285,6 @@ export const useUserStore = defineStore("user", {
           (element) => element == "base.lending_access"
         ) == "base.lending_access"
       );
-    },
-    async getUrl(path: string) {
-      const res = await fetch(apiHost + path, {
-        method: "GET",
-        headers: {
-          Authorization: "Token " + this.user.token,
-        },
-      });
-      if (res.ok) {
-        return await res.json();
-      } else {
-        return res;
-      }
     },
   },
 });
