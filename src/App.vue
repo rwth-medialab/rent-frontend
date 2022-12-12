@@ -1,10 +1,12 @@
 <script lang="ts">
 import "@/assets/custom.css";
 import { useUserStore } from "@/stores/user.js";
+import {useSettingsStore} from "@/stores/settings.js"
 export default {
   setup() {
     const userStore = useUserStore();
-    return { userStore };
+    const settingsStore = useSettingsStore();
+    return { userStore, settingsStore };
   },
   watch: {
     $route: function (newroute, oldroute) {
@@ -104,7 +106,7 @@ export default {
 </script>
 
 <template>
-  <v-app>
+  <v-app :theme="settingsStore.theme">
     <v-navigation-drawer v-model="drawer" temporary right>
       <v-list nav dense>
         <template v-if="staff">
@@ -195,6 +197,8 @@ export default {
         <v-icon icon="mdi-account" />
       </v-btn>
       <div v-if="!$vuetify.display.mobile && loggedIn">|</div>
+      <v-btn icon="mdi-theme-light-dark" @click="settingsStore.theme = settingsStore.theme == 'light' ? 'dark' : 'light'"></v-btn>
+      <div>|</div>
       <v-btn v-if="!loggedIn" icon to="/login" class="no-active">
         <v-icon class="no-active" icon="mdi-login" />
       </v-btn>
