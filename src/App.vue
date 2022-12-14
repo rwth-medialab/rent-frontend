@@ -1,7 +1,7 @@
 <script lang="ts">
 import "@/assets/custom.css";
 import { useUserStore } from "@/stores/user.js";
-import {useSettingsStore} from "@/stores/settings.js"
+import { useSettingsStore } from "@/stores/settings.js";
 export default {
   setup() {
     const userStore = useUserStore();
@@ -14,6 +14,12 @@ export default {
         this.isCredentialsInvalid();
       }
       this.currentLinks = this.getRouteLinks();
+      if (
+        !this.staff &&
+        this.$router.currentRoute.value.path.includes("admin")
+      ) {
+        this.$router.push("/");
+      }
     },
   },
   methods: {
@@ -143,27 +149,29 @@ export default {
       </v-list>
     </v-navigation-drawer>
     <v-app-bar dense>
-      <v-app-bar-nav-icon
-        v-if="$vuetify.display.mobile"
-        @click.stop="drawer = !drawer"
-      ></v-app-bar-nav-icon>
-      <v-app-bar-title>
-        <v-btn href="/">{{ siteName }}</v-btn>
-      </v-app-bar-title>
-      <template
+      <template v-slot:prepend>
+        <v-app-bar-nav-icon
+          v-if="$vuetify.display.mobile"
+          @click.stop="drawer = !drawer"
+        ></v-app-bar-nav-icon>
+      </template>
+      <template v-slot:title
+        ><v-btn href="/">{{ siteName }}</v-btn></template
+      >
+      <v-tabs
+        align-tabs="title"
         v-if="
           !$vuetify.display.mobile &&
           $router.currentRoute.value.path.includes('admin')
         "
       >
-        <v-tabs align-tabs="center">
-          <v-tab to="/admin/rental"> Verleih </v-tab>
-          <v-tab to="/admin/inventory"> Inventar </v-tab>
-          <v-tab v-if="inventory_rights" to="/admin/settings">
-            Einstellungen
-          </v-tab>
-        </v-tabs>
-      </template>
+        <v-tab to="/admin/rental"> Verleih </v-tab>
+        <v-tab to="/admin/inventory"> Inventar </v-tab>
+        <v-tab v-if="inventory_rights" to="/admin/settings">
+          Einstellungen
+        </v-tab>
+      </v-tabs>
+      <v-spacer></v-spacer>
       <!-- v-tabs below the current tabs-->
       <template
         v-if="
@@ -179,32 +187,36 @@ export default {
           >
         </v-tabs>
       </template>
-      <v-spacer></v-spacer>
-      <v-btn
-        v-if="!$vuetify.display.mobile && staff"
-        id="adminbutton"
-        to="/admin"
-      >
-        Admin
-      </v-btn>
-      <div v-if="!$vuetify.display.mobile && staff">|</div>
-      <v-btn
-        v-if="!$vuetify.display.mobile && loggedIn"
-        icon
-        to="/account"
-        class="no-active"
-      >
-        <v-icon icon="mdi-account" />
-      </v-btn>
-      <div v-if="!$vuetify.display.mobile && loggedIn">|</div>
-      <v-btn icon="mdi-theme-light-dark" @click="settingsStore.theme = settingsStore.theme == 'light' ? 'dark' : 'light'"></v-btn>
-      <div>|</div>
-      <v-btn v-if="!loggedIn" icon to="/login" class="no-active">
-        <v-icon class="no-active" icon="mdi-login" />
-      </v-btn>
-      <v-btn v-else-if="loggedIn" icon @click="logout()">
-        <v-icon class="no-active" icon="mdi-logout" />
-      </v-btn>
+      <template v-slot:append>
+        <v-btn
+          v-if="!$vuetify.display.mobile && staff"
+          id="adminbutton"
+          to="/admin"
+        >
+          Admin
+        </v-btn>
+        <div v-if="!$vuetify.display.mobile && staff">|</div>
+        <v-btn
+          v-if="!$vuetify.display.mobile && loggedIn"
+          icon="mdi-account"
+          to="/account"
+          class="no-active"
+        >
+        </v-btn>
+        <div v-if="!$vuetify.display.mobile && loggedIn">|</div>
+        <v-btn
+          icon="mdi-theme-light-dark"
+          @click="
+            settingsStore.theme =
+              settingsStore.theme == 'light' ? 'dark' : 'light'
+          "
+        ></v-btn>
+        <div>|</div>
+        <v-btn v-if="!loggedIn" icon="mdi-login" to="/login" class="no-active">
+        </v-btn>
+        <v-btn v-else-if="loggedIn" icon="mdi-logout" @click="logout()">
+        </v-btn>
+      </template>
     </v-app-bar>
     <v-main fluid>
       <router-view />
