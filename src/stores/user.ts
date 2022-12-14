@@ -70,7 +70,7 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
-    async deleteURLWithAuth({ url = "", params = {} }) {
+    async deleteURLWithAuth({ url = ""}) {
       if(url.slice(0,1)!="/"){
         url = "/" + url;
       }
