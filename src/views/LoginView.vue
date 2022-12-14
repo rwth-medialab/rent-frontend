@@ -50,7 +50,7 @@ export default {
 </script>
 
 <template>
-  <v-form @submit.prevent="login" v-model="valid">
+  <v-form class="ma-3" @submit.prevent="login" v-model="valid">
     <v-text-field
       label="Username"
       type="username"
