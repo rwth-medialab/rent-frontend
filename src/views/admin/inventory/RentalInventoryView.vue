@@ -10,7 +10,7 @@ export default {
       headers: ["abc", "abc"],
       categories: [],
       objecttypes: {},
-      objects: {},
+      objects: [],
       isCategoryEditDialogOpen: false,
       toBeEditedCategory: {},
       isTypeDetailsDialogOpen: false,
@@ -166,13 +166,14 @@ export default {
         });
       });
       this.objecttypes = resulttypes;
-      const objects = await this.userStore.getFromURLWithAuth({
-        url: "rentalobjects",
-      });
-      let tempObjects = {};
-      //TODO sort objects to type
-      console.log(resulttypes);
-      console.log(this.objecttypes);
+      this.objects.splice(
+        0,
+        this.objects.length,
+        ...(await this.userStore.getFromURLWithAuth({
+          url: "rentalobjects",
+        }))
+      );
+      console.log(this.objects);
     },
     createEditedCategory() {
       console.log(this.toBeEditedCategory);
@@ -204,12 +205,12 @@ export default {
     //TODO delete function with extra accept function
   },
   watch: {
-    isCategoryEditDialogOpen: function (newvalue, oldvalue) {
+    isCategoryEditDialogOpen: function (newvalue) {
       if (!newvalue) {
         this.toBeEditedCategory = {};
       }
     },
-    isTypeDetailsDialogOpen: function (newvalue, oldvalue) {
+    isTypeDetailsDialogOpen: function (newvalue) {
       if (!newvalue) {
         this.toBeEditedObjectsType = {};
         this.selectedTags = [];
@@ -318,7 +319,7 @@ export default {
         <v-list-group>
           <template v-slot:activator="{ props }">
             <v-list-item v-bind="props" :subtitle="category.description">
-              <template v-slot:title="title">
+              <template v-slot:title>
                 {{ category.name }}
                 <v-btn
                   v-if="userStore.has_inventory_rights()"
@@ -338,6 +339,7 @@ export default {
                 'w-100': $vuetify.display.mobile,
               }"
               v-for="rentaltype in objecttypes[categories[index]['id']]"
+              :key="rentaltype['id']"
             >
               <v-list-group>
                 <template v-slot:activator="{ props }">
@@ -383,6 +385,24 @@ export default {
                     </div>
                   </v-list-item>
                 </template>
+                <v-list-item
+                  v-for="object in objects.filter(
+                    (object) => object['type'] == rentaltype['id']
+                  )"
+                >
+                  <v-card>
+                    <template v-slot:title>
+                      {{
+                        rentaltype["prefix_identifier"] +
+                        object["internal_identifier"]
+                      }}
+                    </template>
+                    <div></div>
+                    <v-chip v-if="object['rentable']" color="green">ausleihbar</v-chip>
+                    <v-chip v-else color="red">versteckt</v-chip>
+                    </v-card
+                  >
+                </v-list-item>
               </v-list-group></v-list-item
             >
           </v-row>
