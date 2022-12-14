@@ -38,14 +38,12 @@ export default {
       this.selectedTags = this.tags.filter((tag) =>
         this.toBeEditedObjectsType["tags"].includes(tag["id"])
       );
-      console.log(this.selectedTags);
-      console.log(this.toBeEditedObjectsType);
+      console.log(type)
     },
     saveEditedObjectsType() {
       let formData = new FormData();
       if (this.openTypeImage.includes("base64")) {
         //string containes 'base64' => uploaded image
-        console.log(this.openTypeImage);
         formData.append(this.toBeUploadedImage["type"], this.toBeUploadedImage);
       }
       for (const key in this.toBeEditedObjectsType) {
@@ -93,7 +91,46 @@ export default {
       });
       setTimeout(this.updateData, 200);
     },
-    createEditedObjectsType() {},
+    createEditedObjectsType() {
+      let formData = new FormData();
+      if (this.openTypeImage.includes("base64")) {
+        //string containes 'base64' => uploaded image
+        formData.append(this.toBeUploadedImage["type"], this.toBeUploadedImage);
+      }
+      for (const key in this.toBeEditedObjectsType) {
+        if (
+          Object.prototype.hasOwnProperty.call(
+            this.toBeEditedObjectsType,
+            key
+          ) &&
+          key != "rentalobjects"
+        ) {
+          let element = this.toBeEditedObjectsType[key];
+
+          if (key == "tags" && this.selectedTags.length > 0) {
+            element = this.selectedTags.map((x) => x["id"]);
+            console.log(element);
+          } 
+          if (Array.isArray(element)) {
+            element.forEach((el) => {
+              formData.append(key, el);
+            });
+          } else {
+            formData.append(key, element);
+          }
+        }
+      }
+      console.log(...formData);
+      this.userStore.postURLWithAuth({
+        url: "rentalobjecttypes/",
+        params: formData,
+      });
+      setTimeout(this.updateData, 200);
+    },
+    openCreateTypeDetailsDialog(category:string){
+      this.isTypeDetailsDialogOpen = true
+      this.toBeEditedObjectsType['category'] = category
+    },
     tempSaveTypeImage(e) {
       //temporary save the image as bas64 to display it temporarily
       const image = e.target.files[0];
@@ -176,6 +213,8 @@ export default {
       if (!newvalue) {
         this.toBeEditedObjectsType = {};
         this.selectedTags = [];
+        this.toBeUploadedImage = ""
+        this.openTypeImage = ""
       }
     },
   },
@@ -251,17 +290,19 @@ export default {
             density="compact"
             accept="image/*"
             @change="tempSaveTypeImage"
-            v-if="userStore.has_inventory_rights"
+            v-if="userStore.has_inventory_rights()"
           ></v-file-input>
         </v-col>
       </v-row>
       <v-card-actions>
         <v-spacer></v-spacer
-        ><v-btn @click="isTypeDetailsDialogOpen = false">Abbrechen</v-btn>
+        ><v-btn @click="isTypeDetailsDialogOpen = false">Schließen</v-btn>
+        <template v-if="userStore.has_inventory_rights()">
         <v-btn v-if="toBeEditedObjectsType['id']" @click="saveEditedObjectsType"
           >Speichern</v-btn
         >
         <v-btn v-else @click="createEditedObjectsType">Erstellen</v-btn>
+        </template>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -278,7 +319,7 @@ export default {
               <template v-slot:title="title">
                 {{ category.name }}
                 <v-btn
-                  v-if="userStore.has_inventory_rights"
+                  v-if="userStore.has_inventory_rights()"
                   size="small"
                   flat
                   icon="mdi-pencil"
@@ -345,11 +386,12 @@ export default {
           </v-row>
           <v-list-item>
             <v-btn
+              v-if="userStore.has_inventory_rights()"
               elevation="0"
               prepend-icon="mdi-plus"
               action
               @click.stop
-              @click="isTypeDetailsDialogOpen = true"
+              @click="openCreateTypeDetailsDialog(category.id)"
               >Neuen Typ hinzufügen</v-btn
             >
           </v-list-item>
@@ -357,7 +399,7 @@ export default {
       </v-list>
     </v-card>
   </div>
-  <v-card class="categorycard" v-if="userStore.has_inventory_rights">
+  <v-card class="categorycard" v-if="userStore.has_inventory_rights()">
     <v-list>
       <v-list-item>
         <v-btn
