@@ -171,7 +171,7 @@ export default {
           Einstellungen
         </v-tab>
       </v-tabs>
-      <v-spacer></v-spacer>
+      <v-spacer v-if="!$vuetify.display.mobile"></v-spacer>
       <!-- v-tabs below the current tabs-->
       <template
         v-if="
