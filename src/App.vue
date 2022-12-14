@@ -82,7 +82,7 @@ export default {
             links: [
               { to: "/admin/inventory/rental", name: "Verleih" },
               { to: "/admin/inventory/onpremise", name: "Vorort" },
-              { to: "/admin/inventory/objects", name: "Objekte" },
+              { to: "/admin/inventory/tags", name: "Tags" },
             ],
           },
           settings: {
