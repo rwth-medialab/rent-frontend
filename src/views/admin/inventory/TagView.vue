@@ -51,7 +51,7 @@ export default {
     <div v-if="tags.length < 1">
       Keine Tags vorhanden, bitte füge welche hinzu
     </div>
-    <v-list-item v-for="(tag, index) in tags">
+    <v-list-item v-for="(tag, index) in tags" :key="tag['id']">
       <v-card class="ma-2">
         <v-text-field
           class="ma-2"

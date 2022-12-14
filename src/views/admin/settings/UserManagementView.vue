@@ -2,4 +2,6 @@
 export default {};
 </script>
 
-<template></template>
+<template>
+  <v-card></v-card>
+</template>
