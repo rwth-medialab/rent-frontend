@@ -38,7 +38,7 @@ export default {
       this.selectedTags = this.tags.filter((tag) =>
         this.toBeEditedObjectsType["tags"].includes(tag["id"])
       );
-      console.log(type)
+      console.log(type);
     },
     saveEditedObjectsType() {
       let formData = new FormData();
@@ -110,7 +110,7 @@ export default {
           if (key == "tags" && this.selectedTags.length > 0) {
             element = this.selectedTags.map((x) => x["id"]);
             console.log(element);
-          } 
+          }
           if (Array.isArray(element)) {
             element.forEach((el) => {
               formData.append(key, el);
@@ -127,9 +127,9 @@ export default {
       });
       setTimeout(this.updateData, 200);
     },
-    openCreateTypeDetailsDialog(category:string){
-      this.isTypeDetailsDialogOpen = true
-      this.toBeEditedObjectsType['category'] = category
+    openCreateTypeDetailsDialog(category: string) {
+      this.isTypeDetailsDialogOpen = true;
+      this.toBeEditedObjectsType["category"] = category;
     },
     tempSaveTypeImage(e) {
       //temporary save the image as bas64 to display it temporarily
@@ -213,8 +213,8 @@ export default {
       if (!newvalue) {
         this.toBeEditedObjectsType = {};
         this.selectedTags = [];
-        this.toBeUploadedImage = ""
-        this.openTypeImage = ""
+        this.toBeUploadedImage = "";
+        this.openTypeImage = "";
       }
     },
   },
@@ -298,10 +298,12 @@ export default {
         <v-spacer></v-spacer
         ><v-btn @click="isTypeDetailsDialogOpen = false">Schließen</v-btn>
         <template v-if="userStore.has_inventory_rights()">
-        <v-btn v-if="toBeEditedObjectsType['id']" @click="saveEditedObjectsType"
-          >Speichern</v-btn
-        >
-        <v-btn v-else @click="createEditedObjectsType">Erstellen</v-btn>
+          <v-btn
+            v-if="toBeEditedObjectsType['id']"
+            @click="saveEditedObjectsType"
+            >Speichern</v-btn
+          >
+          <v-btn v-else @click="createEditedObjectsType">Erstellen</v-btn>
         </template>
       </v-card-actions>
     </v-card>

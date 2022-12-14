@@ -37,7 +37,7 @@ export default {
       this.userStore.deleteURLWithAuth({
         url: "tags/" + this.tags[index]["id"],
       });
-      setTimeout(this.syncTags, 200)
+      setTimeout(this.syncTags, 200);
     },
   },
   mounted() {
@@ -76,10 +76,13 @@ export default {
             Speichern</v-btn
           >
           <v-btn
-          @click="deleteTag(index)"
+            @click="deleteTag(index)"
             v-if="userStore.has_inventory_rights()"
             text
-            flat> Löschen </v-btn>
+            flat
+          >
+            Löschen
+          </v-btn>
         </v-row>
       </v-card>
     </v-list-item>

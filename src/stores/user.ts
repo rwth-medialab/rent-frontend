@@ -33,7 +33,7 @@ export const useUserStore = defineStore("user", {
       this.user = user;
     },
     async getFromURLWithAuth({ url = "", params = {} }) {
-      if(url.slice(0,1)!="/"){
+      if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
       url = apiHost + url;
@@ -54,7 +54,7 @@ export const useUserStore = defineStore("user", {
         });
     },
     async patchURLWithAuth({ url = "", params = {} }) {
-      if(url.slice(0,1)!="/"){
+      if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
       url = apiHost + url;
@@ -63,15 +63,15 @@ export const useUserStore = defineStore("user", {
         url += "/";
       }
       return await axios
-        .patch(url, params,{
+        .patch(url, params, {
           headers: { Authorization: "Token " + this.user.token },
         })
         .then(function (response) {
           return response.data;
         });
     },
-    async deleteURLWithAuth({ url = ""}) {
-      if(url.slice(0,1)!="/"){
+    async deleteURLWithAuth({ url = "" }) {
+      if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
       url = apiHost + url;
@@ -88,7 +88,7 @@ export const useUserStore = defineStore("user", {
         });
     },
     async postURLWithAuth({ url = "", params = {} }) {
-      if(url.slice(0,1)!="/"){
+      if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
       url = apiHost + url;
@@ -96,9 +96,9 @@ export const useUserStore = defineStore("user", {
         //strict ending in / is activated in Django
         url += "/";
       }
-      console.log(url)
+      console.log(url);
       return await axios
-        .post(url, params,{
+        .post(url, params, {
           headers: { Authorization: "Token " + this.user.token },
         })
         .then(function (response) {
@@ -204,7 +204,7 @@ export const useUserStore = defineStore("user", {
       } else {
         url += "?";
       }
-      let params = {};
+      const params = {};
       if (category != null) {
         params["category"] = category;
       }

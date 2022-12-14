@@ -20,8 +20,12 @@ const router = createRouter({
     {
       path: "/admin/inventory/tags",
       name: "tagsView",
-      component: () =>
-        import("@/views/admin/inventory/TagView.vue"),
+      component: () => import("@/views/admin/inventory/TagView.vue"),
+    },
+    {
+      path: "/admin/settings/users",
+      name: "userManagement",
+      component: () => import("@/views/admin/settings/UserManagementView.vue"),
     },
     {
       path: "/login",
