@@ -17,11 +17,14 @@ export default {
       toBeEditedObjectsType: {},
       openTypeImage: null,
       toBeUploadedImage: null,
+      tags: [],
+      selectedTags: [],
     };
   },
   async mounted() {
     this.updateData();
-    console.log(this.categories);
+    this.tags = await this.userStore.getFromURLWithAuth({ url: "tags" });
+    console.log(this.tags);
   },
   methods: {
     openTypeDetailsDialog(type) {
@@ -31,6 +34,11 @@ export default {
         "image"
       ].replace("http://", "https://");
       this.openTypeImage = this.toBeEditedObjectsType["image"];
+      //filter all used tags from all possible tags
+      this.selectedTags = this.tags.filter((tag) =>
+        this.toBeEditedObjectsType["tags"].includes(tag["id"])
+      );
+      console.log(this.selectedTags);
       console.log(this.toBeEditedObjectsType);
     },
     saveEditedObjectsType() {
@@ -48,9 +56,6 @@ export default {
           ) &&
           key != "rentalobjects"
         ) {
-          if (key == "tags" && this.toBeEditedObjectsType[key].length < 1) {
-            continue;
-          }
           if (
             key == "image" &&
             this.toBeEditedObjectsType[key].includes("http")
@@ -58,8 +63,27 @@ export default {
             //image has not been changed => shouldnt be uploaded
             continue;
           }
-          const element = this.toBeEditedObjectsType[key];
-          formData.append(key, element);
+          let element = this.toBeEditedObjectsType[key];
+
+          if (key == "tags" && this.selectedTags.length > 0) {
+            element = this.selectedTags.map((x) => x["id"]);
+            console.log(element);
+          } else if (key == "tags" && this.selectedTags.length == 0) {
+            //can not empty many-to-many field with Formdata https://github.com/encode/django-rest-framework/issues/2883
+            // so we need a extra request here #cursed
+            this.userStore.patchURLWithAuth({
+              url: "rentalobjecttypes/" + this.toBeEditedObjectsType["id"],
+              params: { tags: [] },
+            });
+            continue;
+          }
+          if (Array.isArray(element)) {
+            element.forEach((el) => {
+              formData.append(key, el);
+            });
+          } else {
+            formData.append(key, element);
+          }
         }
       }
       console.log(...formData);
@@ -151,6 +175,7 @@ export default {
     isTypeDetailsDialogOpen: function (newvalue, oldvalue) {
       if (!newvalue) {
         this.toBeEditedObjectsType = {};
+        this.selectedTags = [];
       }
     },
   },
@@ -199,6 +224,16 @@ export default {
         v-model="toBeEditedObjectsType['prefix_identifier']"
         :readonly="!userStore.has_inventory_rights()"
       ></v-text-field>
+      <v-combobox
+        v-model:model-value="selectedTags"
+        :readonly="!userStore.has_inventory_rights()"
+        multiple
+        chips
+        :items="tags"
+        item-title="name"
+        item-value="id"
+        label="Tags"
+      ></v-combobox>
       <v-checkbox
         label="In Verleihübersicht anzeigen"
         :readonly="!userStore.has_inventory_rights()"
