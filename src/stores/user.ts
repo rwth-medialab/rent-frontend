@@ -22,7 +22,11 @@ export type userType = {
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: useStorage("user", {} as userType),
-    message: "",
+    message: { type: "info", text: null, alert: false } as {
+      type: "error" | "success" | "warning" | "info";
+      text: string;
+      alert: boolean;
+    },
   }),
 
   actions: {
@@ -31,6 +35,18 @@ export const useUserStore = defineStore("user", {
 
       const user = await res.json();
       this.user = user;
+    },
+    alert(text: string, type: "error" | "success" | "warning" | "info") {
+      this.message["type"] = type;
+      this.message["text"] = text;
+      this.message["alert"] = true;
+      let message = this.message;
+      //display alert for 5seconds
+      setTimeout(resetAlert, 5000);
+
+      function resetAlert() {
+        message["alert"] = false;
+      }
     },
     async getFromURLWithAuth({ url = "", params = {} }) {
       if (url.slice(0, 1) != "/") {
@@ -112,8 +128,10 @@ export const useUserStore = defineStore("user", {
         username.includes(" ") ||
         password.includes(" ")
       ) {
-        this.message =
-          "Weder Nutzername noch Passwort darf leer sein oder ein Leerzeichen enthalten";
+        this.alert(
+          "Weder Nutzername noch Passwort darf leer sein oder ein Leerzeichen enthalten",
+          "warning"
+        );
         return false;
       }
       const res = await fetch(apiHost + "/auth/login/", {
@@ -126,12 +144,12 @@ export const useUserStore = defineStore("user", {
       const user = await res.json();
       if (res.ok) {
         this.user = user;
-        this.message = "Erfolgreich reingeloggt, du wirst jetzt umgeleitet";
+        this.alert("Erfolgreich eingeloggt", "success");
         return true;
       } else {
         console.log(user);
       }
-      this.message = user["non_field_errors"][0];
+      this.alert(user["non_field_errors"][0], "warning");
       return false;
     },
     getReservations({

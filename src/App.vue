@@ -219,6 +219,7 @@ export default {
       </template>
     </v-app-bar>
     <v-main fluid>
+      <v-alert v-model="userStore.message['alert']" class="ma-3" :type="userStore.message['type']" :text="userStore.message['text']" closable></v-alert>
       <router-view />
     </v-main>
   </v-app>

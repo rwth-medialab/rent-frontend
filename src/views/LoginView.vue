@@ -10,14 +10,12 @@ export default {
       valid: false,
       username: "",
       password: "",
-      alert: false,
-      alertmessage: "",
       usernameRules: [
         (v: string) => !!v || "Der Nutzername darf nicht leer sein",
         (v: string) =>
           v.length > 3 || "Der Nutzername besteht aus mindestens 3 Zeichen",
         (v: string) =>
-          /[0-9a-zA-Z]/.test(v) ||
+          /^[0-9a-zA-Z]+$/.test(v) ||
           "Der Nutzername besteht nur aus Ziffern und Buchstaben",
       ],
       passwordRules: [
@@ -36,9 +34,6 @@ export default {
         );
         if (isSuccessfull) {
           this.goBack();
-        } else {
-          this.alert = true;
-          this.alertmessage = this.userStore.message;
         }
       }
     },
@@ -69,9 +64,4 @@ export default {
     <v-btn type="submit">Login</v-btn>
     <v-btn class="ml-3" to="register">register</v-btn>
   </v-form>
-  <!-- <br />
-
-    <v-alert :value="alert" type="error">
-      {{ alertmessage }}
-    </v-alert> -->
 </template>

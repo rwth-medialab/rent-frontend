@@ -19,6 +19,9 @@ export default {
       toBeUploadedImage: null,
       tags: [],
       selectedTags: [],
+      deleteDialog: false,
+      deleteURL: "",
+      deleteData: "",
     };
   },
   async mounted() {
@@ -56,9 +59,9 @@ export default {
         ) {
           if (
             key == "image" &&
-            this.toBeEditedObjectsType[key].includes("http")
+            !(typeof this.toBeEditedObjectsType[key] == "object")
           ) {
-            //image has not been changed => shouldnt be uploaded
+            //since type is not object image has not been changed => shouldnt be uploaded
             continue;
           }
           let element = this.toBeEditedObjectsType[key];
@@ -89,6 +92,7 @@ export default {
         url: "rentalobjecttypes/" + this.toBeEditedObjectsType["id"],
         params: formData,
       });
+      this.isTypeDetailsDialogOpen = false;
       setTimeout(this.updateData, 200);
     },
     createEditedObjectsType() {
@@ -125,6 +129,7 @@ export default {
         url: "rentalobjecttypes/",
         params: formData,
       });
+      this.isTypeDetailsDialogOpen = false;
       setTimeout(this.updateData, 200);
     },
     openCreateTypeDetailsDialog(category: string) {
@@ -175,6 +180,12 @@ export default {
       );
       console.log(this.objects);
     },
+    /** executes the deletion of an object after the confirmation interface. will delete the object from DATABASE*/
+    executeDeletion() {
+      this.userStore.deleteURLWithAuth({ url: this.deleteURL });
+      this.deleteDialog = false;
+      setTimeout(this.updateData, 200);
+    },
     createEditedCategory() {
       console.log(this.toBeEditedCategory);
       console.log(
@@ -205,9 +216,16 @@ export default {
     //TODO delete function with extra accept function
   },
   watch: {
+    //delete temp value
     isCategoryEditDialogOpen: function (newvalue) {
       if (!newvalue) {
         this.toBeEditedCategory = {};
+      }
+    },
+    deleteDialog: function (newvalue) {
+      if (!newvalue) {
+        this.deleteURL = "";
+        this.deleteData = "";
       }
     },
     isTypeDetailsDialogOpen: function (newvalue) {
@@ -309,6 +327,27 @@ export default {
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <!-- confirm dialog to delete DB Objects-->
+  <v-dialog v-model="deleteDialog">
+    <template class="d-flex justify-center">
+      <v-card class="w-50 pa-3">
+        <template v-slot:title
+          ><div class="text-h5 font-weight-bold">
+            Willst du wirklich das folgende löschen:
+          </div></template
+        >
+        <div class="text-subtitle-2 font-weight-bold">Name:</div>
+        <div class="font-italic">{{ deleteData }}</div>
+
+        <template v-slot:actions>
+          <v-spacer></v-spacer
+          ><v-btn @click="deleteDialog = false">Abbrechen</v-btn>
+          <v-btn @click="executeDeletion">Löschen</v-btn>
+        </template>
+      </v-card>
+    </template>
+  </v-dialog>
+  <!-- main part-->
   <div class="d-flex flex-wrap">
     <v-card
       class="categorycard w-100"
@@ -328,6 +367,18 @@ export default {
                   icon="mdi-pencil"
                   @click.stop
                   @click="editCategory(index)"
+                ></v-btn>
+                <v-btn
+                  v-if="userStore.has_inventory_rights()"
+                  size="small"
+                  flat
+                  icon="mdi-delete"
+                  @click.stop
+                  @click="
+                    deleteURL = 'categories/' + category['id'];
+                    deleteDialog = !deleteDialog;
+                    deleteData = category['name'];
+                  "
                 ></v-btn>
               </template>
             </v-list-item>
@@ -398,10 +449,11 @@ export default {
                       }}
                     </template>
                     <div></div>
-                    <v-chip v-if="object['rentable']" color="green">ausleihbar</v-chip>
+                    <v-chip v-if="object['rentable']" color="green"
+                      >ausleihbar</v-chip
+                    >
                     <v-chip v-else color="red">versteckt</v-chip>
-                    </v-card
-                  >
+                  </v-card>
                 </v-list-item>
               </v-list-group></v-list-item
             >
