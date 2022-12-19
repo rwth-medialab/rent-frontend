@@ -335,12 +335,14 @@ export default {
       </v-card-title>
 
       <v-card-actions>
-        <v-spacer></v-spacer
-        ><v-btn @click="isCategoryEditDialogOpen = false">Abbrechen</v-btn>
-        <v-btn v-if="toBeEditedCategory['id']" @click="saveEditedCategory"
-          >Speichern</v-btn
-        >
-        <v-btn v-else @click="createEditedCategory">Erstellen</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn @click="isCategoryEditDialogOpen = false">Abbrechen</v-btn>
+        <template v-if="userStore.has_inventory_rights()">
+          <v-btn v-if="toBeEditedCategory['id']" @click="saveEditedCategory"
+            >Speichern</v-btn
+          >
+          <v-btn v-else @click="createEditedCategory">Erstellen</v-btn>
+        </template>
       </v-card-actions></v-card
     >
   </v-dialog>
@@ -547,7 +549,7 @@ export default {
                     </v-card-actions>
                   </v-card>
                 </v-list-item>
-                <v-list-item>
+                <v-list-item v-if="userStore.has_inventory_rights()">
                   <v-btn
                     @click.stop
                     @click="
