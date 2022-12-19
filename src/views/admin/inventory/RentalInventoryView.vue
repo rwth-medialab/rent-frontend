@@ -7,7 +7,6 @@ export default {
   },
   data() {
     return {
-      headers: ["abc", "abc"],
       categories: [],
       objecttypes: {},
       objects: [],
@@ -22,14 +21,60 @@ export default {
       deleteDialog: false,
       deleteURL: "",
       deleteData: "",
+      objectEditData: {},
+      objectEditType: "",
+      isObjectDetailsDialogOpen: false,
     };
   },
   async mounted() {
     this.updateData();
     this.tags = await this.userStore.getFromURLWithAuth({ url: "tags" });
-    console.log(this.tags);
   },
   methods: {
+    openCreateObjectDialog(localType: string) {
+      //calculate highest internal identifier in object array and use it +1 as new value
+      const typeObjects = this.objects.filter(
+        (object) => object["type"] == localType
+      );
+      const new_internal_identifier =
+        typeObjects.length == 0
+          ? 1
+          : parseInt(
+              typeObjects.sort(
+                (object1, object2) =>
+                  object2["internal_identifier"] -
+                  object1["internal_identifier"]
+              )[0]["internal_identifier"]
+            ) + 1;
+      this.objectEditData["internal_identifier"] = new_internal_identifier + "";
+      this.objectEditData["type"] = localType;
+      this.isObjectDetailsDialogOpen = true;
+    },
+    openObjectDetailsDialog(localType) {
+      this.objectEditData = { ...localType };
+      this.isObjectDetailsDialogOpen = true;
+    },
+    saveObjectFromDialog(create: boolean) {
+      if (
+        this.objectEditData["inventory_number"] == "" ||
+        this.objectEditData["inventory_number"] == null
+      ) {
+        delete this.objectEditData["inventory_number"];
+      }
+      if (create) {
+        this.userStore.postURLWithAuth({
+          url: "rentalobjects",
+          params: this.objectEditData,
+        });
+      } else {
+        this.userStore.patchURLWithAuth({
+          url: "rentalobjects/" + this.objectEditData["id"],
+          params: this.objectEditData,
+        });
+      }
+      this.isObjectDetailsDialogOpen = false;
+      setTimeout(this.updateData, 200);
+    },
     openTypeDetailsDialog(type) {
       this.isTypeDetailsDialogOpen = true;
       this.toBeEditedObjectsType = { ...type };
@@ -41,12 +86,11 @@ export default {
       this.selectedTags = this.tags.filter((tag) =>
         this.toBeEditedObjectsType["tags"].includes(tag["id"])
       );
-      console.log(type);
     },
     saveEditedObjectsType() {
       let formData = new FormData();
       if (this.openTypeImage.includes("base64")) {
-        //string containes 'base64' => uploaded image
+        //string containes 'base64' => uploaded image. because a temporary representation has been set
         formData.append(this.toBeUploadedImage["type"], this.toBeUploadedImage);
       }
       for (const key in this.toBeEditedObjectsType) {
@@ -68,7 +112,6 @@ export default {
 
           if (key == "tags" && this.selectedTags.length > 0) {
             element = this.selectedTags.map((x) => x["id"]);
-            console.log(element);
           } else if (key == "tags" && this.selectedTags.length == 0) {
             //can not empty many-to-many field with Formdata https://github.com/encode/django-rest-framework/issues/2883
             // so we need a extra request here #cursed
@@ -87,7 +130,6 @@ export default {
           }
         }
       }
-      console.log(...formData);
       this.userStore.patchURLWithAuth({
         url: "rentalobjecttypes/" + this.toBeEditedObjectsType["id"],
         params: formData,
@@ -113,7 +155,6 @@ export default {
 
           if (key == "tags" && this.selectedTags.length > 0) {
             element = this.selectedTags.map((x) => x["id"]);
-            console.log(element);
           }
           if (Array.isArray(element)) {
             element.forEach((el) => {
@@ -124,7 +165,6 @@ export default {
           }
         }
       }
-      console.log(...formData);
       this.userStore.postURLWithAuth({
         url: "rentalobjecttypes/",
         params: formData,
@@ -148,6 +188,11 @@ export default {
       this.toBeEditedObjectsType["image"] = this.toBeUploadedImage;
     },
     async updateData() {
+      this.objects.splice(
+        0,
+        this.objects.length,
+        ...(await this.userStore.getFromURLWithAuth({ url: "rentalobjects" }))
+      );
       this.categories.splice(
         0,
         this.categories.length,
@@ -178,7 +223,6 @@ export default {
           url: "rentalobjects",
         }))
       );
-      console.log(this.objects);
     },
     /** executes the deletion of an object after the confirmation interface. will delete the object from DATABASE*/
     executeDeletion() {
@@ -187,23 +231,18 @@ export default {
       setTimeout(this.updateData, 200);
     },
     createEditedCategory() {
-      console.log(this.toBeEditedCategory);
-      console.log(
-        this.userStore.postURLWithAuth({
-          url: "/categories/",
-          params: this.toBeEditedCategory,
-        })
-      );
+      this.userStore.postURLWithAuth({
+        url: "/categories/",
+        params: this.toBeEditedCategory,
+      });
       this.isCategoryEditDialogOpen = false;
       setTimeout(this.updateData, 200);
     },
     saveEditedCategory() {
-      console.log(
-        this.userStore.patchURLWithAuth({
-          url: "/categories/" + this.toBeEditedCategory["id"],
-          params: this.toBeEditedCategory,
-        })
-      );
+      this.userStore.patchURLWithAuth({
+        url: "/categories/" + this.toBeEditedCategory["id"],
+        params: this.toBeEditedCategory,
+      });
       this.isCategoryEditDialogOpen = false;
       setTimeout(this.updateData, 200);
     },
@@ -213,13 +252,18 @@ export default {
       this.toBeEditedCategory = { ...this.categories[value] };
       delete this.toBeEditedCategory["rentalobjecttypes"];
     },
-    //TODO delete function with extra accept function
   },
   watch: {
     //delete temp value
     isCategoryEditDialogOpen: function (newvalue) {
       if (!newvalue) {
         this.toBeEditedCategory = {};
+      }
+    },
+    isObjectDetailsDialogOpen: function (newvalue) {
+      if (!newvalue) {
+        this.objectEditData = {};
+        this.objectEditType = "";
       }
     },
     deleteDialog: function (newvalue) {
@@ -241,6 +285,42 @@ export default {
 </script>
 
 <template>
+  <v-dialog v-model="isObjectDetailsDialogOpen">
+    <v-card class="pa-2">
+      <template v-slot:title>
+        <div class="ma-2">
+          {{ objectEditType + objectEditData["internal_identifier"] }}
+        </div>
+        <!--  -->
+      </template>
+      <v-text-field
+        class="ma-2"
+        label="Inventarnummer"
+        v-model="objectEditData['inventory_number']"
+      >
+      </v-text-field>
+      <v-checkbox
+        label="ausleihbar(also z.B. nicht defekt)"
+        v-model="objectEditData['rentable']"
+      ></v-checkbox>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn @click.stop @click="isObjectDetailsDialogOpen = false">
+          Abbrechen</v-btn
+        >
+        <v-btn
+          v-if="objectEditData['id']"
+          @click.stop
+          @click="saveObjectFromDialog(false)"
+        >
+          Speichern
+        </v-btn>
+        <v-btn v-else @click.stop @click="saveObjectFromDialog(true)">
+          Erstellen</v-btn
+        >
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <v-dialog v-model="isCategoryEditDialogOpen">
     <v-card>
       <v-card-title>
@@ -350,7 +430,7 @@ export default {
   <!-- main part-->
   <div class="d-flex flex-wrap">
     <v-card
-      class="categorycard w-100"
+      class="w-100 mt-2 mx-2"
       v-for="(category, index) in categories"
       :key="category.id"
     >
@@ -411,15 +491,14 @@ export default {
                           {{ rentaltype["name"] }}
                         </v-card-title>
 
-                        <v-card-subtitle class="d-flex">
-                          <v-chip
-                            v-if="!rentaltype['visible']"
-                            class=""
-                            color="red"
-                            >versteckt</v-chip
-                          >
-                          <v-chip v-else color="green">angezeigt</v-chip>
-                        </v-card-subtitle>
+                        <v-chip
+                          class="ml-4"
+                          :color="rentaltype['visible'] ? 'green' : 'red'"
+                          :text="
+                            rentaltype['visible'] ? 'angezeigt' : 'versteckt'
+                          "
+                          variant="elevated"
+                        ></v-chip>
 
                         <v-card-actions>
                           <v-btn
@@ -449,11 +528,37 @@ export default {
                       }}
                     </template>
                     <div></div>
-                    <v-chip v-if="object['rentable']" color="green"
-                      >ausleihbar</v-chip
-                    >
-                    <v-chip v-else color="red">versteckt</v-chip>
+                    <v-chip
+                      :color="object['rentable'] ? 'green' : 'red'"
+                      :text="object['rentable'] ? 'ausleihbar' : 'versteckt'"
+                      variant="elevated"
+                    ></v-chip>
+                    <v-card-actions>
+                      <v-btn
+                        @click.stop
+                        @click="
+                          objectEditType = rentaltype['prefix_identifier'];
+                          openObjectDetailsDialog(object);
+                        "
+                        variant="outlined"
+                        size="small"
+                        >Details</v-btn
+                      >
+                    </v-card-actions>
                   </v-card>
+                </v-list-item>
+                <v-list-item>
+                  <v-btn
+                    @click.stop
+                    @click="
+                      objectEditType = rentaltype['prefix_identifier'];
+                      openCreateObjectDialog(rentaltype['id']);
+                    "
+                    prepend-icon="mdi-plus"
+                    action
+                    flat
+                    >Neues Objekt hinzufügen</v-btn
+                  >
                 </v-list-item>
               </v-list-group></v-list-item
             >
@@ -473,7 +578,7 @@ export default {
       </v-list>
     </v-card>
   </div>
-  <v-card class="categorycard" v-if="userStore.has_inventory_rights()">
+  <v-card class="ma-2" v-if="userStore.has_inventory_rights()">
     <v-list>
       <v-list-item>
         <v-btn
@@ -490,13 +595,6 @@ export default {
 </template>
 
 <style scoped>
-.categorycard {
-  margin: 1% !important;
-}
-
-.extend-icon {
-  top: 50% !important;
-}
 .type-card {
   padding: 0 !important;
 }
