@@ -58,6 +58,13 @@ export default {
         this.$router.push("/");
       }
     },
+    toggleLogin() {
+      if (this.loggedIn) {
+        this.logout();
+      } else {
+        this.$router.push("/login");
+      }
+    },
   },
   async mounted() {
     document.title = this.siteName;
@@ -114,6 +121,14 @@ export default {
 <template>
   <v-app :theme="settingsStore.theme">
     <v-navigation-drawer v-model="drawer" temporary right>
+      <template v-slot:append>
+        <v-btn
+          class="w-100"
+          @click="toggleLogin"
+          :color="loggedIn ? 'red' : 'green'"
+          >{{ loggedIn ? "Ausloggen" : "Einloggen" }}</v-btn
+        ></template
+      >
       <v-list nav dense>
         <template v-if="staff">
           <v-list-group no-action>
@@ -140,7 +155,7 @@ export default {
             </template>
           </v-list-group>
         </template>
-        <v-list-item to="/rental">
+        <v-list-item to="/">
           <v-list-item-title> Verleih </v-list-item-title>
         </v-list-item>
         <v-list-item to="/onpremise">
@@ -211,17 +226,30 @@ export default {
               settingsStore.theme == 'light' ? 'dark' : 'light'
           "
         ></v-btn>
-        <div>|</div>
-        <v-btn v-if="!loggedIn" icon="mdi-login" to="/login" class="no-active">
-        </v-btn>
-        <v-btn v-else-if="loggedIn" icon="mdi-logout" @click="logout()">
+        <div v-if="!$vuetify.display.mobile">|</div>
+        <v-btn
+          v-if="!$vuetify.display.mobile"
+          :icon="loggedIn ? 'mdi-logout' : 'mdi-login'"
+          @click="toggleLogin()"
+          class="no-active"
+        >
         </v-btn>
       </template>
     </v-app-bar>
     <v-main fluid>
-      <v-alert v-model="userStore.message['alert']" class="ma-3" :type="userStore.message['type']" :text="userStore.message['text']" closable></v-alert>
+      <v-alert
+        v-model="userStore.message['alert']"
+        class="ma-3"
+        :type="userStore.message['type']"
+        :text="userStore.message['text']"
+        closable
+      ></v-alert>
       <router-view />
     </v-main>
   </v-app>
 </template>
-<style scoped></style>
+<style>
+.w-30 {
+  width: 30% !important;
+}
+</style>
