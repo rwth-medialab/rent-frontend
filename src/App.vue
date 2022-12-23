@@ -9,7 +9,7 @@ export default {
     return { userStore, settingsStore };
   },
   watch: {
-    $route: function (newroute, oldroute) {
+    $route: function (_newroute, oldroute) {
       if (oldroute.name == "login") {
         this.isCredentialsInvalid();
       }
