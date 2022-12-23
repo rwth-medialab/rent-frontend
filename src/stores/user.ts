@@ -40,7 +40,7 @@ export const useUserStore = defineStore("user", {
       this.message["type"] = type;
       this.message["text"] = text;
       this.message["alert"] = true;
-      let message = this.message;
+      const message = this.message;
       //display alert for 5seconds
       setTimeout(resetAlert, 5000);
 
@@ -48,7 +48,7 @@ export const useUserStore = defineStore("user", {
         message["alert"] = false;
       }
     },
-    async getFromURLWithAuth({ url = "", params = {} }) {
+    async getFromURLWithoutAuth({ url = "", params = {}, headers = {} }) {
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -59,15 +59,24 @@ export const useUserStore = defineStore("user", {
       }
       if (Object.keys(params).length > 0) {
         const urlparams = new URLSearchParams(params);
-        url += "?${urlparams}";
+        url += "?" + urlparams.toString();
       }
+
       return await axios
         .get(url, {
-          headers: { Authorization: "Token " + this.user.token },
+          headers: headers,
         })
         .then(function (response) {
           return response.data;
         });
+    },
+    async getFromURLWithAuth({ url = "", params = {}, headers = {} }) {
+      headers["Authorization"] = "Token " + this.user.token;
+      return this.getFromURLWithoutAuth({
+        url: url,
+        params: params,
+        headers: headers,
+      });
     },
     async patchURLWithAuth({ url = "", params = {} }) {
       if (url.slice(0, 1) != "/") {
@@ -183,56 +192,6 @@ export const useUserStore = defineStore("user", {
 
       return axios
         .get(url, { headers: { Authorization: "Token " + this.user.token } })
-        .then(function (response) {
-          return response.data;
-        });
-    },
-    getCategories() {
-      const targeturl = apiHost + "/api/categories/";
-      const params = new URLSearchParams({
-        type: null,
-        category: "adsbsd",
-        numbers: String(1),
-      });
-      return axios
-        .get(targeturl, {
-          headers: { Authorization: "Token " + this.user.token },
-        })
-        .then(function (response) {
-          return response.data;
-        });
-    },
-    getObjects({ type = null }) {
-      let url = apiHost + "/api/rentalobjects/?";
-
-      if (type != null) {
-        url += "type=" + type + "&";
-      }
-
-      return axios
-        .get(url, { headers: { Authorization: "Token " + this.user.token } })
-        .then(function (response) {
-          return response.data;
-        });
-    },
-    getObjectTypes({ id = null, category = null }) {
-      let url = apiHost + "/api/rentalobjecttypes/";
-      if (id != null) {
-        url += id + "/";
-      } else {
-        url += "?";
-      }
-      const params = {};
-      if (category != null) {
-        params["category"] = category;
-      }
-
-      const urlparams = new URLSearchParams(params);
-
-      return axios
-        .get(url + "${urlsparams}", {
-          headers: { Authorization: "Token " + this.user.token },
-        })
         .then(function (response) {
           return response.data;
         });
