@@ -4,114 +4,22 @@
   background-color: inherit !important;
 }
 
-/* fixes veutifys overwriting of list's css for tiptap */
-ol, ul{
-  padding-left: 40px !important;
-}
+/* fixes veutifys css reset apply editor styles  https://github.com/vueup/vue-quill/tree/master/packages/vue-quill/src/assets*/
 
-code {
-  background: #f4f4f4;
-}
-
-
-/* 
-https://github.com/maythamfahmi/CodeStyler/blob/main/codestyler/css/CodeStyler.css 
-License for this part:
-  The MIT License (MIT)
-
-  Copyright (c) 2019 ITBackyard LLC
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-*/
-pre {
-  background: #f4f4f4;
-  border: 1px solid #ddd;
-  border-left: 3px solid #f36d33;
-  color: #666;
-  page-break-inside: avoid;
-  font: normal normal 14px/16px "Courier New", Courier, Monospace;
-  line-height: 1.0;
-  margin-bottom: 1.6em;
-  max-width: 100%;
-  padding: .5em 1em;
-  display: block;
-  word-wrap: break-word;
-  margin-left: 30px;
-  overflow: auto;
-  overflow-x: auto;
+pre.ql-syntax {
+  background-color: #23241f !important;
+  color: #f8f8f2;
+  overflow: visible;
+  border-radius: 3px;
   white-space: pre-wrap;
-  counter-reset: line;
+  padding: 5px 10px !important;
 }
 
-pre:hover,
-pre:focus {
-  border-left: 3px solid #338df3;
-}
-
-div.code {
-  position: relative;
-}
-
-pre+button {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-pre .line-number {
-  user-select: none;
-  float: left;
-  margin: 0 1em 0 -1em;
-  border-right: 1px solid;
-  text-align: right;
-}
-
-pre .line-number span {
-  display: block;
-  padding: 0 .5em 0 1em;
-}
-
-pre .cl {
-  display: block;
-  clear: both;
-}
-
-.codeButton {
-  background-color: transparent;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-  border-radius: 2x;
-  border: 1px solid;
-  display: inline-block;
-  cursor: pointer;
-  color: #000;
-  font-family: Arial;
-  font-size: 14px;
-  padding: 2px 2px;
-  text-decoration: none;
-  margin: 2px 2px;
-}
-
-.codeButton:hover {
-  background-color: transparent;
-}
-
-.codeButton:active {
-  top: 1px;
+blockquote {
+  border-left: 4px solid #ccc;
+  background-color: aliceblue;
+  margin-bottom: 5px;
+  margin-top: 5px !important;
+  margin-left: 16px !important;
+  padding-left: 16px !important;
 }
