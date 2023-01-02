@@ -70,7 +70,7 @@ export default {
       textNode.appendChild(textValue);
       textNode.setAttribute("textLength", width);
       textNode.setAttribute("lengthAdjust", "spacing");
-      //TODO fix download and add the n
+      //TODO fix download and add the name
       //svgContent.appendChild(textNode)
       console.log(svgContent);
       const url = window.URL.createObjectURL(new Blob([svgContent.outerHTML]));
