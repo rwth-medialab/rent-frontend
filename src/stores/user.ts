@@ -3,8 +3,9 @@ import { useStorage } from "@vueuse/core";
 import moment from "moment";
 import axios from "axios";
 
-//TODO CHANGE ENV
-const apiHost = import.meta.env.VITE_API_HOST + "/api";
+import type { RentalObjectTypeType } from "@/ts/rent.types";
+
+const apiHost = import.meta.env.VITE_API_HOST;
 
 export type userType = {
   expiry: string;
@@ -27,6 +28,7 @@ export const useUserStore = defineStore("user", {
       text: string;
       alert: boolean;
     },
+    shoppingCart: useStorage("shoppingCart", [] as RentalObjectTypeType[]),
   }),
 
   actions: {
@@ -41,8 +43,8 @@ export const useUserStore = defineStore("user", {
       this.message["text"] = text;
       this.message["alert"] = true;
       const message = this.message;
-      //display alert for 5seconds
-      setTimeout(resetAlert, 5000);
+      //display alert for a couple of seconds
+      setTimeout(resetAlert, 3000);
 
       function resetAlert() {
         message["alert"] = false;
@@ -79,6 +81,8 @@ export const useUserStore = defineStore("user", {
       });
     },
     async patchURLWithAuth({ url = "", params = {} }) {
+      console.log(url)
+      console.log(params)
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -113,6 +117,8 @@ export const useUserStore = defineStore("user", {
         });
     },
     async postURLWithAuth({ url = "", params = {} }) {
+      console.log(url)
+      console.log(params)
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -196,15 +202,6 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
-    postRentals(id: string, reservation_id: string) {
-      //TODO
-      const url = apiHost + "/api/rentalobjecttypes/";
-      axios.post(url, {
-        headers: { Authorization: "Token " + this.user.token },
-        reservation_id: reservation_id,
-        object_id: id,
-      });
-    },
     async signOut() {
       const res = await fetch(apiHost + "/auth/logout/", {
         method: "POST",
@@ -214,28 +211,31 @@ export const useUserStore = defineStore("user", {
         //body: JSON.stringify({ username, password }),
       });
       if (res.ok) {
-        this.user = null;
+        this.user = {} as userType;
       }
     },
     async checkCredentials() {
       //check if expiry date is in future return true in that case
-      try {
-        const valid = moment(this.user.expiry).isAfter();
-        const res = await fetch(apiHost + "/auth/checkcredentials/", {
-          method: "POST",
-          headers: {
-            Authorization: "Token " + this.user.token,
-          },
-          //body: JSON.stringify({ username, password }),
-        });
-        if (!valid || res.status != 200) {
-          console.log("expected 401");
-          this.user = null;
+      if (('token' in this.user)) {
+        try {
+          const res = await fetch(apiHost + "/auth/checkcredentials/", {
+            method: "POST",
+            headers: {
+              Authorization: "Token " + this.user.token,
+            },
+            //body: JSON.stringify({ username, password }),
+          });
+          if (res.status != 200) {
+            this.alert("Sie wurden ausgeloggt, bitte loggen Sie sich neu ein.", "info")
+            this.user = {} as userType;
+            return false;
+          }
+          return true;
+        } catch (error) {
+          this.user = {} as userType;
           return false;
         }
-        return true;
-      } catch (error) {
-        this.user = null;
+      } else {
         return false;
       }
     },

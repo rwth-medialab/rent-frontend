@@ -1,14 +1,18 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
+import QrcodeVue from "qrcode.vue";
+import type { RentalObjectTypeType, TagType } from "@/ts/rent.types";
+import { formatDate } from "@vueuse/shared";
 export default {
   setup() {
     const userStore = useUserStore();
     return { userStore };
   },
+  components: { QrcodeVue },
   data() {
     return {
       categories: [],
-      objecttypes: {},
+      objecttypes: {} as RentalObjectTypeType,
       objects: [],
       isCategoryEditDialogOpen: false,
       toBeEditedCategory: {},
@@ -16,7 +20,7 @@ export default {
       toBeEditedObjectsType: {},
       openTypeImage: null,
       toBeUploadedImage: null,
-      tags: [],
+      tags: [] as TagType[],
       selectedTags: [],
       deleteDialog: false,
       deleteURL: "",
@@ -28,7 +32,6 @@ export default {
   },
   async mounted() {
     this.updateData();
-    this.tags = await this.userStore.getFromURLWithAuth({ url: "tags" });
   },
   methods: {
     openCreateObjectDialog(localType: string) {
@@ -54,6 +57,35 @@ export default {
       this.objectEditData = { ...localType };
       this.isObjectDetailsDialogOpen = true;
     },
+    downloadQrCode() {
+      // deepcopy to keep changes to the downloaded file
+      let svgContent = document
+        .getElementById("qrcode")
+        .cloneNode(true) as HTMLElement;
+      svgContent.setAttribute("height", "200");
+      const width = svgContent.getAttribute("width");
+      let textNode = document.createElement("text");
+      const textValue = document.createTextNode(
+        this.objectEditType + this.objectEditData["internal_identifier"]
+      );
+      textNode.appendChild(textValue);
+      textNode.setAttribute("textLength", width);
+      textNode.setAttribute("lengthAdjust", "spacing");
+      //TODO fix download and add the n
+      //svgContent.appendChild(textNode)
+      console.log(svgContent);
+      const url = window.URL.createObjectURL(new Blob([svgContent.outerHTML]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        this.objectEditType +
+          this.objectEditData["internal_identifier"] +
+          ".svg"
+      );
+      document.body.appendChild(link);
+      link.click();
+    },
     saveObjectFromDialog(create: boolean) {
       if (
         this.objectEditData["inventory_number"] == "" ||
@@ -78,9 +110,7 @@ export default {
     openTypeDetailsDialog(type) {
       this.isTypeDetailsDialogOpen = true;
       this.toBeEditedObjectsType = { ...type };
-      this.toBeEditedObjectsType["image"] = this.toBeEditedObjectsType[
-        "image"
-      ].replace("http://", "https://");
+      this.toBeEditedObjectsType["image"] = this.toBeEditedObjectsType["image"];
       this.openTypeImage = this.toBeEditedObjectsType["image"];
       //filter all used tags from all possible tags
       this.selectedTags = this.tags.filter((tag) =>
@@ -111,7 +141,10 @@ export default {
           let element = this.toBeEditedObjectsType[key];
 
           if (key == "tags" && this.selectedTags.length > 0) {
-            element = this.selectedTags.map((x) => x["id"]);
+            // if the tags are selected through the v-select their value is number. if they are not changed they are of type TagType
+            element = this.selectedTags.map((x) =>
+              typeof x == "number" ? x : x["id"]
+            );
           } else if (key == "tags" && this.selectedTags.length == 0) {
             //can not empty many-to-many field with Formdata https://github.com/encode/django-rest-framework/issues/2883
             // so we need a extra request here #cursed
@@ -121,6 +154,7 @@ export default {
             });
             continue;
           }
+          console.log(element);
           if (Array.isArray(element)) {
             element.forEach((el) => {
               formData.append(key, el);
@@ -138,6 +172,7 @@ export default {
       setTimeout(this.updateData, 200);
     },
     createEditedObjectsType() {
+      // we have to use formdata here, otherwise we couldn't uplaod the image
       let formData = new FormData();
       if (this.openTypeImage.includes("base64")) {
         //string containes 'base64' => uploaded image
@@ -188,6 +223,12 @@ export default {
       this.toBeEditedObjectsType["image"] = this.toBeUploadedImage;
     },
     async updateData() {
+      // use splice to keep reactivity with arrays. Direct array manipulation sometimes does not keep reactivity
+      this.tags.splice(
+        0,
+        this.tags.length,
+        ...(await this.userStore.getFromURLWithAuth({ url: "tags" }))
+      );
       this.objects.splice(
         0,
         this.objects.length,
@@ -202,7 +243,7 @@ export default {
         url: "rentalobjecttypes",
       });
       //to reduce network load. load every type and match them on the device
-      let resulttypes = {};
+      let resulttypes = {} as RentalObjectTypeType;
       this.categories.forEach((category) => {
         resulttypes[category["id"]] = [];
         types.forEach((objtype) => {
@@ -286,9 +327,9 @@ export default {
 
 <template>
   <v-dialog v-model="isObjectDetailsDialogOpen">
-    <v-card class="pa-2">
+    <v-card class="pa-4">
       <template v-slot:title>
-        <div class="ma-2">
+        <div class="">
           {{ objectEditType + objectEditData["internal_identifier"] }}
         </div>
         <!--  -->
@@ -303,6 +344,19 @@ export default {
         label="ausleihbar(also z.B. nicht defekt)"
         v-model="objectEditData['rentable']"
       ></v-checkbox>
+      <v-img>
+        <qrcode-vue
+          id="qrcode"
+          class="ma-2"
+          v-if="objectEditData['id']"
+          :value="objectEditData['id'] + ''"
+          :size="150"
+          render-as="svg"
+        ></qrcode-vue
+      ></v-img>
+      <v-btn variant="outlined" width="200" @click="downloadQrCode()"
+        >Download Qr-Code</v-btn
+      >
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn @click.stop @click="isObjectDetailsDialogOpen = false">
@@ -346,6 +400,7 @@ export default {
       </v-card-actions></v-card
     >
   </v-dialog>
+  <!-- Objecttype edit dialog-->
   <v-dialog v-model="isTypeDetailsDialogOpen">
     <v-card class="pa-3">
       <h2 class="ma-2">Details von: {{ toBeEditedObjectsType["name"] }}</h2>
@@ -354,17 +409,29 @@ export default {
         v-model="toBeEditedObjectsType['name']"
         :readonly="!userStore.has_inventory_rights()"
       ></v-text-field>
+      <div>Die Beschreibung wird in der Detailansicht angezeigt</div>
       <v-textarea
         label="Beschreibung"
         v-model="toBeEditedObjectsType['description']"
         :readonly="!userStore.has_inventory_rights()"
       ></v-textarea>
+      <div>Die Kurzbeschreibung wird in der Verleihübersicht angezeigt.</div>
+      <v-textarea
+        label="Kurzbeschreibung"
+        v-model="toBeEditedObjectsType['shortdescription']"
+        :readonly="!userStore.has_inventory_rights()"
+      ></v-textarea>
+      <v-text-field
+        label="Hersteller"
+        v-model="toBeEditedObjectsType['manufacturer']"
+        :readonly="!userStore.has_inventory_rights()"
+      ></v-text-field>
       <v-text-field
         label="Präfix für ID"
         v-model="toBeEditedObjectsType['prefix_identifier']"
         :readonly="!userStore.has_inventory_rights()"
       ></v-text-field>
-      <v-combobox
+      <v-select
         v-model:model-value="selectedTags"
         :readonly="!userStore.has_inventory_rights()"
         multiple
@@ -373,7 +440,7 @@ export default {
         item-title="name"
         item-value="id"
         label="Tags"
-      ></v-combobox>
+      ></v-select>
       <v-checkbox
         label="In Verleihübersicht anzeigen"
         :readonly="!userStore.has_inventory_rights()"
@@ -382,7 +449,6 @@ export default {
       <v-row>
         <v-avatar class="ma-3" size="100" rounded="0">
           <v-img cover aspect-ratio="1" :src="openTypeImage"></v-img>
-          <!-- TODO replace "replace(http://, https://)" with something better, maybe django could send the correct protocol -->
           <!-- Suggestions between types-->
         </v-avatar>
         <v-col>
@@ -412,7 +478,7 @@ export default {
   <!-- confirm dialog to delete DB Objects-->
   <v-dialog v-model="deleteDialog">
     <template class="d-flex justify-center">
-      <v-card class="w-50 pa-3">
+      <v-card class="pa-3" :class="$vuetify.display.mobile ? 'w-75' : 'w-50'">
         <template v-slot:title
           ><div class="text-h5 font-weight-bold">
             Willst du wirklich das folgende löschen:
@@ -482,11 +548,8 @@ export default {
                         <v-img
                           cover
                           aspect-ratio="1"
-                          :src="
-                            rentaltype['image'].replace('http://', 'https://')
-                          "
+                          :src="rentaltype['image']"
                         ></v-img>
-                        <!-- TODO replace "replace(http://, https://)" with something better -->
                       </v-avatar>
                       <div class="flex-column">
                         <v-card-title class="text-xs-h5 d-flex">
@@ -521,6 +584,7 @@ export default {
                   v-for="object in objects.filter(
                     (object) => object['type'] == rentaltype['id']
                   )"
+                  :key="object['id']"
                 >
                   <v-card>
                     <template v-slot:title>
@@ -599,10 +663,6 @@ export default {
 <style scoped>
 .type-card {
   padding: 0 !important;
-}
-
-.w-30 {
-  width: 30% !important;
 }
 
 .w-70 {

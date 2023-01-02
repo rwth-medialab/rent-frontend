@@ -171,7 +171,7 @@ export default {
         ></v-app-bar-nav-icon>
       </template>
       <template v-slot:title
-        ><v-btn href="/">{{ siteName }}</v-btn></template
+        ><v-btn @click="$router.push('/')">{{ siteName }}</v-btn></template
       >
       <v-tabs
         align-tabs="title"
@@ -203,6 +203,7 @@ export default {
         </v-tabs>
       </template>
       <template v-slot:append>
+        <!-- button for the admin area, only displayed for staff-->
         <v-btn
           v-if="!$vuetify.display.mobile && staff"
           id="adminbutton"
@@ -211,28 +212,40 @@ export default {
           Admin
         </v-btn>
         <div v-if="!$vuetify.display.mobile && staff">|</div>
+        
+        <!-- Account button, leads to account overview -->
         <v-btn
           v-if="!$vuetify.display.mobile && loggedIn"
           icon="mdi-account"
-          to="/account"
-          class="no-active"
+          @click="$router.push('/account')"
         >
         </v-btn>
         <div v-if="!$vuetify.display.mobile && loggedIn">|</div>
+        <!-- Button to switch between light and dark theme-->
         <v-btn
-          icon="mdi-theme-light-dark"
+          :icon="
+            settingsStore.theme == 'light'
+              ? 'mdi-weather-sunny'
+              : 'mdi-weather-night'
+          "
           @click="
             settingsStore.theme =
               settingsStore.theme == 'light' ? 'dark' : 'light'
           "
         ></v-btn>
         <div v-if="!$vuetify.display.mobile">|</div>
+        <!-- Login/Logout Button-->
         <v-btn
           v-if="!$vuetify.display.mobile"
           :icon="loggedIn ? 'mdi-logout' : 'mdi-login'"
           @click="toggleLogin()"
-          class="no-active"
         >
+        </v-btn>
+        <div>|</div>
+        <v-btn icon @click="$router.push('/cart')">
+          <v-badge floating :content="userStore.shoppingCart.length">
+            <v-icon icon="mdi-basket"></v-icon>
+          </v-badge>
         </v-btn>
       </template>
     </v-app-bar>

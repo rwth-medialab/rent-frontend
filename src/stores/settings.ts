@@ -3,6 +3,6 @@ import { useStorage } from "@vueuse/core";
 
 export const useSettingsStore = defineStore("settings", {
   state: () => ({
-    theme: useStorage("settings", "light"),
+    theme: useStorage("settings", "dark"),
   }),
 });
