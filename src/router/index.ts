@@ -6,9 +6,6 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import("@/views/HomeView.vue"),
     },
     {
@@ -28,9 +25,18 @@ const router = createRouter({
       component: () => import("@/views/admin/settings/UserManagementView.vue"),
     },
     {
+      path: "/admin/settings/texts",
+      name: "textManagement",
+      component: () => import("@/views/admin/settings/TextManagementView.vue"),
+    },
+    {
       path: "/login",
       name: "login",
       component: () => import("@/views/LoginView.vue"),
+    },
+    {
+      path: "/type/:id",
+      component: () => import("@/views/TypeView.vue"),
     },
     {
       // redirect rental button to a default case in this case the rental dashboard
