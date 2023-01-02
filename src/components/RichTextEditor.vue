@@ -101,7 +101,7 @@ export default {
           disabled: (editor: Editor): boolean => {
             return !editor.can().chain().focus().undo().run();
           },
-          isActive: (_editor: Editor): boolean => {
+          isActive: (): boolean => {
             return false;
           },
         },
@@ -114,7 +114,7 @@ export default {
           disabled: (editor: Editor): boolean => {
             return !editor.can().chain().focus().redo().run();
           },
-          isActive: (_editor: Editor): boolean => {
+          isActive: (): boolean => {
             return false;
           },
         },
@@ -163,7 +163,7 @@ export default {
           action: (editor: Editor): void => {
             this.editLink(editor);
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -189,10 +189,10 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().unsetAllMarks().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
-          isActive: (_editor: Editor): boolean => {
+          isActive: (): boolean => {
             return false;
           },
         },
@@ -202,7 +202,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().setParagraph().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -215,7 +215,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleHeading({ level: 1 }).run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -228,7 +228,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleHeading({ level: 2 }).run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -241,7 +241,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleHeading({ level: 3 }).run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -254,7 +254,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleHeading({ level: 4 }).run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -267,7 +267,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleHeading({ level: 5 }).run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -280,7 +280,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleHeading({ level: 6 }).run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -293,7 +293,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleBulletList().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -306,7 +306,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleOrderedList().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -319,7 +319,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleCodeBlock().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -332,7 +332,7 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().toggleBlockquote().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
           isActive: (editor: Editor): boolean => {
@@ -345,23 +345,23 @@ export default {
           action: (editor: Editor): void => {
             editor.chain().focus().setHorizontalRule().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
-          isActive: (_editor: Editor): boolean => {
+          isActive: (): boolean => {
             return false;
           },
         },
         {
           tooltip: "Hard Break",
-          icon: "mdi-keayboard-return",
+          icon: "mdi-keyboard-return",
           action: (editor: Editor): void => {
             editor.chain().focus().setHardBreak().run();
           },
-          disabled: (_editor: Editor): boolean => {
+          disabled: (): boolean => {
             return false;
           },
-          isActive: (_editor: Editor): boolean => {
+          isActive: (): boolean => {
             return false;
           },
         },
