@@ -12,6 +12,9 @@ import * as directives from "vuetify/directives";
 import "@mdi/font/css/materialdesignicons.css";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import VCalendar from "v-calendar";
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import '@vueup/vue-quill/dist/vue-quill.bubble.css'
 
 // import "./assets/main.css";
 
@@ -31,6 +34,7 @@ const vuetify = createVuetify({
 app.use(vuetify);
 // Use plugin with defaults
 app.use(VCalendar, {});
+app.component('QuillEditor', QuillEditor)
 app.use(createPinia());
 app.use(router);
 
