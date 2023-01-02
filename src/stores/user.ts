@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
-import moment from "moment";
 import axios from "axios";
 
 import type { RentalObjectTypeType } from "@/ts/rent.types";
@@ -81,8 +80,6 @@ export const useUserStore = defineStore("user", {
       });
     },
     async patchURLWithAuth({ url = "", params = {} }) {
-      console.log(url)
-      console.log(params)
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -117,8 +114,6 @@ export const useUserStore = defineStore("user", {
         });
     },
     async postURLWithAuth({ url = "", params = {} }) {
-      console.log(url)
-      console.log(params)
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -216,7 +211,7 @@ export const useUserStore = defineStore("user", {
     },
     async checkCredentials() {
       //check if expiry date is in future return true in that case
-      if (('token' in this.user)) {
+      if ("token" in this.user) {
         try {
           const res = await fetch(apiHost + "/auth/checkcredentials/", {
             method: "POST",
@@ -226,7 +221,10 @@ export const useUserStore = defineStore("user", {
             //body: JSON.stringify({ username, password }),
           });
           if (res.status != 200) {
-            this.alert("Sie wurden ausgeloggt, bitte loggen Sie sich neu ein.", "info")
+            this.alert(
+              "Sie wurden ausgeloggt, bitte loggen Sie sich neu ein.",
+              "info"
+            );
             this.user = {} as userType;
             return false;
           }

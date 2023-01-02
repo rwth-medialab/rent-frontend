@@ -5,8 +5,7 @@ export default {
 
   data() {
     return {
-      content:
-        "",
+      content: "",
     };
   },
 };
@@ -23,7 +22,8 @@ export default {
 </template>
 
 <style>
-ol, ul{
+ol,
+ul {
   padding-left: 40px !important;
 }
 </style>

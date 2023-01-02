@@ -2,7 +2,6 @@
 import { useUserStore } from "@/stores/user";
 import QrcodeVue from "qrcode.vue";
 import type { RentalObjectTypeType, TagType } from "@/ts/rent.types";
-import { formatDate } from "@vueuse/shared";
 export default {
   setup() {
     const userStore = useUserStore();
@@ -110,7 +109,6 @@ export default {
     openTypeDetailsDialog(type) {
       this.isTypeDetailsDialogOpen = true;
       this.toBeEditedObjectsType = { ...type };
-      this.toBeEditedObjectsType["image"] = this.toBeEditedObjectsType["image"];
       this.openTypeImage = this.toBeEditedObjectsType["image"];
       //filter all used tags from all possible tags
       this.selectedTags = this.tags.filter((tag) =>

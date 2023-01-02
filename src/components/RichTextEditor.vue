@@ -66,7 +66,7 @@
 <script lang="ts">
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image"
+import Image from "@tiptap/extension-image";
 import { Editor, EditorContent } from "@tiptap/vue-3";
 
 export default {
@@ -408,7 +408,7 @@ export default {
 
   mounted() {
     this.editor = new Editor({
-      extensions: [StarterKit, Link.configure({ openOnClick: false }),Image],
+      extensions: [StarterKit, Link.configure({ openOnClick: false }), Image],
       content: this.modelValue,
       onUpdate: () => {
         // HTML

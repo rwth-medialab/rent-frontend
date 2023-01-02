@@ -7,8 +7,8 @@ export default {
   },
   created() {
     // do not allow person here if they are already logged in
-    if (this.userStore.checkCredentials()){
-      this.$router.push("/")
+    if (this.userStore.checkCredentials()) {
+      this.$router.push("/");
     }
   },
   data() {

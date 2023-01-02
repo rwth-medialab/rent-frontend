@@ -212,7 +212,7 @@ export default {
           Admin
         </v-btn>
         <div v-if="!$vuetify.display.mobile && staff">|</div>
-        
+
         <!-- Account button, leads to account overview -->
         <v-btn
           v-if="!$vuetify.display.mobile && loggedIn"

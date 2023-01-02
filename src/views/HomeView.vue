@@ -1,6 +1,5 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
-import CartComponentVue from "@/components/CartComponent.vue";
 import type { RentalObjectTypeType, TagType } from "@/ts/rent.types";
 export default {
   data: () => {
@@ -65,9 +64,7 @@ export default {
       );
     },
   },
-  components:{
-    CartComponentVue
-  }
+  components: {},
 };
 </script>
 
