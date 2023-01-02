@@ -27,3 +27,5 @@ coverage
 *.sln
 *.sw?
 .env
+# local folder for copied javascript modules
+transfer
