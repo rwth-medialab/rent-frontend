@@ -62,6 +62,15 @@ export default {
               toolbar="full"
             />
           </div>
+          <v-btn
+            color="warning"
+            class="mt-2 mr-2"
+            @click="
+              text.content = '';
+              submitText(text.id);
+            "
+            >Leeren</v-btn
+          >
           <v-btn color="secondary" class="mt-2" @click="submitText(text.id)"
             >Speichern</v-btn
           ></v-expansion-panel-text
