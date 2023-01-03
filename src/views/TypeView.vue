@@ -53,10 +53,11 @@ export default {
         <div>
           Hersteller: {{ thing.manufacturer }} <br />
           Beschreibung: <br />
-          {{ thing.description }}
-        </div></v-col
-      ></v-row
-    >
+          <div
+            class="ql-editor ql-snow"
+            v-html="thing.description"
+          ></div></div></v-col
+    ></v-row>
   </v-card>
 </template>
 

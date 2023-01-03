@@ -408,11 +408,13 @@ export default {
         :readonly="!userStore.has_inventory_rights()"
       ></v-text-field>
       <div>Die Beschreibung wird in der Detailansicht angezeigt</div>
-      <v-textarea
-        label="Beschreibung"
-        v-model="toBeEditedObjectsType['description']"
+      <quill-editor
+        content-type="html"
+        theme="snow"
+        toolbar="full"
+        v-model:content="toBeEditedObjectsType['description']"
         :readonly="!userStore.has_inventory_rights()"
-      ></v-textarea>
+      ></quill-editor>
       <div>Die Kurzbeschreibung wird in der Verleihübersicht angezeigt.</div>
       <v-textarea
         label="Kurzbeschreibung"
@@ -447,7 +449,7 @@ export default {
       <v-row>
         <v-avatar class="ma-3" size="100" rounded="0">
           <v-img cover aspect-ratio="1" :src="openTypeImage"></v-img>
-          <!-- Suggestions between types-->
+          <!-- TODO Suggestions between types-->
         </v-avatar>
         <v-col>
           <v-file-input

@@ -7,7 +7,7 @@ export default {
   },
   async created() {
     // do not allow person here if they are already logged in
-    if ( await this.userStore.checkCredentials()) {
+    if (await this.userStore.checkCredentials()) {
       this.$router.push("/");
     }
   },

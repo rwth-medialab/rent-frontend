@@ -8,7 +8,7 @@ export default {
       tags: [] as TagType[],
       searchTerm: "" as string,
       neededTexts: ["frontpage"],
-      texts: [] as TextType[]
+      texts: [] as TextType[],
     };
   },
   setup() {
@@ -17,8 +17,11 @@ export default {
   },
   async mounted() {
     // get the stuf around first
-    this.texts = await this.userStore.getFromURLWithoutAuth({url: "texts", params:{names: this.neededTexts}})
-    console.log(this.texts)
+    this.texts = await this.userStore.getFromURLWithoutAuth({
+      url: "texts",
+      params: { names: this.neededTexts },
+    });
+    console.log(this.texts);
     this.tags = await this.userStore.getFromURLWithoutAuth({ url: "tags" });
     this.rentableTypes.splice(
       0,
@@ -73,8 +76,13 @@ export default {
 </script>
 
 <template>
-  <v-card class="ma-3" flat> 
-    <div v-html="texts.find(x => x.name == 'frontpage').content"> </div></v-card>
+  <v-card class="ma-3" flat>
+    <div
+      class="ql-editor ql-snow"
+      v-if="texts.find((x) => x.name == 'frontpage')"
+      v-html="texts.find((x) => x.name == 'frontpage').content"
+    ></div
+  ></v-card>
   <v-card class="d-flex px-3">
     <v-row class="mt-2">
       <v-col
