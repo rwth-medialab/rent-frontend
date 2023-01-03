@@ -23,3 +23,14 @@ blockquote {
   margin-left: 16px !important;
   padding-left: 16px !important;
 }
+
+
+/* scoped css did nothing -> here it works img in  */
+.frontpage img {
+  width: 100% ;
+}
+
+/* frontpage */
+.w-32 {
+  width: 32%;
+}
