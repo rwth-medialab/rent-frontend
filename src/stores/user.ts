@@ -238,28 +238,28 @@ export const useUserStore = defineStore("user", {
       }
     },
     isStaff() {
-      return this.user.user.is_staff;
+      return typeof this.user.user != "undefined" ? this.user.user.is_staff:false;
     },
     has_inventory_rights() {
-      return (
+      return typeof this.user.user != "undefined" ?(
         this.user.user.user_permissions.find(
           (element) => element == "base.inventory_editing"
         ) == "base.inventory_editing"
-      );
+      ):false;
     },
     has_general_rights() {
-      return (
+      return typeof this.user.user != "undefined" ?(
         this.user.user.user_permissions.find(
           (element) => element == "base.general_access"
         ) == "base.general_access"
-      );
+      ):false;
     },
     has_lending_rights() {
-      return (
+      return typeof this.user.user != "undefined" ?(
         this.user.user.user_permissions.find(
           (element) => element == "base.lending_access"
         ) == "base.lending_access"
-      );
+      ):false;
     },
   },
 });

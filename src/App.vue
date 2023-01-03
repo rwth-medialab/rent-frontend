@@ -49,13 +49,10 @@ export default {
       return val;
     },
     async logout() {
+      //reset permissions
       await this.userStore.signOut();
-      if (
-        !this.staff &&
-        this.$router.currentRoute.value.path.includes("admin")
-      ) {
-        this.$router.push("/");
-      }
+      this.isCredentialsInvalid()
+      this.$router.push("/");
     },
     toggleLogin() {
       if (this.loggedIn) {
