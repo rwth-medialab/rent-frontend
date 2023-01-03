@@ -9,6 +9,10 @@ export default {
       searchTerm: "" as string,
       neededTexts: ["frontpage"],
       texts: [] as TextType[],
+      filterDialog: {
+        open: false,
+        selectedTags: [] as number[],
+      },
     };
   },
   setup() {
@@ -61,7 +65,13 @@ export default {
     },
     filterTypes() {
       // converts the types and corresponding tags to a Json string and filters them for the searchterm
-      return this.rentableTypes.filter((thing) =>
+      let filtered = this.rentableTypes;
+      if (this.filterDialog.selectedTags.length > 0) {
+        filtered = filtered.filter((thing) =>
+          this.filterDialog.selectedTags.every((tag) => thing.tags.includes(tag))
+        );
+      }
+      filtered = filtered.filter((thing) =>
         (
           JSON.stringify(thing) +
           JSON.stringify(this.tags.filter((tag) => thing.tags.includes(tag.id)))
@@ -69,6 +79,7 @@ export default {
           .toLowerCase()
           .includes(this.searchTerm.toLowerCase())
       );
+      return filtered;
     },
   },
   components: {},
@@ -76,29 +87,46 @@ export default {
 </script>
 
 <template>
+  <v-dialog v-model="filterDialog.open">
+    <v-card>
+      <v-card-title class="text-h4"
+        >Filter
+        <hr
+      /></v-card-title>
+      <v-card>
+        <v-card-title> Tags </v-card-title>
+        <v-card-text>
+          <v-select
+            :items="tags"
+            v-model="filterDialog.selectedTags"
+            item-title="name"
+            item-value="id"
+            multiple
+          ></v-select
+        ></v-card-text>
+      </v-card>
+    </v-card>
+  </v-dialog>
   <v-card class="ma-3" flat>
     <div
-      class="ql-editor ql-snow"
+      class="ql-editor ql-snow frontpage"
       v-if="texts.find((x) => x.name == 'frontpage')"
       v-html="texts.find((x) => x.name == 'frontpage').content"
     ></div
   ></v-card>
-  <v-card class="d-flex px-3">
-    <v-row class="mt-2">
-      <v-col
-        :cols="$vuetify.display.mobile ? 10 : 8"
-        :offset="$vuetify.display.mobile ? 0 : 1"
-      >
-        <v-text-field
-          v-model="searchTerm"
-          prepend-icon="mdi-magnify"
-          class=""
-        ></v-text-field>
-      </v-col>
-      <v-col cols="2">
-        <v-btn icon="mdi-filter" elevation="0"></v-btn>
-      </v-col>
-    </v-row>
+  <v-card class="d-flex justify-center px-3">
+    <div :class="$vuetify.display.mobile ? 'w-100' : 'w-75'">
+      <v-text-field
+        v-model="searchTerm"
+        prepend-icon="mdi-magnify"
+        class=""
+      ></v-text-field>
+    </div>
+    <v-btn
+      icon="mdi-filter"
+      flat
+      @click="filterDialog.open = !filterDialog.open"
+    ></v-btn>
   </v-card>
   <v-card elevation="0" class="d-flex flex-wrap justify-left">
     <v-card
@@ -164,9 +192,3 @@ export default {
     </v-card>
   </v-card>
 </template>
-
-<style>
-.w-32 {
-  width: 32%;
-}
-</style>
