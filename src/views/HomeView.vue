@@ -25,7 +25,6 @@ export default {
       url: "texts",
       params: { names: this.neededTexts },
     });
-    console.log(this.texts);
     this.tags = await this.userStore.getFromURLWithoutAuth({ url: "tags" });
     this.rentableTypes.splice(
       0,
@@ -89,6 +88,7 @@ export default {
 </script>
 
 <template>
+  <!-- filterdialog-->
   <v-dialog v-model="filterDialog.open">
     <v-card>
       <v-card-title class="text-h4"
@@ -109,13 +109,15 @@ export default {
       </v-card>
     </v-card>
   </v-dialog>
-  <v-card class="ma-3" flat>
+  <!-- Rich Text from /admin/settings/texts-->
+  <v-card 
+      v-if="texts.find((x) => x.name == 'frontpage') && texts.find((x) => x.name == 'frontpage').content !=''" class="ma-3" flat>
     <div
       class="ql-editor ql-snow frontpage"
-      v-if="texts.find((x) => x.name == 'frontpage')"
       v-html="texts.find((x) => x.name == 'frontpage').content"
     ></div
   ></v-card>
+  <!-- Filter-->
   <v-card class="d-flex justify-center px-3">
     <div :class="$vuetify.display.mobile ? 'w-100' : 'w-75'">
       <v-text-field
@@ -130,6 +132,7 @@ export default {
       @click="filterDialog.open = !filterDialog.open"
     ></v-btn>
   </v-card>
+  <!-- Type enumeration-->
   <v-card elevation="0" class="d-flex flex-wrap justify-left">
     <v-card
       class="ma-2 pa-2"
