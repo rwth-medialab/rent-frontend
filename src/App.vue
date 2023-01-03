@@ -50,7 +50,6 @@ export default {
     },
     async logout() {
       await this.userStore.signOut();
-      await this.isCredentialsInvalid();
       if (
         !this.staff &&
         this.$router.currentRoute.value.path.includes("admin")
