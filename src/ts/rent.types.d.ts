@@ -13,3 +13,5 @@ export type RentalObjectTypeType = {
 };
 
 export type TagType = { name: string; id?: number; description: string };
+
+export type TextType = {name: string; id?: number; content: string};
