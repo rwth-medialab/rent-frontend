@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useUserStore } from "@/stores/user";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,36 +8,49 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: () => import("@/views/HomeView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
+      path: "/login",
+      name: "login",
+      component: () => import("@/views/LoginView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
+      path: "/type/:id",
+      component: () => import("@/views/TypeView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
+      path: "/register",
+      name: "registerView",
+      component: () => import("@/views/RegisterView.vue"),
+      meta: { requiresAdmin: false },
     },
     {
       path: "/admin/inventory/rental",
       name: "rentalinventoryview",
       component: () =>
         import("@/views/admin/inventory/RentalInventoryView.vue"),
+      meta: { requiresAdmin: true },
     },
     {
       path: "/admin/inventory/tags",
       name: "tagsView",
       component: () => import("@/views/admin/inventory/TagView.vue"),
+      meta: { requiresAdmin: true },
     },
     {
       path: "/admin/settings/users",
       name: "userManagement",
       component: () => import("@/views/admin/settings/UserManagementView.vue"),
+      meta: { requiresAdmin: true },
     },
     {
       path: "/admin/settings/texts",
       name: "textManagement",
       component: () => import("@/views/admin/settings/TextManagementView.vue"),
-    },
-    {
-      path: "/login",
-      name: "login",
-      component: () => import("@/views/LoginView.vue"),
-    },
-    {
-      path: "/type/:id",
-      component: () => import("@/views/TypeView.vue"),
+      meta: { requiresAdmin: true },
     },
     {
       // redirect rental button to a default case in this case the rental dashboard
@@ -71,6 +85,14 @@ const router = createRouter({
       component: () => import("@/views/errorpages/404CatchAll.vue"),
     },
   ],
+});
+
+router.beforeEach((to) => {
+  // only allow access to areas that people are supposed
+  const userStore = useUserStore();
+  if (to.meta.requiresAdmin && !userStore.isStaff()) {
+    return { path: "/" };
+  }
 });
 
 export default router;
