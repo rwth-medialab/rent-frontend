@@ -68,7 +68,9 @@ export default {
       let filtered = this.rentableTypes;
       if (this.filterDialog.selectedTags.length > 0) {
         filtered = filtered.filter((thing) =>
-          this.filterDialog.selectedTags.every((tag) => thing.tags.includes(tag))
+          this.filterDialog.selectedTags.every((tag) =>
+            thing.tags.includes(tag)
+          )
         );
       }
       filtered = filtered.filter((thing) =>
