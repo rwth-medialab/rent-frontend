@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { requiresAdmin: false },
     },
     {
+      path: "/validate/:hash",
+      name: "EmailValidationView",
+      component: () => import("@/views/EmailValidationView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
       path: "/admin/inventory/rental",
       name: "rentalinventoryview",
       component: () =>

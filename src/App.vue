@@ -51,7 +51,7 @@ export default {
     async logout() {
       //reset permissions
       await this.userStore.signOut();
-      this.isCredentialsInvalid()
+      this.isCredentialsInvalid();
       this.$router.push("/");
     },
     toggleLogin() {

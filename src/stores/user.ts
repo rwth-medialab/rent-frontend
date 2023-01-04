@@ -33,17 +33,23 @@ export const useUserStore = defineStore("user", {
   actions: {
     async fetchUser() {
       const res = await fetch(apiHost + "/user");
-
       const user = await res.json();
       this.user = user;
     },
-    alert(text: string, type: "error" | "success" | "warning" | "info") {
+    alert(
+      text: string,
+      type: "error" | "success" | "warning" | "info",
+      duration?: number
+    ) {
       this.message["type"] = type;
       this.message["text"] = text;
       this.message["alert"] = true;
       const message = this.message;
+      if (typeof duration == "undefined") {
+        duration = 3000;
+      }
       //display alert for a couple of seconds
-      setTimeout(resetAlert, 3000);
+      setTimeout(resetAlert, duration);
 
       function resetAlert() {
         message["alert"] = false;
@@ -69,6 +75,13 @@ export const useUserStore = defineStore("user", {
         })
         .then(function (response) {
           return response.data;
+        })
+        .catch((error) => {
+          let msg = "";
+          Object.keys(error["response"]["data"]).forEach(
+            (errorkey) => (msg += error["response"]["data"][errorkey])
+          );
+          this.alert(msg, "warning", 10000);
         });
     },
     async getFromURLWithAuth({ url = "", params = {}, headers = {} }) {
@@ -113,7 +126,16 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
-    async postURLWithAuth({ url = "", params = {} }) {
+    async postURLWithAuth({ url = "", params = {}, headers = {} }) {
+      headers["Authorization"] = "Token " + this.user.token;
+      return this.postURLWithoutAuth({
+        url: url,
+        params: params,
+        headers: headers,
+      });
+    },
+    async postURLWithoutAuth({ url = "", params = {}, headers = {} }) {
+      console.log(params);
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -125,12 +147,20 @@ export const useUserStore = defineStore("user", {
       console.log(url);
       return await axios
         .post(url, params, {
-          headers: { Authorization: "Token " + this.user.token },
+          headers: headers,
         })
         .then(function (response) {
           return response.data;
+        })
+        .catch((error) => {
+          let msg = "";
+          Object.keys(error["response"]["data"]).forEach(
+            (errorkey) => (msg += error["response"]["data"][errorkey])
+          );
+          this.alert(msg, "warning", 10000);
         });
     },
+    //TODO move to axios + move this.alert
     async signIn(username: string, password: string) {
       if (
         username == "" ||
@@ -238,28 +268,30 @@ export const useUserStore = defineStore("user", {
       }
     },
     isStaff() {
-      return typeof this.user.user != "undefined" ? this.user.user.is_staff:false;
+      return typeof this.user.user != "undefined"
+        ? this.user.user.is_staff
+        : false;
     },
     has_inventory_rights() {
-      return typeof this.user.user != "undefined" ?(
-        this.user.user.user_permissions.find(
-          (element) => element == "base.inventory_editing"
-        ) == "base.inventory_editing"
-      ):false;
+      return typeof this.user.user != "undefined"
+        ? this.user.user.user_permissions.find(
+            (element) => element == "base.inventory_editing"
+          ) == "base.inventory_editing"
+        : false;
     },
     has_general_rights() {
-      return typeof this.user.user != "undefined" ?(
-        this.user.user.user_permissions.find(
-          (element) => element == "base.general_access"
-        ) == "base.general_access"
-      ):false;
+      return typeof this.user.user != "undefined"
+        ? this.user.user.user_permissions.find(
+            (element) => element == "base.general_access"
+          ) == "base.general_access"
+        : false;
     },
     has_lending_rights() {
-      return typeof this.user.user != "undefined" ?(
-        this.user.user.user_permissions.find(
-          (element) => element == "base.lending_access"
-        ) == "base.lending_access"
-      ):false;
+      return typeof this.user.user != "undefined"
+        ? this.user.user.user_permissions.find(
+            (element) => element == "base.lending_access"
+          ) == "base.lending_access"
+        : false;
     },
   },
 });

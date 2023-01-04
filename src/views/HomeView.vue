@@ -110,8 +110,14 @@ export default {
     </v-card>
   </v-dialog>
   <!-- Rich Text from /admin/settings/texts-->
-  <v-card 
-      v-if="texts.find((x) => x.name == 'frontpage') && texts.find((x) => x.name == 'frontpage').content !=''" class="ma-3" flat>
+  <v-card
+    v-if="
+      texts.find((x) => x.name == 'frontpage') &&
+      texts.find((x) => x.name == 'frontpage').content != ''
+    "
+    class="ma-3"
+    flat
+  >
     <div
       class="ql-editor ql-snow frontpage"
       v-html="texts.find((x) => x.name == 'frontpage').content"
