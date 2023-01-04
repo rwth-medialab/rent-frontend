@@ -117,6 +117,7 @@ export default {
       v-html="texts.find((x) => x.name == 'frontpage').content"
     ></div
   ></v-card>
+  <div v-else class="ma-5"></div>
   <!-- Filter-->
   <v-card class="d-flex justify-center px-3">
     <div :class="$vuetify.display.mobile ? 'w-100' : 'w-75'">
