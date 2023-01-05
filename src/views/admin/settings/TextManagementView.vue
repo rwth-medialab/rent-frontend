@@ -34,9 +34,6 @@ export default {
   },
   methods: {
     submitText(id: number): void {
-      console.log(id);
-      console.log(this.texts);
-      console.log(this.texts.find((text) => (text.id = id)));
       this.userStore.patchURLWithAuth({
         url: "texts/" + String(id),
         params: this.texts.find((text) => (text.id = id)),
