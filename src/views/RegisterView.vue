@@ -1,5 +1,6 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
+import type { VueElement } from "vue";
 export default {
   setup() {
     const userStore = useUserStore();
@@ -30,7 +31,7 @@ export default {
           (v: string) =>
             v.length > 3 || "Der Nutzername besteht aus mehr als 3 Zeichen",
           (v: string) =>
-            /^[0-9a-zA-Z]+$/.test(v) ||
+            /^[0-9a-z]+$/.test(v) ||
             "Der Nutzername besteht nur aus Ziffern und Buchstaben",
         ],
         emailRules: [
@@ -42,6 +43,13 @@ export default {
     };
   },
   methods: {
+    revalidateForm() {
+      // we need to tell typescript that validate exists
+      const form = this.$refs.registrationForm as VueElement & {
+        validate(): () => boolean;
+      };
+      form.validate();
+    },
     async register() {
       if (this.registrationForm.valid) {
         let msg = "";
@@ -68,8 +76,9 @@ export default {
     this.registrationForm.passwordRules.splice(
       0,
       0,
-      (v: string) =>
-        v == this.registrationForm.data.confirmPassword ||
+      () =>
+        this.registrationForm.data.password ==
+          this.registrationForm.data.confirmPassword ||
         "Das Passwort stimmt nicht mit der Wiederholung überein"
     );
   },
@@ -81,7 +90,11 @@ export default {
     <v-container class="">
       <div class="text-h3">Registrierung</div>
       <hr class="my-2" />
-      <v-form @submit.prevent="register" v-model="registrationForm.valid">
+      <v-form
+        @submit.prevent="register"
+        v-model="registrationForm.valid"
+        ref="registrationForm"
+      >
         <v-text-field
           :rules="registrationForm.notEmptyRules"
           type="lastname"
@@ -115,12 +128,15 @@ export default {
           label="Passwort"
           :rules="registrationForm.passwordRules"
           v-model="registrationForm.data.password"
+          @input="revalidateForm()"
           required
         />
         <v-text-field
           type="password"
           label="Passwortwiederholung"
+          :rules="registrationForm.passwordRules"
           v-model="registrationForm.data.confirmPassword"
+          @input="revalidateForm()"
           required
         />
         <v-btn type="submit">Registrieren</v-btn>
