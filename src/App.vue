@@ -1,12 +1,10 @@
 <script lang="ts">
 import "@/assets/custom.css";
 import { useUserStore } from "@/stores/user.js";
-import { useSettingsStore } from "@/stores/settings.js";
 export default {
   setup() {
     const userStore = useUserStore();
-    const settingsStore = useSettingsStore();
-    return { userStore, settingsStore };
+    return { userStore };
   },
   watch: {
     $route: function (_newroute, oldroute) {
