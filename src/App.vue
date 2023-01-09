@@ -115,7 +115,7 @@ export default {
 </script>
 
 <template>
-  <v-app :theme="settingsStore.theme">
+  <v-app :theme="userStore.theme">
     <v-navigation-drawer v-model="drawer" temporary right>
       <template v-slot:append>
         <v-btn
@@ -220,13 +220,13 @@ export default {
         <!-- Button to switch between light and dark theme-->
         <v-btn
           :icon="
-            settingsStore.theme == 'light'
+            userStore.theme == 'light'
               ? 'mdi-weather-sunny'
               : 'mdi-weather-night'
           "
           @click="
-            settingsStore.theme =
-              settingsStore.theme == 'light' ? 'dark' : 'light'
+            userStore.theme =
+              userStore.theme == 'light' ? 'dark' : 'light'
           "
         ></v-btn>
         <div v-if="!$vuetify.display.mobile">|</div>

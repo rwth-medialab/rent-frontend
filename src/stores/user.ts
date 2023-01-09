@@ -28,6 +28,7 @@ export const useUserStore = defineStore("user", {
       alert: boolean;
     },
     shoppingCart: useStorage("shoppingCart", [] as RentalObjectTypeType[]),
+    theme: useStorage("settings", "dark"),
   }),
 
   actions: {
