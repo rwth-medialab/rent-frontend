@@ -1,6 +1,9 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
 import type { RentalObjectTypeType, TagType, TextType } from "@/ts/rent.types";
+import "v-calendar/dist/style.css";
+import dateFormat from "dateformat";
+import VCalendar from "v-calendar";
 export default {
   data: () => {
     return {
@@ -17,10 +20,32 @@ export default {
   },
   setup() {
     const userStore = useUserStore();
+    userStore.$subscribe(async (mutation, state) => {
+      // reset rentRange.end if start changes to prevent sideeffects
+      if (mutation.type == "direct" && mutation.events.key == "start") {
+        state.rentRange.end = null;
+      }
+      if (
+        mutation.type == "direct" &&
+        state.rentRange.start != null &&
+        state.rentRange.end != null &&
+        (mutation.events.key == "start" || mutation.events.key == "end")
+      ) {
+        userStore.available = await userStore.getFromURLWithAuth({
+          url: "rentalobjecttypes/available",
+          params: {
+            from_date: dateFormat(state.rentRange.start, "yyyy-mm-dd"),
+            until_date: dateFormat(state.rentRange.end, "yyyy-mm-dd"),
+          },
+        });
+        console.log(userStore.available)
+      }
+    });
     return { userStore };
   },
   async mounted() {
     // get the stuf around first
+    this.userStore.isLoggedIn = await this.userStore.checkCredentials();
     this.texts = await this.userStore.getFromURLWithoutAuth({
       url: "texts",
       params: { names: this.neededTexts },
@@ -36,32 +61,6 @@ export default {
     );
   },
   methods: {
-    addToCart(objectType: RentalObjectTypeType) {
-      //check if this type is already in cart
-      if (
-        this.userStore.shoppingCart.filter((x) => x.id == objectType.id)
-          .length > 0
-      ) {
-        // increase count by one
-        this.userStore.shoppingCart.filter((x) => x.id == objectType.id)[0]
-          .count++;
-      } else {
-        // add type and add count = 1 to the object
-        this.userStore.shoppingCart.push({ ...objectType, count: 1 });
-      }
-    },
-    removeFromCart(objectType: RentalObjectTypeType) {
-      if (
-        this.userStore.shoppingCart.find((x) => x.id == objectType.id).count > 1
-      ) {
-        this.userStore.shoppingCart.find((x) => x.id == objectType.id).count--;
-      } else {
-        const index = this.userStore.shoppingCart.indexOf(
-          this.userStore.shoppingCart.find((x) => x.id == objectType.id)
-        );
-        this.userStore.shoppingCart.splice(index, 1);
-      }
-    },
     filterTypes() {
       // converts the types and corresponding tags to a Json string and filters them for the searchterm
       let filtered = this.rentableTypes;
@@ -83,7 +82,7 @@ export default {
       return filtered;
     },
   },
-  components: {},
+  components: { VCalendar },
 };
 </script>
 
@@ -125,7 +124,7 @@ export default {
   ></v-card>
   <div v-else class="ma-5"></div>
   <!-- Filter-->
-  <v-card class="d-flex justify-center px-3">
+  <v-card flat class="d-flex justify-center px-3">
     <div :class="$vuetify.display.mobile ? 'w-100' : 'w-75'">
       <v-text-field
         v-model="searchTerm"
@@ -139,8 +138,50 @@ export default {
       @click="filterDialog.open = !filterDialog.open"
     ></v-btn>
   </v-card>
+  <div v-if="userStore.isLoggedIn" class="d-flex flex-column align-center justify-center">
+    <div class="text-h5 text-center">Zeitraum in dem reserviert werden soll:</div>
+    <div class="d-flex">
+      <vc-date-picker
+        v-model="userStore.rentRange.start"
+        class="mr-2"
+        mode="date"
+        input="YYYY-MM-DD"
+        :available-dates="{
+          weekdays: [Number(userStore.settings.lenting_day.value)],
+          start: new Date(),
+        }"
+      >
+        <template v-slot="{ inputValue, inputEvents }">
+          <input
+            class="bg-white border px-2 py-1 rounded"
+            :value="inputValue"
+            v-on="inputEvents"
+          />
+        </template>
+      </vc-date-picker>
+      <div>-</div>
+      <vc-date-picker
+        class="ml-2"
+        mode="date"
+        input="YYYY-MM-DD"
+        v-model="userStore.rentRange.end"
+        :available-dates="{
+          weekdays: [Number(userStore.settings.returning_day.value)],
+          start: userStore.rentRange.start,
+        }"
+      >
+        <template v-slot="{ inputValue, inputEvents }">
+          <input
+            class="bg-white border px-2 py-1 rounded"
+            :value="inputValue"
+            v-on="inputEvents"
+          />
+        </template>
+      </vc-date-picker>
+    </div>
+  </div>
   <!-- Type enumeration-->
-  <v-card elevation="0" class="d-flex flex-wrap justify-left">
+  <v-card class="d-flex flex-wrap justify-left" flat>
     <v-card
       class="ma-2 pa-2"
       :class="$vuetify.display.mobile ? 'w-100' : 'w-32'"
@@ -165,10 +206,11 @@ export default {
         </div>
         <hr />
       </template>
-      <v-card-actions>
+      <v-card-actions @click.stop>
         <!-- display +- chip if objecttypecount>0 else display cart-->
         <v-chip
           v-if="
+            userStore.isLoggedIn &&
             userStore.shoppingCart.filter((x) => x['id'] == thing['id'])
               .length > 0
           "
@@ -176,7 +218,7 @@ export default {
           <template #prepend>
             <v-btn
               @click.stop
-              @click="removeFromCart(thing)"
+              @click="userStore.removeFromCart(thing)"
               icon="mdi-minus"
               size="small"
             ></v-btn
@@ -188,18 +230,25 @@ export default {
           <template #append>
             <v-btn
               @click.stop
-              @click="addToCart(thing)"
+              @click="userStore.addToCart(thing)"
               icon="mdi-plus"
               size="small"
+              :disabled="!(thing.id in userStore.available) || userStore.getNumberInCart(thing)>=userStore.available[thing.id].available"
             ></v-btn
           ></template>
         </v-chip>
         <v-btn
-          v-else
+          v-else-if="userStore.isLoggedIn"
           @click.stop
-          @click="addToCart(thing)"
+          @click="userStore.addToCart(thing)"
           icon="mdi-basket"
+          :disabled="!(thing.id in userStore.available) || userStore.getNumberInCart(thing)>=userStore.available[thing.id].available"
         ></v-btn>
+        <v-chip
+          v-if="thing.id in userStore.available"
+          :color="userStore.available[thing.id].available>5?'green': (userStore.available[thing.id].available>0?'yellow': 'red')"
+          >{{ userStore.available[thing.id].available }} verfügbar</v-chip
+        >
       </v-card-actions>
     </v-card>
   </v-card>

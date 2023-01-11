@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { requiresAdmin: false },
     },
     {
+      path: "/cart",
+      name: "cartView",
+      component: () => import("@/views/CartView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
       path: "/validate/:hash",
       name: "EmailValidationView",
       component: () => import("@/views/EmailValidationView.vue"),

@@ -5,7 +5,6 @@ import App from "@/App.vue";
 import router from "./router";
 // Vuetify
 import "vuetify/styles";
-import "v-calendar/dist/style.css";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
@@ -32,8 +31,8 @@ const vuetify = createVuetify({
   },
 });
 app.use(vuetify);
-// Use plugin with defaults
-app.use(VCalendar, {});
+// use custom prefix in case vuetify 3 reintroduces the calendar
+app.use(VCalendar, { componentPrefix: "vc" });
 app.component("QuillEditor", QuillEditor);
 app.use(createPinia());
 app.use(router);

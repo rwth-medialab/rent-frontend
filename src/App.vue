@@ -62,6 +62,7 @@ export default {
   },
   async mounted() {
     document.title = this.siteName;
+    this.userStore.refreshSettings()
     await this.isCredentialsInvalid();
     this.currentLinks = this.getRouteLinks();
   },
@@ -235,8 +236,8 @@ export default {
           @click="toggleLogin()"
         >
         </v-btn>
-        <div>|</div>
-        <v-btn icon @click="$router.push('/cart')">
+        <div v-if="loggedIn">|</div>
+        <v-btn v-if="loggedIn" icon @click="$router.push('/cart')">
           <v-badge floating :content="userStore.shoppingCart.length">
             <v-icon icon="mdi-basket"></v-icon>
           </v-badge>
@@ -244,13 +245,14 @@ export default {
       </template>
     </v-app-bar>
     <v-main fluid>
-      <v-alert
+      <v-alert v-if="userStore.message.alert && !userStore.message.text.includes('html')"
         v-model="userStore.message['alert']"
         class="ma-3"
         :type="userStore.message['type']"
         :text="userStore.message['text']"
         closable
-      ></v-alert>
+      />
+      <div v-if="userStore.message.alert && userStore.message.text.includes('html')" v-html="userStore.message.text"></div>
       <router-view />
     </v-main>
   </v-app>

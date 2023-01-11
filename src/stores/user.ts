@@ -2,7 +2,11 @@ import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
 import axios from "axios";
 
-import type { RentalObjectTypeType } from "@/ts/rent.types";
+import type {
+  RentalObjectTypeType,
+  AvailableType,
+  SettingsType,
+} from "@/ts/rent.types";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
@@ -22,13 +26,17 @@ export type userType = {
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: useStorage("user", {} as userType),
+    isLoggedIn:false,
     message: { type: "info", text: null, alert: false } as {
       type: "error" | "success" | "warning" | "info";
       text: string;
       alert: boolean;
     },
     shoppingCart: useStorage("shoppingCart", [] as RentalObjectTypeType[]),
-    theme: useStorage("settings", "dark"),
+    available: {} as AvailableType,
+    rentRange: { start: null, end: null, valid: false },
+    theme: useStorage("theme", "dark"),
+    settings: {} as SettingsType,
   }),
 
   actions: {
@@ -36,6 +44,38 @@ export const useUserStore = defineStore("user", {
       const res = await fetch(apiHost + "/user");
       const user = await res.json();
       this.user = user;
+    },
+    addToCart(objectType: RentalObjectTypeType) {
+      //check if this type is already in cart
+      if (this.shoppingCart.filter((x) => x.id == objectType.id).length > 0) {
+        // increase count by one
+        this.shoppingCart.filter((x) => x.id == objectType.id)[0].count++;
+      } else {
+        // add type and add count = 1 to the object
+        this.shoppingCart.push({ ...objectType, count: 1 });
+      }
+    },
+    removeFromCart(objectType: RentalObjectTypeType, all?:boolean) {
+      if (typeof all != 'undefined' && all){
+        this.shoppingCart.find((x) => x.id == objectType.id).count=1
+      }
+      if (this.shoppingCart.find((x) => x.id == objectType.id).count > 1) {
+        this.shoppingCart.find((x) => x.id == objectType.id).count--;
+      } else {
+        const index = this.shoppingCart.indexOf(
+          this.shoppingCart.find((x) => x.id == objectType.id)
+        );
+        this.shoppingCart.splice(index, 1);
+      }
+    },
+    getNumberInCart(objectType: RentalObjectTypeType) {
+      if (
+        this.shoppingCart.filter((x) => x["id"] == objectType["id"]).length == 0
+      ) {
+        return 0;
+      }
+      return this.shoppingCart.filter((x) => x["id"] == objectType["id"])[0]
+        .count;
     },
     alert(
       text: string,
@@ -224,7 +264,8 @@ export const useUserStore = defineStore("user", {
 
       return axios
         .get(url, { headers: { Authorization: "Token " + this.user.token } })
-        .then(function (response) {
+        .then(function (this,response) {
+          this.isLoggedIn = false
           return response.data;
         });
     },
@@ -238,6 +279,7 @@ export const useUserStore = defineStore("user", {
       });
       if (res.ok) {
         this.user = {} as userType;
+        this.isLoggedIn = false
       }
     },
     async checkCredentials() {
@@ -257,14 +299,18 @@ export const useUserStore = defineStore("user", {
               "info"
             );
             this.user = {} as userType;
+            this.isLoggedIn = false
             return false;
           }
+          this.isLoggedIn = true
           return true;
         } catch (error) {
           this.user = {} as userType;
+          this.isLoggedIn = false
           return false;
         }
       } else {
+        this.isLoggedIn = false
         return false;
       }
     },
@@ -293,6 +339,12 @@ export const useUserStore = defineStore("user", {
             (element) => element == "base.lending_access"
           ) == "base.lending_access"
         : false;
+    },
+    async refreshSettings() {
+      let tempSettings = await this.getFromURLWithoutAuth({ url: "settings" });
+      let sortedSettings = {};
+      tempSettings.forEach((x) => (sortedSettings[x.type] = {value: x.value, id:x.id}));
+      this.settings = sortedSettings;
     },
   },
 });

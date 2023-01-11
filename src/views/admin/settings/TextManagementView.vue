@@ -36,8 +36,11 @@ export default {
     submitText(id: number): void {
       this.userStore.patchURLWithAuth({
         url: "texts/" + String(id),
-        params: this.texts.find((text) => (text.id = id)),
+        params: this.texts.find((text) => text.id == id),
       });
+    },
+    clearText(text: TextType) {
+      this.$refs["editor" + text.id][0].setText("");
     },
   },
 };
@@ -53,19 +56,14 @@ export default {
         <v-expansion-panel-text>
           <div>
             <QuillEditor
+              :ref="'editor' + text.id"
               theme="snow"
               content-type="html"
               v-model:content="text.content"
               toolbar="full"
             />
           </div>
-          <v-btn
-            color="warning"
-            class="mt-2 mr-2"
-            @click="
-              text.content = '';
-              submitText(text.id);
-            "
+          <v-btn color="warning" class="mt-2 mr-2" @click="clearText(text)"
             >Leeren</v-btn
           >
           <v-btn color="secondary" class="mt-2" @click="submitText(text.id)"

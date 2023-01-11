@@ -411,9 +411,10 @@ export default {
       <quill-editor
         content-type="html"
         theme="snow"
-        toolbar="full"
+        :toolbar="userStore.has_inventory_rights()?'full':'minimal'"
         v-model:content="toBeEditedObjectsType['description']"
-        :readonly="!userStore.has_inventory_rights()"
+        :disabled="!userStore.has_inventory_rights()"
+        :readOnly="!userStore.has_inventory_rights()"
       ></quill-editor>
       <div>Die Kurzbeschreibung wird in der Verleihübersicht angezeigt.</div>
       <v-textarea

@@ -17,6 +17,9 @@ export default {
           password: "",
           confirmPassword: "",
           email: "",
+          profile: {
+            newsletter: false,
+          },
         },
         notEmptyRules: [
           (v: string) => !!v || "Das Passwort darf nicht leer sein.",
@@ -35,9 +38,11 @@ export default {
             "Der Nutzername besteht nur aus Ziffern und Buchstaben",
         ],
         emailRules: [
-          (v: string) =>
-            new RegExp("@([a-zA-Z0-9]+\\.)?rwth-aachen\\.de", "i").test(v) ||
-            "Die Email ist nicht vom Format @...rwth-aachen.de",
+          // (v: string) =>
+          //   new RegExp(
+          //     useUserStore().settings.email_validation_regex.value,
+          //     "i"
+          //   ).test(v) || "Die Email ist nicht vom Format @...rwth-aachen.de",
         ] as ((v: string) => boolean | string)[],
       },
     };
@@ -80,6 +85,18 @@ export default {
         this.registrationForm.data.password ==
           this.registrationForm.data.confirmPassword ||
         "Das Passwort stimmt nicht mit der Wiederholung überein"
+    );
+    // we do it here to not use useUserStore
+    this.registrationForm.emailRules.splice(
+      0,
+      0,
+      (v: string) =>
+        new RegExp(
+          this.userStore.settings.email_validation_regex.value,
+          "i"
+        ).test(v) ||
+        "Die Email ist nicht vom Format " +
+          this.userStore.settings.email_validation_regex.value
     );
   },
   computed: {},
@@ -136,6 +153,13 @@ export default {
           label="Passwortwiederholung"
           :rules="registrationForm.passwordRules"
           v-model="registrationForm.data.confirmPassword"
+          @input="revalidateForm()"
+          required
+        />
+        <v-checkbox
+          type="checkbox"
+          label="Newsletteranmeldung"
+          v-model="registrationForm.data.profile.newsletter"
           @input="revalidateForm()"
           required
         />

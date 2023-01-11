@@ -27,18 +27,78 @@ export default {
 <template>
   <!-- V-Card to wrap whole page-->
   <v-card class="ma-2 pa-2">
-    <v-row class="d-flex flex wrap"
+    <v-row class="d-flex justify-center"
       ><v-col
         :cols="$vuetify.display.xs ? 'auto' : '3'"
         class="d-flex flex-column"
-        ><v-avatar
+      >
+        <v-avatar
           class="ma-2"
           rounded="0"
           :size="$vuetify.display.xs ? '150' : 'auto'"
         >
           <v-img cover aspect-ratio="1" :src="thing.image"></v-img>
         </v-avatar>
-        <v-btn> <v-icon icon="mdi-basket"> </v-icon></v-btn>
+        <div>
+          <v-chip
+            v-if="
+              userStore.checkCredentials() &&
+              userStore.shoppingCart.filter((x) => x['id'] == thing['id'])
+                .length > 0
+            "
+          >
+            <template #prepend>
+              <v-btn
+                variant="plain"
+                @click.stop
+                @click="userStore.removeFromCart(thing)"
+                icon="mdi-minus"
+                size="small"
+              ></v-btn
+            ></template>
+            {{
+              userStore.shoppingCart.filter((x) => x["id"] == thing["id"])[0]
+                .count
+            }}
+            <template #append>
+              <v-btn
+                variant="plain"
+                @click.stop
+                @click="userStore.addToCart(thing)"
+                icon="mdi-plus"
+                size="small"
+                :disabled="
+                  !(thing.id in userStore.available) ||
+                  userStore.getNumberInCart(thing) >=
+                    userStore.available[thing.id].available
+                "
+              ></v-btn
+            ></template>
+          </v-chip>
+          <v-btn
+            v-else-if="userStore.checkCredentials()"
+            flat
+            @click.stop
+            @click="userStore.addToCart(thing)"
+            icon="mdi-basket"
+            :disabled="
+              !(thing.id in userStore.available) ||
+              userStore.getNumberInCart(thing) >=
+                userStore.available[thing.id].available
+            "
+          ></v-btn>
+          <v-chip
+            v-if="thing.id in userStore.available"
+            :color="
+              userStore.available[thing.id].available > 5
+                ? 'green'
+                : userStore.available[thing.id].available > 0
+                ? 'yellow'
+                : 'red'
+            "
+            >{{ userStore.available[thing.id].available }} verfügbar</v-chip
+          >
+        </div>
       </v-col>
       <!--- Take up full 12 points on small displays to keep the Text readable-->
       <v-col :cols="$vuetify.display.xs ? '12' : '9'"
