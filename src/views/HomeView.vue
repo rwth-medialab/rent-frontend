@@ -151,10 +151,10 @@ export default {
     <div class="text-h5 text-center">
       Zeitraum in dem reserviert werden soll:
     </div>
-    <div class="d-flex">
+    <div class="d-flex flex-wrap justify-center">
       <vc-date-picker
         v-model="userStore.rentRange.start"
-        class="mr-2"
+        class="ml-2"
         mode="date"
         input="YYYY-MM-DD"
         :available-dates="{
@@ -163,14 +163,14 @@ export default {
         }"
       >
         <template v-slot="{ inputValue, inputEvents }">
-          <input
+          Von: <input
             class="bg-white border px-2 py-1 rounded"
             :value="inputValue"
             v-on="inputEvents"
           />
         </template>
       </vc-date-picker>
-      <div>-</div>
+      <div></div>
       <vc-date-picker
         class="ml-2"
         mode="date"
@@ -182,7 +182,7 @@ export default {
         }"
       >
         <template v-slot="{ inputValue, inputEvents }">
-          <input
+          Bis: <input
             class="bg-white border px-2 py-1 rounded"
             :value="inputValue"
             v-on="inputEvents"
