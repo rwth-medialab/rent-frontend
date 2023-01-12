@@ -176,7 +176,6 @@ export const useUserStore = defineStore("user", {
       });
     },
     async postURLWithoutAuth({ url = "", params = {}, headers = {} }) {
-      console.log(params);
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -185,7 +184,6 @@ export const useUserStore = defineStore("user", {
         //strict ending in / is activated in Django
         url += "/";
       }
-      console.log(url);
       return await axios
         .post(url, params, {
           headers: headers,

@@ -38,7 +38,6 @@ export default {
             until_date: dateFormat(state.rentRange.end, "yyyy-mm-dd"),
           },
         });
-        console.log(userStore.available)
       }
     });
     return { userStore };

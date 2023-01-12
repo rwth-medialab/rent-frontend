@@ -66,7 +66,6 @@ export default {
           });
           msg =
             "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
-          console.log(ret);
         } catch (error) {
           Object.keys(error["response"]["data"]).forEach(
             (errorkey) => (msg += error["response"]["data"][errorkey])
