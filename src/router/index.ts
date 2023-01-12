@@ -53,6 +53,12 @@ const router = createRouter({
       meta: { requiresAdmin: true },
     },
     {
+      path: "/admin/inventory/priorities",
+      name: "priorityManagement",
+      component: () => import("@/views/admin/inventory/PriorityManagementView.vue"),
+      meta: { requiresAdmin: true },
+    },
+    {
       path: "/admin/settings/users",
       name: "userManagement",
       component: () => import("@/views/admin/settings/UserManagementView.vue"),

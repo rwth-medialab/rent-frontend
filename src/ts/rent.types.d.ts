@@ -23,3 +23,18 @@ export type AvailableType = {
 export type SettingsType = {
   [type: "returning_day" | "lenting_day" | string]: { value: string };
 };
+
+export type MaxdurationType = {
+  id?: number;
+  prio: number;
+  duration: number | string;
+  rental_object_type: number;
+  duration_in_days?: number;
+};
+
+export type PriorityType = {
+  id?: number;
+  name: string;
+  description: string;
+  prio: number | string;
+};

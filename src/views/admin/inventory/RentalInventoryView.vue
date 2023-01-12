@@ -24,9 +24,16 @@ export default {
       deleteDialog: false,
       deleteURL: "",
       deleteData: "",
+      duration: {} as { [prioid: number]: { duration: number; id?: number } },
       objectEditData: {},
       objectEditType: "",
       isObjectDetailsDialogOpen: false,
+      priorityClasses: [] as {
+        id: number;
+        name: string;
+        description: string;
+        prio: number
+      }[],
     };
   },
   async mounted() {
@@ -106,7 +113,25 @@ export default {
       this.isObjectDetailsDialogOpen = false;
       setTimeout(this.updateData, 200);
     },
-    openTypeDetailsDialog(type) {
+    async openTypeDetailsDialog(type) {
+      console.log(
+        await this.userStore.getFromURLWithAuth({
+          url: "duration",
+          params: { object_type: type.id },
+        })
+      );
+      const duration = await this.userStore.getFromURLWithAuth({
+        url: "duration",
+        params: { object_type: type.id },
+      });
+      this.priorityClasses.forEach(
+        (prio) => (this.duration[prio.id] = { duration: 0 })
+      );
+      duration.forEach(
+        (x) =>
+          (this.duration[x.prio] = { duration: x.duration_in_days, id: x.id })
+      );
+      console.log(this.duration);
       this.isTypeDetailsDialogOpen = true;
       this.toBeEditedObjectsType = { ...type };
       this.openTypeImage = this.toBeEditedObjectsType["image"];
@@ -152,7 +177,6 @@ export default {
             });
             continue;
           }
-          console.log(element);
           if (Array.isArray(element)) {
             element.forEach((el) => {
               formData.append(key, el);
@@ -165,6 +189,33 @@ export default {
       this.userStore.patchURLWithAuth({
         url: "rentalobjecttypes/" + this.toBeEditedObjectsType["id"],
         params: formData,
+      });
+      Object.keys(this.duration).forEach((x) => {
+        if (this.duration[x].duration != "" && this.duration[x].duration != 0) {
+          if ("id" in this.duration[x]) {
+            //this duration object already exists so patch it not post it
+            this.userStore.patchURLWithAuth({
+              url: "duration/" + this.duration[x].id,
+              params: { duration: this.duration[x].duration },
+            });
+          } else {
+            this.userStore.postURLWithAuth({
+              url: "duration",
+              params: {
+                duration: this.duration[x].duration,
+                prio: x,
+                rental_object_type: this.toBeEditedObjectsType["id"],
+              },
+            });
+          }
+        } else if (
+          (this.duration[x].duration == "" || this.duration[x].duration == 0) &&
+          "id" in this.duration[x]
+        ) {
+          this.userStore.deleteURLWithAuth({
+            url: "duration/" + this.duration[x].id,
+          });
+        }
       });
       this.isTypeDetailsDialogOpen = false;
       setTimeout(this.updateData, 200);
@@ -262,6 +313,9 @@ export default {
           url: "rentalobjects",
         }))
       );
+      this.priorityClasses = await this.userStore.getFromURLWithAuth({
+        url: "priority",
+      });
     },
     /** executes the deletion of an object after the confirmation interface. will delete the object from DATABASE*/
     executeDeletion() {
@@ -312,6 +366,7 @@ export default {
       }
     },
     isTypeDetailsDialogOpen: function (newvalue) {
+      console.log(this.duration);
       if (!newvalue) {
         this.toBeEditedObjectsType = {};
         this.selectedTags = [];
@@ -401,22 +456,28 @@ export default {
   <!-- Objecttype edit dialog-->
   <v-dialog v-model="isTypeDetailsDialogOpen">
     <v-card class="pa-3">
-      <h2 class="ma-2">Details von: {{ toBeEditedObjectsType["name"] }}</h2>
+      <div class="ma-2 text-h4">
+        Details von: {{ toBeEditedObjectsType["name"] }}
+      </div>
       <v-text-field
         label="Name"
         v-model="toBeEditedObjectsType['name']"
         :readonly="!userStore.has_inventory_rights()"
       ></v-text-field>
-      <div>Die Beschreibung wird in der Detailansicht angezeigt</div>
+      <div class="text-h5 ma-2">
+        Die Beschreibung wird in der Detailansicht angezeigt:
+      </div>
       <quill-editor
         content-type="html"
         theme="snow"
-        :toolbar="userStore.has_inventory_rights()?'full':'minimal'"
+        :toolbar="userStore.has_inventory_rights() ? 'full' : 'minimal'"
         v-model:content="toBeEditedObjectsType['description']"
         :disabled="!userStore.has_inventory_rights()"
         :readOnly="!userStore.has_inventory_rights()"
-      ></quill-editor>
-      <div>Die Kurzbeschreibung wird in der Verleihübersicht angezeigt.</div>
+      />
+      <div class="text-h5 ma-2">
+        Die Kurzbeschreibung wird in der Verleihübersicht angezeigt:
+      </div>
       <v-textarea
         label="Kurzbeschreibung"
         v-model="toBeEditedObjectsType['shortdescription']"
@@ -462,6 +523,30 @@ export default {
           ></v-file-input>
         </v-col>
       </v-row>
+      <div class="text-h5">
+        Verleihdauern in Tagen
+        <v-tooltip activator="parent" location="top">
+          Es wird aber immer bis zum nächsten Rückgabetag aufgerundet
+        </v-tooltip>
+      </div>
+      <div
+        v-for="priority in priorityClasses"
+        :key="priority.id"
+        class="d-flex"
+      >
+        <v-tooltip activator="parent" location="top">
+          {{ priority.description }}
+        </v-tooltip>
+        <v-text-field
+          :label="priority.name + ' (Prio: '+ priority.prio + ')'"
+          v-model="duration[priority.id]['duration']"
+          type="number"
+          :readonly="!userStore.has_inventory_rights()"
+          hint="Verleihdauer in Tagen"
+        >
+          <template #append-inner>Tage</template>
+        </v-text-field>
+      </div>
       <v-card-actions>
         <v-spacer></v-spacer
         ><v-btn @click="isTypeDetailsDialogOpen = false">Schließen</v-btn>

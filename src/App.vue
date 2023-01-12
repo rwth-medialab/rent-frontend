@@ -85,6 +85,7 @@ export default {
               { to: "/admin/inventory/rental", name: "Verleih" },
               { to: "/admin/inventory/onpremise", name: "Vorort" },
               { to: "/admin/inventory/tags", name: "Tags" },
+              { to: "/admin/inventory/priorities", name: "Prioritäten" },
             ],
           },
           settings: {
