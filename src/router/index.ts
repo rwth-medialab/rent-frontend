@@ -108,7 +108,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   // only allow access to areas that people are supposed
   const userStore = useUserStore();
-  if (to.meta.requiresAdmin && !userStore.isStaff()) {
+  if (to.meta.requiresAdmin && !userStore.is_staff) {
     return { path: "/" };
   }
 });

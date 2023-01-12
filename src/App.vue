@@ -6,14 +6,22 @@ export default {
     const userStore = useUserStore();
     return { userStore };
   },
+  created() {
+    this.$watch("userStore.isLoggedIn", (newval, oldval) => {
+        this.userStore.func_isStaff();
+        this.userStore.func_has_inventory_rights();
+        this.userStore.func_has_lending_rights();
+        console.log(newval, oldval);
+    });
+  },
   watch: {
     $route: function (_newroute, oldroute) {
       if (oldroute.name == "login") {
-        this.isCredentialsInvalid();
+        this.userStore.checkCredentials();
       }
       this.currentLinks = this.getRouteLinks();
       if (
-        !this.staff &&
+        !this.userStore.is_staff &&
         this.$router.currentRoute.value.path.includes("admin")
       ) {
         this.$router.push("/");
@@ -21,18 +29,6 @@ export default {
     },
   },
   methods: {
-    async isCredentialsInvalid() {
-      this.loggedIn = await this.userStore.checkCredentials();
-      // check if user is a staff member and if so show admin button
-      if (this.loggedIn) {
-        this.staff = this.userStore.isStaff();
-        this.inventory_rights = this.userStore.has_inventory_rights();
-        this.general_rights = this.userStore.has_general_rights();
-        this.lending_rights = this.userStore.has_lending_rights();
-      } else {
-        this.staff = false;
-      }
-    },
     getRouteLinks() {
       let val = [];
       Object.keys(this.links.admin).forEach((element) => {
@@ -49,11 +45,10 @@ export default {
     async logout() {
       //reset permissions
       await this.userStore.signOut();
-      this.isCredentialsInvalid();
       this.$router.push("/");
     },
     toggleLogin() {
-      if (this.loggedIn) {
+      if (this.userStore.isLoggedIn) {
         this.logout();
       } else {
         this.$router.push("/login");
@@ -62,19 +57,14 @@ export default {
   },
   async mounted() {
     document.title = this.siteName;
-    this.userStore.refreshSettings()
-    await this.isCredentialsInvalid();
+    this.userStore.refreshSettings();
+    this.userStore.checkCredentials()
     this.currentLinks = this.getRouteLinks();
   },
   data: () => {
     return {
       siteName: import.meta.env.VITE_SITENAME,
       drawer: false,
-      loggedIn: false,
-      staff: false,
-      inventory_rights: false,
-      general_rights: false,
-      lending_rights: false,
       currentLinks: [],
       links: {
         admin: {
@@ -121,12 +111,12 @@ export default {
         <v-btn
           class="w-100"
           @click="toggleLogin"
-          :color="loggedIn ? 'red' : 'green'"
-          >{{ loggedIn ? "Ausloggen" : "Einloggen" }}</v-btn
+          :color="userStore.isLoggedIn ? 'red' : 'green'"
+          >{{ userStore.isLoggedIn ? "Ausloggen" : "Einloggen" }}</v-btn
         ></template
       >
       <v-list nav dense>
-        <template v-if="staff">
+        <template v-if="userStore.is_staff">
           <v-list-group no-action>
             <template v-slot:activator="{ props }">
               <v-list-item v-bind="props" title="Admin"> </v-list-item>
@@ -178,7 +168,7 @@ export default {
       >
         <v-tab to="/admin/rental"> Verleih </v-tab>
         <v-tab to="/admin/inventory"> Inventar </v-tab>
-        <v-tab v-if="inventory_rights" to="/admin/settings">
+        <v-tab v-if="userStore.inventory_rights" to="/admin/settings">
           Einstellungen
         </v-tab>
       </v-tabs>
@@ -201,22 +191,22 @@ export default {
       <template v-slot:append>
         <!-- button for the admin area, only displayed for staff-->
         <v-btn
-          v-if="!$vuetify.display.mobile && staff"
+          v-if="!$vuetify.display.mobile && userStore.is_staff"
           id="adminbutton"
           to="/admin"
         >
           Admin
         </v-btn>
-        <div v-if="!$vuetify.display.mobile && staff">|</div>
+        <div v-if="!$vuetify.display.mobile && userStore.is_staff">|</div>
 
         <!-- Account button, leads to account overview -->
         <v-btn
-          v-if="!$vuetify.display.mobile && loggedIn"
+          v-if="!$vuetify.display.mobile && userStore.isLoggedIn"
           icon="mdi-account"
           @click="$router.push('/account')"
         >
         </v-btn>
-        <div v-if="!$vuetify.display.mobile && loggedIn">|</div>
+        <div v-if="!$vuetify.display.mobile && userStore.isLoggedIn">|</div>
         <!-- Button to switch between light and dark theme-->
         <v-btn
           :icon="
@@ -225,20 +215,19 @@ export default {
               : 'mdi-weather-night'
           "
           @click="
-            userStore.theme =
-              userStore.theme == 'light' ? 'dark' : 'light'
+            userStore.theme = userStore.theme == 'light' ? 'dark' : 'light'
           "
         ></v-btn>
         <div v-if="!$vuetify.display.mobile">|</div>
         <!-- Login/Logout Button-->
         <v-btn
           v-if="!$vuetify.display.mobile"
-          :icon="loggedIn ? 'mdi-logout' : 'mdi-login'"
+          :icon="userStore.isLoggedIn ? 'mdi-logout' : 'mdi-login'"
           @click="toggleLogin()"
         >
         </v-btn>
-        <div v-if="loggedIn">|</div>
-        <v-btn v-if="loggedIn" icon @click="$router.push('/cart')">
+        <div v-if="userStore.isLoggedIn">|</div>
+        <v-btn v-if="userStore.isLoggedIn" icon @click="$router.push('/cart')">
           <v-badge floating :content="userStore.shoppingCart.length">
             <v-icon icon="mdi-basket"></v-icon>
           </v-badge>
@@ -246,14 +235,22 @@ export default {
       </template>
     </v-app-bar>
     <v-main fluid>
-      <v-alert v-if="userStore.message.alert && !userStore.message.text.includes('html')"
+      <v-alert
+        v-if="
+          userStore.message.alert && !userStore.message.text.includes('html')
+        "
         v-model="userStore.message['alert']"
         class="ma-3"
         :type="userStore.message['type']"
         :text="userStore.message['text']"
         closable
       />
-      <div v-if="userStore.message.alert && userStore.message.text.includes('html')" v-html="userStore.message.text"></div>
+      <div
+        v-if="
+          userStore.message.alert && userStore.message.text.includes('html')
+        "
+        v-html="userStore.message.text"
+      ></div>
       <router-view />
     </v-main>
   </v-app>

@@ -444,7 +444,7 @@ export default {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn @click="isCategoryEditDialogOpen = false">Abbrechen</v-btn>
-        <template v-if="userStore.has_inventory_rights()">
+        <template v-if="userStore.inventory_rights">
           <v-btn v-if="toBeEditedCategory['id']" @click="saveEditedCategory"
             >Speichern</v-btn
           >
@@ -462,7 +462,7 @@ export default {
       <v-text-field
         label="Name"
         v-model="toBeEditedObjectsType['name']"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
       ></v-text-field>
       <div class="text-h5 ma-2">
         Die Beschreibung wird in der Detailansicht angezeigt:
@@ -470,10 +470,10 @@ export default {
       <quill-editor
         content-type="html"
         theme="snow"
-        :toolbar="userStore.has_inventory_rights() ? 'full' : 'minimal'"
+        :toolbar="userStore.inventory_rights ? 'full' : 'minimal'"
         v-model:content="toBeEditedObjectsType['description']"
-        :disabled="!userStore.has_inventory_rights()"
-        :readOnly="!userStore.has_inventory_rights()"
+        :disabled="!userStore.inventory_rights"
+        :readOnly="!userStore.inventory_rights"
       />
       <div class="text-h5 ma-2">
         Die Kurzbeschreibung wird in der Verleihübersicht angezeigt:
@@ -481,21 +481,21 @@ export default {
       <v-textarea
         label="Kurzbeschreibung"
         v-model="toBeEditedObjectsType['shortdescription']"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
       ></v-textarea>
       <v-text-field
         label="Hersteller"
         v-model="toBeEditedObjectsType['manufacturer']"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
       ></v-text-field>
       <v-text-field
         label="Präfix für ID"
         v-model="toBeEditedObjectsType['prefix_identifier']"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
       ></v-text-field>
       <v-select
         v-model:model-value="selectedTags"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
         multiple
         chips
         :items="tags"
@@ -505,7 +505,7 @@ export default {
       ></v-select>
       <v-checkbox
         label="In Verleihübersicht anzeigen"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
         v-model="toBeEditedObjectsType['visible']"
       ></v-checkbox>
       <v-row>
@@ -519,7 +519,7 @@ export default {
             density="compact"
             accept="image/*"
             @change="tempSaveTypeImage"
-            v-if="userStore.has_inventory_rights()"
+            v-if="userStore.inventory_rights"
           ></v-file-input>
         </v-col>
       </v-row>
@@ -541,7 +541,7 @@ export default {
           :label="priority.name + ' (Prio: '+ priority.prio + ')'"
           v-model="duration[priority.id]['duration']"
           type="number"
-          :readonly="!userStore.has_inventory_rights()"
+          :readonly="!userStore.inventory_rights"
           hint="Verleihdauer in Tagen"
         >
           <template #append-inner>Tage</template>
@@ -550,7 +550,7 @@ export default {
       <v-card-actions>
         <v-spacer></v-spacer
         ><v-btn @click="isTypeDetailsDialogOpen = false">Schließen</v-btn>
-        <template v-if="userStore.has_inventory_rights()">
+        <template v-if="userStore.inventory_rights">
           <v-btn
             v-if="toBeEditedObjectsType['id']"
             @click="saveEditedObjectsType"
@@ -595,7 +595,7 @@ export default {
               <template v-slot:title>
                 {{ category.name }}
                 <v-btn
-                  v-if="userStore.has_inventory_rights()"
+                  v-if="userStore.inventory_rights"
                   size="small"
                   flat
                   icon="mdi-pencil"
@@ -603,7 +603,7 @@ export default {
                   @click="editCategory(index)"
                 ></v-btn>
                 <v-btn
-                  v-if="userStore.has_inventory_rights()"
+                  v-if="userStore.inventory_rights"
                   size="small"
                   flat
                   icon="mdi-delete"
@@ -699,7 +699,7 @@ export default {
                     </v-card-actions>
                   </v-card>
                 </v-list-item>
-                <v-list-item v-if="userStore.has_inventory_rights()">
+                <v-list-item v-if="userStore.inventory_rights">
                   <v-btn
                     @click.stop
                     @click="
@@ -717,7 +717,7 @@ export default {
           </v-row>
           <v-list-item>
             <v-btn
-              v-if="userStore.has_inventory_rights()"
+              v-if="userStore.inventory_rights"
               elevation="0"
               prepend-icon="mdi-plus"
               action
@@ -730,7 +730,7 @@ export default {
       </v-list>
     </v-card>
   </div>
-  <v-card class="ma-2" v-if="userStore.has_inventory_rights()">
+  <v-card class="ma-2" v-if="userStore.inventory_rights">
     <v-list>
       <v-list-item>
         <v-btn

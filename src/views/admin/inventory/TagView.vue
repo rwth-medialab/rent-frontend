@@ -57,19 +57,19 @@ export default {
           class="ma-2"
           label="Tagname"
           v-model="tag['name']"
-          :readonly="!userStore.has_inventory_rights()"
+          :readonly="!userStore.inventory_rights"
         ></v-text-field>
         <v-textarea
           class="ma-2"
           label="description"
           v-model="tag['description']"
-          :readonly="!userStore.has_inventory_rights()"
+          :readonly="!userStore.inventory_rights"
         ></v-textarea>
         <!-- TODO add color selection-->
         <v-row class="ma-2">
           <v-btn
             @click="saveTag(index)"
-            v-if="userStore.has_inventory_rights()"
+            v-if="userStore.inventory_rights"
             text
             flat
           >
@@ -77,7 +77,7 @@ export default {
           >
           <v-btn
             @click="deleteTag(index)"
-            v-if="userStore.has_inventory_rights()"
+            v-if="userStore.inventory_rights"
             text
             flat
           >
@@ -86,16 +86,16 @@ export default {
         </v-row>
       </v-card>
     </v-list-item>
-    <v-list-item v-if="userStore.has_inventory_rights()">
+    <v-list-item v-if="userStore.inventory_rights">
       <v-text-field
         label="Tagname"
         v-model="newTag['name']"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
       ></v-text-field>
       <v-textarea
         label="description"
         v-model="newTag['description']"
-        :readonly="!userStore.has_inventory_rights()"
+        :readonly="!userStore.inventory_rights"
       ></v-textarea>
       <!-- TODO add color selection-->
 

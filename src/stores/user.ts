@@ -26,7 +26,7 @@ export type userType = {
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: useStorage("user", {} as userType),
-    isLoggedIn:false,
+    isLoggedIn: false,
     message: { type: "info", text: null, alert: false } as {
       type: "error" | "success" | "warning" | "info";
       text: string;
@@ -37,6 +37,9 @@ export const useUserStore = defineStore("user", {
     rentRange: { start: null, end: null, valid: false },
     theme: useStorage("theme", "dark"),
     settings: {} as SettingsType,
+    inventory_rights: false,
+    lending_rights: false,
+    is_staff:false
   }),
 
   actions: {
@@ -55,9 +58,9 @@ export const useUserStore = defineStore("user", {
         this.shoppingCart.push({ ...objectType, count: 1 });
       }
     },
-    removeFromCart(objectType: RentalObjectTypeType, all?:boolean) {
-      if (typeof all != 'undefined' && all){
-        this.shoppingCart.find((x) => x.id == objectType.id).count=1
+    removeFromCart(objectType: RentalObjectTypeType, all?: boolean) {
+      if (typeof all != "undefined" && all) {
+        this.shoppingCart.find((x) => x.id == objectType.id).count = 1;
       }
       if (this.shoppingCart.find((x) => x.id == objectType.id).count > 1) {
         this.shoppingCart.find((x) => x.id == objectType.id).count--;
@@ -262,8 +265,8 @@ export const useUserStore = defineStore("user", {
 
       return axios
         .get(url, { headers: { Authorization: "Token " + this.user.token } })
-        .then(function (this,response) {
-          this.isLoggedIn = false
+        .then(function (this, response) {
+          this.isLoggedIn = false;
           return response.data;
         });
     },
@@ -277,7 +280,7 @@ export const useUserStore = defineStore("user", {
       });
       if (res.ok) {
         this.user = {} as userType;
-        this.isLoggedIn = false
+        this.isLoggedIn = false;
       }
     },
     async checkCredentials() {
@@ -297,51 +300,51 @@ export const useUserStore = defineStore("user", {
               "info"
             );
             this.user = {} as userType;
-            this.isLoggedIn = false
+            this.isLoggedIn = false;
             return false;
           }
-          this.isLoggedIn = true
+          this.isLoggedIn = true;
           return true;
         } catch (error) {
           this.user = {} as userType;
-          this.isLoggedIn = false
+          this.isLoggedIn = false;
           return false;
         }
       } else {
-        this.isLoggedIn = false
+        this.isLoggedIn = false;
         return false;
       }
     },
-    isStaff() {
-      return typeof this.user.user != "undefined"
-        ? this.user.user.is_staff
-        : false;
+    func_isStaff() {
+      this.is_staff= typeof this.user.user != "undefined"
+      ? this.user.user.is_staff
+      : false;
+      return this.is_staff
     },
-    has_inventory_rights() {
-      return typeof this.user.user != "undefined"
-        ? this.user.user.user_permissions.find(
-            (element) => element == "base.inventory_editing"
-          ) == "base.inventory_editing"
-        : false;
+    func_has_inventory_rights() {
+      this.inventory_rights =
+        typeof this.user.user != "undefined"
+          ? this.user.user.user_permissions.find(
+              (element) => element == "base.inventory_editing"
+            ) == "base.inventory_editing"
+          : false;
+      return this.inventory_rights;
     },
-    has_general_rights() {
-      return typeof this.user.user != "undefined"
-        ? this.user.user.user_permissions.find(
-            (element) => element == "base.general_access"
-          ) == "base.general_access"
-        : false;
-    },
-    has_lending_rights() {
-      return typeof this.user.user != "undefined"
-        ? this.user.user.user_permissions.find(
-            (element) => element == "base.lending_access"
-          ) == "base.lending_access"
-        : false;
+    func_has_lending_rights() {
+      this.lending_rights =
+        typeof this.user.user != "undefined"
+          ? this.user.user.user_permissions.find(
+              (element) => element == "base.lending_access"
+            ) == "base.lending_access"
+          : false;
+      return this.lending_rights;
     },
     async refreshSettings() {
       let tempSettings = await this.getFromURLWithoutAuth({ url: "settings" });
       let sortedSettings = {};
-      tempSettings.forEach((x) => (sortedSettings[x.type] = {value: x.value, id:x.id}));
+      tempSettings.forEach(
+        (x) => (sortedSettings[x.type] = { value: x.value, id: x.id })
+      );
       this.settings = sortedSettings;
     },
   },
