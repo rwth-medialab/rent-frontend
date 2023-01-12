@@ -7,11 +7,10 @@ export default {
     return { userStore };
   },
   created() {
-    this.$watch("userStore.isLoggedIn", (newval, oldval) => {
+    this.$watch("userStore.isLoggedIn", () => {
         this.userStore.func_isStaff();
         this.userStore.func_has_inventory_rights();
         this.userStore.func_has_lending_rights();
-        console.log(newval, oldval);
     });
   },
   watch: {
