@@ -18,28 +18,35 @@ export default {
       },
     };
   },
+  created() {
+    this.$watch(
+      "userStore.rentRange",
+      async (newval) => {
+        if (newval.start != null && newval.end != null) {
+          // if one of both is null we do not have a range => do not curl available
+          const start = dateFormat(newval.start, "yyyy-mm-dd");
+          const end = dateFormat(newval.end, "yyyy-mm-dd");
+          if (start > end) {
+            // if start is after end null the end to prevent sideeffects (selcted could be in "forbidden" area)
+            this.userStore.available = {};
+            this.userStore.rentRange.end = null;
+          } else {
+            // both are set refresh available
+            this.userStore.available = await this.userStore.getFromURLWithAuth({
+              url: "rentalobjecttypes/available",
+              params: {
+                from_date: dateFormat(newval.start, "yyyy-mm-dd"),
+                until_date: dateFormat(newval.end, "yyyy-mm-dd"),
+              },
+            });
+          }
+        }
+      },
+      { deep: true }
+    );
+  },
   setup() {
     const userStore = useUserStore();
-    userStore.$subscribe(async (mutation, state) => {
-      // reset rentRange.end if start changes to prevent sideeffects
-      if (mutation.type == "direct" && mutation.events.key == "start") {
-        state.rentRange.end = null;
-      }
-      if (
-        mutation.type == "direct" &&
-        state.rentRange.start != null &&
-        state.rentRange.end != null &&
-        (mutation.events.key == "start" || mutation.events.key == "end")
-      ) {
-        userStore.available = await userStore.getFromURLWithAuth({
-          url: "rentalobjecttypes/available",
-          params: {
-            from_date: dateFormat(state.rentRange.start, "yyyy-mm-dd"),
-            until_date: dateFormat(state.rentRange.end, "yyyy-mm-dd"),
-          },
-        });
-      }
-    });
     return { userStore };
   },
   async mounted() {
@@ -137,8 +144,13 @@ export default {
       @click="filterDialog.open = !filterDialog.open"
     ></v-btn>
   </v-card>
-  <div v-if="userStore.isLoggedIn" class="d-flex flex-column align-center justify-center">
-    <div class="text-h5 text-center">Zeitraum in dem reserviert werden soll:</div>
+  <div
+    v-if="userStore.isLoggedIn"
+    class="d-flex flex-column align-center justify-center"
+  >
+    <div class="text-h5 text-center">
+      Zeitraum in dem reserviert werden soll:
+    </div>
     <div class="d-flex">
       <vc-date-picker
         v-model="userStore.rentRange.start"
@@ -232,7 +244,11 @@ export default {
               @click="userStore.addToCart(thing)"
               icon="mdi-plus"
               size="small"
-              :disabled="!(thing.id in userStore.available) || userStore.getNumberInCart(thing)>=userStore.available[thing.id].available"
+              :disabled="
+                !(thing.id in userStore.available) ||
+                userStore.getNumberInCart(thing) >=
+                  userStore.available[thing.id].available
+              "
             ></v-btn
           ></template>
         </v-chip>
@@ -241,11 +257,21 @@ export default {
           @click.stop
           @click="userStore.addToCart(thing)"
           icon="mdi-basket"
-          :disabled="!(thing.id in userStore.available) || userStore.getNumberInCart(thing)>=userStore.available[thing.id].available"
+          :disabled="
+            !(thing.id in userStore.available) ||
+            userStore.getNumberInCart(thing) >=
+              userStore.available[thing.id].available
+          "
         ></v-btn>
         <v-chip
           v-if="thing.id in userStore.available"
-          :color="userStore.available[thing.id].available>5?'green': (userStore.available[thing.id].available>0?'yellow': 'red')"
+          :color="
+            userStore.available[thing.id].available > 5
+              ? 'green'
+              : userStore.available[thing.id].available > 0
+              ? 'yellow'
+              : 'red'
+          "
           >{{ userStore.available[thing.id].available }} verfügbar</v-chip
         >
       </v-card-actions>
