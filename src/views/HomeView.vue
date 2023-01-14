@@ -3,7 +3,6 @@ import { useUserStore } from "@/stores/user";
 import type { RentalObjectTypeType, TagType, TextType } from "@/ts/rent.types";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
-import "v-calendar/dist/style.css";
 import dateFormat from "dateformat";
 export default {
   components: { Datepicker },
