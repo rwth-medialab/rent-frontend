@@ -12,6 +12,19 @@ export type RentalObjectTypeType = {
   count?: number;
 };
 
+export type ReservationType = {
+  count: number;
+  start: Date;
+  end: Date;
+  maxDuration?: number;
+  available?: {
+    // do it like this because we cant have watchers for each item in shopping cart
+    start: Date;
+    end: Date;
+    count: number;
+  };
+} & RentalObjectTypeType;
+
 export type TagType = { name: string; id?: number; description: string };
 
 export type TextType = { name: string; id?: number; content: string };

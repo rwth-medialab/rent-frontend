@@ -6,6 +6,7 @@ import type {
   RentalObjectTypeType,
   AvailableType,
   SettingsType,
+  ReservationType,
 } from "@/ts/rent.types";
 
 const apiHost = import.meta.env.VITE_API_HOST;
@@ -32,22 +33,17 @@ export const useUserStore = defineStore("user", {
       text: string;
       alert: boolean;
     },
-    shoppingCart: useStorage("shoppingCart", [] as RentalObjectTypeType[]),
+    shoppingCart: useStorage("shoppingCart", [] as ReservationType[]),
     available: {} as AvailableType,
     rentRange: { start: null, end: null, valid: false },
     theme: useStorage("theme", "dark"),
     settings: {} as SettingsType,
     inventory_rights: false,
     lending_rights: false,
-    is_staff:false
+    is_staff: false,
   }),
 
   actions: {
-    async fetchUser() {
-      const res = await fetch(apiHost + "/user");
-      const user = await res.json();
-      this.user = user;
-    },
     addToCart(objectType: RentalObjectTypeType) {
       //check if this type is already in cart
       if (this.shoppingCart.filter((x) => x.id == objectType.id).length > 0) {
@@ -55,7 +51,12 @@ export const useUserStore = defineStore("user", {
         this.shoppingCart.filter((x) => x.id == objectType.id)[0].count++;
       } else {
         // add type and add count = 1 to the object
-        this.shoppingCart.push({ ...objectType, count: 1 });
+        this.shoppingCart.push({
+          ...objectType,
+          count: 1,
+          start: this.rentRange.start,
+          end: null,
+        });
       }
     },
     removeFromCart(objectType: RentalObjectTypeType, all?: boolean) {
@@ -90,7 +91,7 @@ export const useUserStore = defineStore("user", {
       this.message["alert"] = true;
       const message = this.message;
       if (typeof duration == "undefined") {
-        duration = 3000;
+        duration = 4000;
       }
       //display alert for a couple of seconds
       setTimeout(resetAlert, duration);
@@ -316,10 +317,9 @@ export const useUserStore = defineStore("user", {
       }
     },
     func_isStaff() {
-      this.is_staff= typeof this.user.user != "undefined"
-      ? this.user.user.is_staff
-      : false;
-      return this.is_staff
+      this.is_staff =
+        typeof this.user.user != "undefined" ? this.user.user.is_staff : false;
+      return this.is_staff;
     },
     func_has_inventory_rights() {
       this.inventory_rights =
@@ -340,8 +340,10 @@ export const useUserStore = defineStore("user", {
       return this.lending_rights;
     },
     async refreshSettings() {
-      let tempSettings = await this.getFromURLWithoutAuth({ url: "settings" });
-      let sortedSettings = {};
+      const tempSettings = await this.getFromURLWithoutAuth({
+        url: "settings",
+      });
+      const sortedSettings = {};
       tempSettings.forEach(
         (x) => (sortedSettings[x.type] = { value: x.value, id: x.id })
       );

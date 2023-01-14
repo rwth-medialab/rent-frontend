@@ -1,10 +1,12 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
 import type { RentalObjectTypeType, TagType, TextType } from "@/ts/rent.types";
+import Datepicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 import "v-calendar/dist/style.css";
 import dateFormat from "dateformat";
-import VCalendar from "v-calendar";
 export default {
+  components: { Datepicker },
   data: () => {
     return {
       rentableTypes: [] as RentalObjectTypeType[],
@@ -49,6 +51,26 @@ export default {
     const userStore = useUserStore();
     return { userStore };
   },
+  computed: {
+    disabledLentingWeekdays() {
+      let weekdays = [0, 1, 2, 3, 4, 5, 6];
+      weekdays.splice(
+        weekdays.indexOf(Number(this.userStore.settings.lenting_day.value) % 7),
+        1
+      );
+      return weekdays;
+    },
+    disabledReturningWeekdays() {
+      let weekdays = [0, 1, 2, 3, 4, 5, 6];
+      weekdays.splice(
+        weekdays.indexOf(
+          Number(this.userStore.settings.returning_day.value) % 7
+        ),
+        1
+      );
+      return weekdays;
+    },
+  },
   async mounted() {
     // get the stuf around first
     this.userStore.isLoggedIn = await this.userStore.checkCredentials();
@@ -88,7 +110,6 @@ export default {
       return filtered;
     },
   },
-  components: { VCalendar },
 };
 </script>
 
@@ -144,7 +165,7 @@ export default {
       @click="filterDialog.open = !filterDialog.open"
     ></v-btn>
   </v-card>
-  <div
+  <v-card
     v-if="userStore.isLoggedIn"
     class="d-flex flex-column align-center justify-center"
   >
@@ -152,45 +173,39 @@ export default {
       Zeitraum in dem reserviert werden soll:
     </div>
     <div class="d-flex flex-wrap justify-center">
-      <vc-date-picker
-        v-model="userStore.rentRange.start"
-        class="ml-2"
-        mode="date"
-        input="YYYY-MM-DD"
-        :available-dates="{
-          weekdays: [Number(userStore.settings.lenting_day.value)],
-          start: new Date(),
-        }"
-      >
-        <template v-slot="{ inputValue, inputEvents }">
-          Von: <input
-            class="bg-white border px-2 py-1 rounded"
-            :value="inputValue"
-            v-on="inputEvents"
-          />
-        </template>
-      </vc-date-picker>
-      <div></div>
-      <vc-date-picker
-        class="ml-2"
-        mode="date"
-        input="YYYY-MM-DD"
-        v-model="userStore.rentRange.end"
-        :available-dates="{
-          weekdays: [Number(userStore.settings.returning_day.value)],
-          start: userStore.rentRange.start,
-        }"
-      >
-        <template v-slot="{ inputValue, inputEvents }">
-          Bis: <input
-            class="bg-white border px-2 py-1 rounded"
-            :value="inputValue"
-            v-on="inputEvents"
-          />
-        </template>
-      </vc-date-picker>
+      <div class="d-flex">
+        Von:<datepicker
+          auto-apply
+          :dark="userStore.theme == 'dark'"
+          v-model="userStore.rentRange.start"
+          class="mr-2"
+          no-disabled-range
+          :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+          :time-picker="false"
+          :min-date="new Date(new Date().setHours(0, 0, 0, 0))"
+          :disabled-week-days="disabledLentingWeekdays"
+        >
+          <template #time-picker><div></div></template>
+        </datepicker>
+      </div>
+      <div class="d-flex">
+        Bis:
+        <datepicker
+          :auto-apply="true"
+          :dark="userStore.theme == 'dark'"
+          v-model="userStore.rentRange.end"
+          class="mr-2"
+          no-disabled-range
+          :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+          :time-picker="false"
+          :min-date="userStore.rentRange.start"
+          :disabled-week-days="disabledReturningWeekdays"
+        >
+          <template #time-picker><div></div></template>
+        </datepicker>
+      </div>
     </div>
-  </div>
+  </v-card>
   <!-- Type enumeration-->
   <v-card class="d-flex flex-wrap justify-left" flat>
     <v-card

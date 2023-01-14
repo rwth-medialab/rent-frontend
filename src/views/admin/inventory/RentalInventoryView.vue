@@ -32,7 +32,7 @@ export default {
         id: number;
         name: string;
         description: string;
-        prio: number
+        prio: number;
       }[],
     };
   },
@@ -538,7 +538,7 @@ export default {
           {{ priority.description }}
         </v-tooltip>
         <v-text-field
-          :label="priority.name + ' (Prio: '+ priority.prio + ')'"
+          :label="priority.name + ' (Prio: ' + priority.prio + ')'"
           v-model="duration[priority.id]['duration']"
           type="number"
           :readonly="!userStore.inventory_rights"

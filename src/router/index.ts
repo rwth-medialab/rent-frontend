@@ -55,7 +55,8 @@ const router = createRouter({
     {
       path: "/admin/inventory/priorities",
       name: "priorityManagement",
-      component: () => import("@/views/admin/inventory/PriorityManagementView.vue"),
+      component: () =>
+        import("@/views/admin/inventory/PriorityManagementView.vue"),
       meta: { requiresAdmin: true },
     },
     {

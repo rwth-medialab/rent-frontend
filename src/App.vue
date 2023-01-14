@@ -8,9 +8,9 @@ export default {
   },
   created() {
     this.$watch("userStore.isLoggedIn", () => {
-        this.userStore.func_isStaff();
-        this.userStore.func_has_inventory_rights();
-        this.userStore.func_has_lending_rights();
+      this.userStore.func_isStaff();
+      this.userStore.func_has_inventory_rights();
+      this.userStore.func_has_lending_rights();
     });
   },
   watch: {
@@ -57,7 +57,7 @@ export default {
   async mounted() {
     document.title = this.siteName;
     this.userStore.refreshSettings();
-    this.userStore.checkCredentials()
+    this.userStore.checkCredentials();
     this.currentLinks = this.getRouteLinks();
   },
   data: () => {
