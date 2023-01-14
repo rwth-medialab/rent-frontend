@@ -13,6 +13,7 @@
     "format": "npx prettier --write ."
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "^3.6.4",
     "@vueup/vue-quill": "^1.0.1",
     "@vueuse/core": "^9.6.0",
     "axios": "^1.2.0",
