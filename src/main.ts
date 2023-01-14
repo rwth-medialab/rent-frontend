@@ -10,7 +10,6 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "@mdi/font/css/materialdesignicons.css";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
-import VCalendar from "v-calendar";
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import "@vueup/vue-quill/dist/vue-quill.bubble.css";
@@ -31,8 +30,6 @@ const vuetify = createVuetify({
   },
 });
 app.use(vuetify);
-// use custom prefix in case vuetify 3 reintroduces the calendar
-app.use(VCalendar, { componentPrefix: "vc" });
 app.component("QuillEditor", QuillEditor);
 app.use(createPinia());
 app.use(router);
