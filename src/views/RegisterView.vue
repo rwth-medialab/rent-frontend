@@ -59,20 +59,15 @@ export default {
       if (this.registrationForm.valid) {
         let msg = "";
         let type = "success" as "warning" | "success" | "error" | "info";
-        try {
-          const ret = await this.userStore.postURLWithoutAuth({
-            url: "users",
-            params: this.registrationForm.data,
-          });
-          msg =
-            "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
-        } catch (error) {
-          Object.keys(error["response"]["data"]).forEach(
-            (errorkey) => (msg += error["response"]["data"][errorkey])
-          );
-          type = "warning";
+        const ret = await this.userStore.postURLWithoutAuth({
+          url: "users",
+          params: this.registrationForm.data,
+        });
+        msg =
+          "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
+        if(typeof ret !='undefined'){
+          this.userStore.alert(msg, type, 10000);
         }
-        this.userStore.alert(msg, type, 10000);
       }
     },
   },
