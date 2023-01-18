@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
-import type { ReservationType } from "@/ts/rent.types";
+import type { ReservationPrototypeType } from "@/ts/rent.types";
 import Datepicker from "@vuepic/vue-datepicker";
 import dateFormat from "dateformat";
 import "@vuepic/vue-datepicker/dist/main.css";
@@ -11,18 +11,25 @@ export default {
       attributes: [{ bar: "red", dates: [], format: "yyyy-mm-dd" }],
     };
   },
-  async mounted() {
-    this.userStore.shoppingCart.forEach(async (thing) => {
-      thing.maxDuration = (
-        await this.userStore.getFromURLWithAuth({
-          url: "rentalobjecttypes/" + thing.id + "/duration/",
-        })
-      )["duration_in_days"];
-    });
+  async created() {},
+  mounted() {
   },
   methods: {
+    refreshMaxDuration() {
+      this.userStore.shoppingCart.forEach((thing) => {
+        this.userStore
+          .getFromURLWithAuth({
+            url: "rentalobjecttypes/" + thing.id + "/duration/",
+          })
+          .then((result) => {
+            thing.maxDuration = result["duration_in_days"];
+          });
+      });
+    },
+
     async validate_and_reserve() {
       let reservation = [];
+      let ret = false
       this.userStore.shoppingCart.forEach((thing) => {
         // check if available has been calculated if not => a date is missing in selection
         if (!("available" in thing)) {
@@ -66,7 +73,13 @@ export default {
           objecttype: thing.id,
           count: thing.count,
         });
+
+        ret = true
       });
+      if(!ret){
+        // do not remove stuff from shoppingcart
+        return
+      }
       const result = await this.userStore.postURLWithAuth({
         url: "reservations/bulk",
         params: { data: reservation },
@@ -121,7 +134,7 @@ export default {
         }
       }
     },
-    latestReturningDay(thing: ReservationType) {
+    latestReturningDay(thing: ReservationPrototypeType) {
       // parse start date
       const start = new Date(Date.parse(dateFormat(thing.start)));
       // get theoratical returning day based on maxDuration
@@ -138,7 +151,7 @@ export default {
       //now we diff until next returning day
       return end;
     },
-    updatedShoppingCartNumber(thing: ReservationType) {
+    updatedShoppingCartNumber(thing: ReservationPrototypeType) {
       if (Number(thing.count) <= 0) {
         this.userStore.removeFromCart(thing);
       } else if (Number(thing.count) > thing.available.count) {
@@ -151,6 +164,11 @@ export default {
     return { userStore };
   },
   computed: {
+    shit() {
+      // we fetch it two times, since vue got some problems with it
+      this.refreshMaxDuration()
+      return this.userStore.shoppingCart;
+    },
     disabledLentingWeekdays() {
       let weekdays = [0, 1, 2, 3, 4, 5, 6];
       weekdays.splice(
@@ -175,11 +193,7 @@ export default {
 
 <template>
   <v-card class="ma-2">
-    <v-card
-      v-for="thing in userStore.shoppingCart"
-      :key="thing.id"
-      class="pa-2"
-    >
+    <v-card v-for="thing in shit" :key="thing.id" class="pa-2">
       <v-card flat :title="thing.name">
         <v-avatar class="ma-3" size="80" rounded="0">
           <v-img cover aspect-ratio="1" :src="thing['image']"></v-img>

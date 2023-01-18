@@ -4,11 +4,24 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import "@vueup/vue-quill/dist/vue-quill.bubble.css";
 import type { TextType } from "@/ts/rent.types";
 import { useUserStore } from "@/stores/user";
+
+import htmlEditButton from "quill-html-edit-button";
+
 export default {
   components: { QuillEditor },
   setup() {
     const userStore = useUserStore();
-    return { userStore };
+    const quillModules = [
+      {
+        name: "htmlEditor",
+        module: htmlEditButton,
+        options: {
+          buttonHTML:
+            '<svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M6.12,15.5L9.86,19.24L11.28,17.83L8.95,15.5L11.28,13.17L9.86,11.76L6.12,15.5M17.28,15.5L13.54,11.76L12.12,13.17L14.45,15.5L12.12,17.83L13.54,19.24L17.28,15.5Z" /></svg>',
+        },
+      },
+    ];
+    return { userStore, quillModules };
   },
   data() {
     return {
@@ -48,6 +61,9 @@ export default {
 
 <template>
   <v-card class="pa-2">
+    <div v-pre>
+      Wichtig, für Template Aktionen mit {{%  ist es wichtig, dass sie alleine in einer Zeile stehen und keine Leerzeichen in der Zeile sind}} 
+    </div>
     <v-expansion-panels>
       <v-expansion-panel v-for="text in texts" :key="text.id">
         <v-expansion-panel-title>
@@ -57,6 +73,7 @@ export default {
           <div>
             <QuillEditor
               :ref="'editor' + text.id"
+              :modules="quillModules"
               theme="snow"
               content-type="html"
               v-model:content="text.content"

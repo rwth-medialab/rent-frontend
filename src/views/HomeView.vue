@@ -48,6 +48,7 @@ export default {
   },
   setup() {
     const userStore = useUserStore();
+    userStore.checkCredentials()
     return { userStore };
   },
   computed: {
@@ -72,7 +73,6 @@ export default {
   },
   async mounted() {
     // get the stuf around first
-    this.userStore.isLoggedIn = await this.userStore.checkCredentials();
     this.texts = await this.userStore.getFromURLWithoutAuth({
       url: "texts",
       params: { names: this.neededTexts },
@@ -113,6 +113,7 @@ export default {
 </script>
 
 <template>
+  <v-alert v-if="userStore.isLoggedIn">s </v-alert>
   <!-- filterdialog-->
   <v-dialog v-model="filterDialog.open">
     <v-card>
@@ -140,7 +141,7 @@ export default {
       texts.find((x) => x.name == 'frontpage') &&
       texts.find((x) => x.name == 'frontpage').content != ''
     "
-    class="ma-3"
+    class="pa-3"
     flat
   >
     <div
@@ -183,8 +184,8 @@ export default {
           :time-picker="false"
           :min-date="new Date(new Date().setHours(0, 0, 0, 0))"
           :disabled-week-days="disabledLentingWeekdays"
+          :enable-time-picker="false"
         >
-          <template #time-picker><div></div></template>
         </datepicker>
       </div>
       <div class="d-flex">
@@ -199,8 +200,8 @@ export default {
           :time-picker="false"
           :min-date="userStore.rentRange.start"
           :disabled-week-days="disabledReturningWeekdays"
+          :enable-time-picker="false"
         >
-          <template #time-picker><div></div></template>
         </datepicker>
       </div>
     </div>

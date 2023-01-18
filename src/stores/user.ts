@@ -6,7 +6,7 @@ import type {
   RentalObjectTypeType,
   AvailableType,
   SettingsType,
-  ReservationType,
+  ReservationPrototypeType,
 } from "@/ts/rent.types";
 
 const apiHost = import.meta.env.VITE_API_HOST;
@@ -33,7 +33,7 @@ export const useUserStore = defineStore("user", {
       text: string;
       alert: boolean;
     },
-    shoppingCart: useStorage("shoppingCart", [] as ReservationType[]),
+    shoppingCart: useStorage("shoppingCart", [] as ReservationPrototypeType[]),
     available: {} as AvailableType,
     rentRange: { start: null, end: null, valid: false },
     theme: useStorage("theme", "dark"),
@@ -99,6 +99,73 @@ export const useUserStore = defineStore("user", {
       function resetAlert() {
         message["alert"] = false;
       }
+    },
+    /* We shouldn't use post, but we do not have to parse the date before sending if we use post */
+    downloadFilledInTemplateWithAuth({ url = "", params = {}, headers = {} }) {
+      headers["Authorization"] = "Token " + this.user.token;
+      if (url.slice(0, 1) != "/") {
+        url = "/" + url;
+      }
+      url = apiHost + url;
+      if (url.slice(-1) != "/") {
+        //strict ending in / is activated in Django
+        url += "/";
+      }
+      // if (Object.keys(params).length > 0) {
+      //   const urlparams = new URLSearchParams(params);
+      //   url += "?" + urlparams.toString();
+      // }
+
+      axios({
+        url: url,
+        data: params,
+        method: "POST",
+        responseType: "blob",
+        headers: headers,
+      }).then((response) => {
+        console.log(response.data);
+        var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+
+        fileLink.href = fileURL;
+        fileLink.setAttribute("download", "file.docx");
+        document.body.appendChild(fileLink);
+
+        fileLink.click();
+      });
+    },
+    downloadFileWithAuth({ url = "", params = {}, headers = {} }) {
+      headers["Authorization"] = "Token " + this.user.token;
+      if (url.slice(0, 1) != "/") {
+        url = "/" + url;
+      }
+      url = apiHost + url;
+      if (url.slice(-1) != "/") {
+        //strict ending in / is activated in Django
+        url += "/";
+      }
+      if (Object.keys(params).length > 0) {
+        const urlparams = new URLSearchParams(params);
+        url += "?" + urlparams.toString();
+      }
+
+      axios({
+        url: url,
+        data: params,
+        method: "GET",
+        responseType: "blob",
+        headers: headers,
+      }).then((response) => {
+        console.log(response.data);
+        var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+
+        fileLink.href = fileURL;
+        fileLink.setAttribute("download", "file.docx");
+        document.body.appendChild(fileLink);
+
+        fileLink.click();
+      });
     },
     async getFromURLWithoutAuth({ url = "", params = {}, headers = {} }) {
       if (url.slice(0, 1) != "/") {
@@ -302,17 +369,29 @@ export const useUserStore = defineStore("user", {
             );
             this.user = {} as userType;
             this.isLoggedIn = false;
+            this.func_has_inventory_rights()
+            this.func_has_lending_rights()
+            this.func_isStaff()
             return false;
           }
-          this.isLoggedIn = true;
-          return true;
+           this.isLoggedIn = true;
+           this.func_has_inventory_rights()
+           this.func_has_lending_rights()
+           this.func_isStaff()
+           return true;
         } catch (error) {
           this.user = {} as userType;
           this.isLoggedIn = false;
+          this.func_has_inventory_rights()
+          this.func_has_lending_rights()
+          this.func_isStaff()
           return false;
         }
       } else {
         this.isLoggedIn = false;
+        this.func_has_inventory_rights()
+        this.func_has_lending_rights()
+        this.func_isStaff()
         return false;
       }
     },

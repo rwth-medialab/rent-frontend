@@ -25,7 +25,7 @@ export default {
   <v-card>
     <v-container>
       <div>
-        {{ retData.success }}
+        {{ retData.success?"":"" }}
       </div>
       <div>
         {{ retData.detail }}

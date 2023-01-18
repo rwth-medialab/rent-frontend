@@ -40,6 +40,12 @@ const router = createRouter({
       meta: { requiresAdmin: false },
     },
     {
+      path: "/admin/rental/dashboard",
+      name: "rentalDashboard",
+      component: () => import("@/views/admin/rental/RentalDashboardView.vue"),
+      meta: { requiresAdmin: true },
+    },
+    {
       path: "/admin/inventory/rental",
       name: "rentalinventoryview",
       component: () =>
@@ -69,6 +75,12 @@ const router = createRouter({
       path: "/admin/settings/texts",
       name: "textManagement",
       component: () => import("@/views/admin/settings/TextManagementView.vue"),
+      meta: { requiresAdmin: true },
+    },
+    {
+      path: "/admin/settings/general",
+      name: "generalSettings",
+      component: () => import("@/views/admin/settings/GeneralSettingsView.vue"),
       meta: { requiresAdmin: true },
     },
     {
@@ -106,12 +118,17 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   // only allow access to areas that people are supposed
   const userStore = useUserStore();
-  if (to.meta.requiresAdmin && !userStore.is_staff) {
-    return { path: "/" };
-  }
+  if (to.meta.requiresAdmin) {
+    // hits performance but only the admin site
+    await userStore.checkCredentials();
+    if (!userStore.is_staff) {
+      return { path: "/" };
+    }
+  }else{
+    userStore.checkCredentials();}
 });
 
 export default router;

@@ -6,18 +6,8 @@ export default {
     const userStore = useUserStore();
     return { userStore };
   },
-  created() {
-    this.$watch("userStore.isLoggedIn", () => {
-      this.userStore.func_isStaff();
-      this.userStore.func_has_inventory_rights();
-      this.userStore.func_has_lending_rights();
-    });
-  },
   watch: {
     $route: function (_newroute, oldroute) {
-      if (oldroute.name == "login") {
-        this.userStore.checkCredentials();
-      }
       this.currentLinks = this.getRouteLinks();
       if (
         !this.userStore.is_staff &&
@@ -57,7 +47,6 @@ export default {
   async mounted() {
     document.title = this.siteName;
     this.userStore.refreshSettings();
-    this.userStore.checkCredentials();
     this.currentLinks = this.getRouteLinks();
   },
   data: () => {
@@ -83,6 +72,7 @@ export default {
             links: [
               { to: "/admin/settings/texts", name: "Texte" },
               { to: "/admin/settings/users", name: "Nutzerverwaltung" },
+              { to: "/admin/settings/general", name: "Einstellungen" },
             ],
           },
           rental: {

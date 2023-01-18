@@ -11,8 +11,8 @@ export default {
       registrationForm: {
         valid: false,
         data: {
-          lastname: "",
-          firstname: "",
+          last_name: "",
+          first_name: "",
           username: "",
           password: "",
           confirmPassword: "",
@@ -63,6 +63,7 @@ export default {
           url: "users",
           params: this.registrationForm.data,
         });
+        console.log(this.registrationForm.data)
         msg =
           "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
         if(typeof ret !='undefined'){
@@ -110,14 +111,14 @@ export default {
           :rules="registrationForm.notEmptyRules"
           type="lastname"
           label="Nachname"
-          v-model="registrationForm.data.lastname"
+          v-model="registrationForm.data.last_name"
           required
         />
         <v-text-field
           :rules="registrationForm.notEmptyRules"
           type="firstname"
           label="Vorname"
-          v-model="registrationForm.data.firstname"
+          v-model="registrationForm.data.first_name"
           required
         />
         <v-text-field

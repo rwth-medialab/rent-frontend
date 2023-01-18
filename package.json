@@ -21,6 +21,7 @@
     "moment": "^2.29.4",
     "pinia": "^2.0.26",
     "qrcode.vue": "^3.3.3",
+    "quill-html-edit-button": "^2.2.12",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
     "vuetify": "^3.1.0"

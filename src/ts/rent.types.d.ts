@@ -12,11 +12,18 @@ export type RentalObjectTypeType = {
   count?: number;
 };
 
-export type ReservationType = {
+export type ReservationPrototypeType = {
   count: number;
   start: Date;
   end: Date;
   maxDuration?: number;
+  reserver?: {
+    id: number;
+    user: {
+      first_name: string;
+      last_name: string;
+    };
+  };
   available?: {
     // do it like this because we cant have watchers for each item in shopping cart
     start: Date;
@@ -50,4 +57,33 @@ export type PriorityType = {
   name: string;
   description: string;
   prio: number | string;
+};
+
+export type RentalObjectType = {
+  internal_identifier: number;
+};
+
+export type UserType = {
+  last_name: string;
+  first_name: string;
+  email: string;
+};
+
+export type ReservationType = {
+  id: number;
+  selectedObjects?: RentalObjectType[];
+  selectableObjects?: RentalObjectType[];
+  objecttype: RentalObjectTypeType;
+  reserver: { user: UserType };
+  reserved_from: string;
+  reserved_until: string;
+  count: number;
+};
+
+export type RentalFormType = {
+  reserver: { user: { first_name: string; last_name: string; email: string } };
+  objecttype: { name: string; prefix_identifier: string };
+  slectedObjects: [pk: int];
+  reserved_from: string;
+  reserved_until: string;
 };
