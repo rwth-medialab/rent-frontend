@@ -35,6 +35,7 @@ export default {
           { title: "Rückgabedatum", key: "reserved_until" },
           { title: "Gegenstand", key: "reservation.objecttype.name" },
           { title: "Identifier", key: "merged_identifier" },
+          { title: "zurückerhalten", key: "received_back_at" },
           // { title: "Vorname", key: "reservation.reserver.user.first_name" },
           // { title: "Nachname", key: "reservation.reserver.user.last_name" },
         ],
@@ -65,6 +66,9 @@ export default {
     },
   },
   methods: {
+    getDate(date){
+      return dateFormat(date, "yyyy-mm-dd HH:ss")
+    },
     async updateData(reservation?: boolean, rental?: boolean) {
       if (typeof reservation == "undefined") {
         reservation = true;
@@ -87,25 +91,30 @@ export default {
         });
       }
       let data = [];
-      this.userStore.getFromURLWithAuth({ url: "rentals" , params: {open: this.rentals.rentalsDialog.filter.open} }).then((response) => {
-        response.map((x) => {
-          // console.log(x);
-          data.push({
-            ...x,
-            merged_identifier:
-              x.reservation.objecttype.prefix_identifier +
-              x.rented_object.internal_identifier,
-            grouping1: "Rückgabedatum: " + x.reserved_until,
-            grouping2:
-              x.reservation.reserver.user.first_name +
-              " " +
-              x.reservation.reserver.user.last_name,
+      this.userStore
+        .getFromURLWithAuth({
+          url: "rentals",
+          params: { open: this.rentals.rentalsDialog.filter.open },
+        })
+        .then((response) => {
+          response.map((x) => {
+            // console.log(x);
+            data.push({
+              ...x,
+              merged_identifier:
+                x.reservation.objecttype.prefix_identifier +
+                x.rented_object.internal_identifier,
+              grouping1: "Rückgabedatum: " + x.reserved_until,
+              grouping2:
+                x.reservation.reserver.user.first_name +
+                " " +
+                x.reservation.reserver.user.last_name,
+            });
+            //console.log(data);
           });
-          //console.log(data);
+          this.rentals.data = data;
+          console.log(this.rentals.data);
         });
-        this.rentals.data = data;
-        console.log(this.rentals.data);
-      });
       //console.log(this.rentals.data);
     },
     async openHandleDialog(item) {
@@ -221,10 +230,18 @@ export default {
       :sort-by="rentals.sortBy"
     >
       <template v-slot:item.actions="{ item }">
-        <v-icon v-if="item.raw.received_back_at == null" size="small" class="mr-2" @click="openRentalDialog(item.raw)">
+        <v-icon
+          v-if="item.raw.received_back_at == null"
+          size="small"
+          class="mr-2"
+          @click="openRentalDialog(item.raw)"
+        >
           mdi-pencil
         </v-icon>
         <v-chip color="success"></v-chip>
+      </template>
+      <template v-slot:item.received_back_at="{ item }">
+        {{ item.raw.received_back_at != null? getDate( new Date(Date.parse(item.raw.received_back_at))):"" }}
       </template>
       <template v-slot:top>
         <v-toolbar flat>
@@ -352,7 +369,7 @@ export default {
           (x) =>
             x.grouping1 == rentals.rentalsDialog.relatedItem.grouping1 &&
             x.grouping2 == rentals.rentalsDialog.relatedItem.grouping2 &&
-            x.received_back_at ==null
+            x.received_back_at == null
         )"
         :key="rental.id"
         :label="rental.merged_identifier"
