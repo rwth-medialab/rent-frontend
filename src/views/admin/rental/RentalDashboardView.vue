@@ -238,7 +238,6 @@ export default {
         >
           mdi-pencil
         </v-icon>
-        <v-chip color="success"></v-chip>
       </template>
       <template v-slot:item.received_back_at="{ item }">
         {{ item.raw.received_back_at != null? getDate( new Date(Date.parse(item.raw.received_back_at))):"" }}
