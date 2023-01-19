@@ -19,18 +19,32 @@ export default {
         sortBy: [{ key: "reserved_from" }],
         headers: [
           { title: "Actions", key: "actions", sortable: false },
-          { title: "Gegenstand", value: "objecttype.name" },
-          { title: "Anzahl", value: "count" },
-          { title: "reserviert von", value: "reserved_from" },
-          { title: "reserviert bis", value: "reserved_until" },
+          { title: "Gegenstand", key: "objecttype.name" },
+          { title: "Anzahl", key: "count" },
+          { title: "reserviert von", key: "reserved_from" },
+          { title: "reserviert bis", key: "reserved_until" },
         ],
         open: true,
       },
       rentals: {
         data: [],
+        groupBy: [{ key: "grouping1" }, { key: "grouping2" }],
+        sortBy: [{ key: "reserved_until" }],
         headers: [
-          {}
-        ]
+          { title: "Actions", key: "actions", sortable: false },
+          { title: "Rückgabedatum", key: "reserved_until" },
+          { title: "Gegenstand", key: "reservation.objecttype.name" },
+          { title: "Identifier", key: "merged_identifier" },
+          // { title: "Vorname", key: "reservation.reserver.user.first_name" },
+          // { title: "Nachname", key: "reservation.reserver.user.last_name" },
+        ],
+        rentalsDialog: {
+          filter: { open: true },
+          open: false,
+          selectedAsReturned: [],
+          // relatedItem is the item which has been selected in the table and from which properties we will fetch the rest
+          relatedItem: null,
+        },
       },
       handleDialog: {
         open: false,
@@ -45,6 +59,9 @@ export default {
     "reservations.open": function () {
       setTimeout(this.updateData, 500);
       //this.updateData();
+    },
+    "rentals.rentalsDialog.filter.open": function () {
+      setTimeout(this.updateData, 500);
     },
   },
   methods: {
@@ -65,16 +82,31 @@ export default {
             ...x,
             grouping1: "Abholdatum: " + x.reserved_from,
             grouping2:
-              x.operation_number +
-              " " +
-              x.reserver.user.first_name +
-              " " +
-              x.reserver.user.last_name,
+              x.reserver.user.first_name + " " + x.reserver.user.last_name,
           };
         });
       }
-      this.rentals.data = await this.userStore.getFromURLWithAuth({url: "rentals"})
-      console.log(this.rentals.data)
+      let data = [];
+      this.userStore.getFromURLWithAuth({ url: "rentals" , params: {open: this.rentals.rentalsDialog.filter.open} }).then((response) => {
+        response.map((x) => {
+          // console.log(x);
+          data.push({
+            ...x,
+            merged_identifier:
+              x.reservation.objecttype.prefix_identifier +
+              x.rented_object.internal_identifier,
+            grouping1: "Rückgabedatum: " + x.reserved_until,
+            grouping2:
+              x.reservation.reserver.user.first_name +
+              " " +
+              x.reservation.reserver.user.last_name,
+          });
+          //console.log(data);
+        });
+        this.rentals.data = data;
+        console.log(this.rentals.data);
+      });
+      //console.log(this.rentals.data);
     },
     async openHandleDialog(item) {
       this.handleDialog.reservations = this.reservations.data.filter(
@@ -103,17 +135,40 @@ export default {
       });
       this.handleDialog.open = true;
     },
-    turnReservationsIntoRentals() {
-      this.userStore.postURLWithAuth({url: "rentals/bulk", params:this.handleDialog.reservations}).then( response => {
-        this.handleDialog.open=false
-        setTimeout(this.updateData, 500);
-      }
-      )
-      
+    openRentalDialog(item) {
+      this.rentals.rentalsDialog.open = true;
+      this.rentals.rentalsDialog.relatedItem = item;
     },
-    downloadForm(){
-      this.userStore.downloadFilledInTemplateWithAuth({url: "reservations/download_form", params: this.handleDialog.reservations})
-    }
+    returnSelectedItems() {
+      this.userStore
+        .postURLWithAuth({
+          url: "rentals/return",
+          params: this.rentals.rentalsDialog.selectedAsReturned,
+        })
+        .then((_res) =>
+          this.updateData().then(() => {
+            this.rentals.rentalsDialog.open = false;
+            this.rentals.rentalsDialog.selectedAsReturned = [];
+          })
+        );
+    },
+    turnReservationsIntoRentals() {
+      this.userStore
+        .postURLWithAuth({
+          url: "rentals/bulk",
+          params: this.handleDialog.reservations,
+        })
+        .then((_response) => {
+          this.handleDialog.open = false;
+          setTimeout(this.updateData, 500);
+        });
+    },
+    downloadForm() {
+      this.userStore.downloadFilledInTemplateWithAuth({
+        url: "reservations/download_form",
+        params: this.handleDialog.reservations,
+      });
+    },
   },
 };
 </script>
@@ -121,6 +176,7 @@ export default {
 <template>
   <v-card>
     <v-data-table
+      class="pa-4"
       :headers="reservations.headers"
       :items="reservations.data"
       :group-by="reservations.groupBy"
@@ -129,7 +185,7 @@ export default {
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>Reservierungen</v-toolbar-title>
-          <v-spacer />
+          <!-- <v-spacer />
           <v-menu location="bottom">
             <template v-slot:activator="{ props }">
               <v-btn icon v-bind="props">
@@ -145,7 +201,7 @@ export default {
                 />
               </v-list-item>
             </v-list>
-          </v-menu>
+          </v-menu> -->
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -154,14 +210,57 @@ export default {
         </v-icon>
       </template>
       <template v-slot:no-data>
-        <div class="text-center">Keine Reservierungen :'(</div>
+        <div class="text-center">Keine Reservierungen</div>
+      </template>
+    </v-data-table>
+    <v-data-table
+      class="pa-4"
+      :headers="rentals.headers"
+      :items="rentals.data"
+      :group-by="rentals.groupBy"
+      :sort-by="rentals.sortBy"
+    >
+      <template v-slot:item.actions="{ item }">
+        <v-icon v-if="item.raw.received_back_at == null" size="small" class="mr-2" @click="openRentalDialog(item.raw)">
+          mdi-pencil
+        </v-icon>
+        <v-chip color="success"></v-chip>
+      </template>
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title>Laufende Verleihvorgänge</v-toolbar-title
+          ><v-spacer />
+          <v-menu location="bottom">
+            <template v-slot:activator="{ props }">
+              <v-btn icon v-bind="props">
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list>
+              <v-list-item>
+                <v-checkbox
+                  label="Nur offene Vorgänge anzeigen"
+                  v-model="rentals.rentalsDialog.filter.open"
+                />
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-toolbar>
+      </template>
+      <template v-slot:no-data>
+        <div class="text-center">Keine laufenden Verleihvorgänge</div>
       </template>
     </v-data-table>
   </v-card>
-  <v-dialog v-model="handleDialog.open" max-width="800px">
+  <v-dialog v-model="handleDialog.open">
     <v-card class="pa-3">
       <div class="text-h4">Verleih</div>
-      <v-card class="pa-3" v-for="reservation in handleDialog.reservations">
+      <v-card
+        class="pa-3"
+        min-height="290px"
+        v-for="reservation in handleDialog.reservations"
+      >
         <v-row>
           <v-col>
             <v-list>
@@ -211,19 +310,20 @@ export default {
           item-value="id"
         ></v-select>
       </v-card>
+      <div
+        class="text-red"
+        v-if="
+          handleDialog.reservations.filter(
+            (x) => x.count != x.selectedObjects.length
+          ).length != 0
+        "
+      >
+        Die ausgewählten Anzahlen passen irgendwo nicht
+      </div>
       <v-card-actions
         ><v-spacer />
         <!-- enable button if number of selectedObjects equals the count  for each reservation-->
-        <div
-          class="text-red"
-          v-if="
-            handleDialog.reservations.filter(
-              (x) => x.count != x.selectedObjects.length
-            ).length != 0
-          "
-        >
-          Die ausgewählten Anzahlen passen irgendwo nicht
-        </div>
+
         <v-btn
           :disabled="
             handleDialog.reservations.filter(
@@ -244,5 +344,26 @@ export default {
         >
       </v-card-actions></v-card
     >
+  </v-dialog>
+  <v-dialog v-model="rentals.rentalsDialog.open">
+    <v-card class="pa-4">
+      <v-checkbox
+        v-for="rental in rentals.data.filter(
+          (x) =>
+            x.grouping1 == rentals.rentalsDialog.relatedItem.grouping1 &&
+            x.grouping2 == rentals.rentalsDialog.relatedItem.grouping2 &&
+            x.received_back_at ==null
+        )"
+        :key="rental.id"
+        :label="rental.merged_identifier"
+        :value="rental.id"
+        v-model="rentals.rentalsDialog.selectedAsReturned"
+      />
+      <v-card-actions>
+        <v-spacer /><v-btn @click="returnSelectedItems"
+          >Rückgabe bestätigen</v-btn
+        ></v-card-actions
+      >
+    </v-card>
   </v-dialog>
 </template>

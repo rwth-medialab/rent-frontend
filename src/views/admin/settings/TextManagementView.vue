@@ -5,7 +5,7 @@ import "@vueup/vue-quill/dist/vue-quill.bubble.css";
 import type { TextType } from "@/ts/rent.types";
 import { useUserStore } from "@/stores/user";
 
-import htmlEditButton from "quill-html-edit-button";
+import {htmlEditButton} from "quill-html-edit-button";
 
 export default {
   components: { QuillEditor },
@@ -61,9 +61,6 @@ export default {
 
 <template>
   <v-card class="pa-2">
-    <div v-pre>
-      Wichtig, für Template Aktionen mit {{%  ist es wichtig, dass sie alleine in einer Zeile stehen und keine Leerzeichen in der Zeile sind}} 
-    </div>
     <v-expansion-panels>
       <v-expansion-panel v-for="text in texts" :key="text.id">
         <v-expansion-panel-title>
