@@ -113,7 +113,6 @@ export default {
 </script>
 
 <template>
-  <v-alert v-if="userStore.isLoggedIn">s </v-alert>
   <!-- filterdialog-->
   <v-dialog v-model="filterDialog.open">
     <v-card>
