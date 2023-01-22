@@ -7,26 +7,14 @@ import type {
   AvailableType,
   SettingsType,
   ReservationPrototypeType,
+  UserStoreType,
 } from "@/ts/rent.types";
 
 const apiHost = import.meta.env.VITE_API_HOST;
 
-export type userType = {
-  expiry: string;
-  token: string;
-  user: {
-    email: string;
-    groups: [string];
-    is_staff: boolean;
-    is_admin: boolean;
-    user_permissions: [string];
-    username: string;
-  };
-};
-
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: useStorage("user", {} as userType),
+    user: useStorage("user", {} as UserStoreType),
     isLoggedIn: false,
     message: { type: "info", text: null, alert: false } as {
       type: "error" | "success" | "warning" | "info";
@@ -351,7 +339,7 @@ export const useUserStore = defineStore("user", {
         //body: JSON.stringify({ username, password }),
       });
       if (res.ok) {
-        this.user = {} as userType;
+        this.user = {} as UserStoreType;
         this.isLoggedIn = false;
       }
     },
@@ -371,7 +359,7 @@ export const useUserStore = defineStore("user", {
               "Sie wurden ausgeloggt, bitte loggen Sie sich neu ein.",
               "info"
             );
-            this.user = {} as userType;
+            this.user = {} as UserStoreType;
             this.isLoggedIn = false;
             this.func_has_inventory_rights();
             this.func_has_lending_rights();
@@ -379,14 +367,14 @@ export const useUserStore = defineStore("user", {
             return false;
           }
           this.isLoggedIn = true;
-          const user = await res.json()
-          this.user.user = user
+          const user = await res.json();
+          this.user.user = user;
           this.func_has_inventory_rights();
           this.func_has_lending_rights();
           this.func_isStaff();
           return true;
         } catch (error) {
-          this.user = {} as userType;
+          this.user = {} as UserStoreType;
           this.isLoggedIn = false;
           this.func_has_inventory_rights();
           this.func_has_lending_rights();
@@ -417,16 +405,21 @@ export const useUserStore = defineStore("user", {
               );
             }
           } else {
-            that.alert("Dein Account wurde automatisch verifiziert.", "success")
+            that.alert(
+              "Dein Account wurde automatisch verifiziert.",
+              "success"
+            );
             if (openedWindow != null) {
               openedWindow.close();
             }
           }
-          if("automatically_verifiable" in verifyres){
-           that.alert("we couldn't verify you automatically, please verify manually at your first rental")
+          if ("automatically_verifiable" in verifyres) {
+            that.alert(
+              "we couldn't verify you automatically, please verify manually at your first rental"
+            );
           }
-          //refresh local profile, this will overwrite the verified state 
-          that.checkCredentials()
+          //refresh local profile, this will overwrite the verified state
+          that.checkCredentials();
         });
       }
       // first we create the verifikation url. this will return {url: "", max_refresh_interval:0} if verification process has already has been finished and there is a access_token.

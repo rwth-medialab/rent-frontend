@@ -87,3 +87,20 @@ export type RentalFormType = {
   reserved_from: string;
   reserved_until: string;
 };
+
+export type UserStoreType = {
+  expiry: string;
+  token: string;
+  user: {
+    email: string;
+    groups: [string];
+    is_staff: boolean;
+    is_admin: boolean;
+    user_permissions: [string];
+    username: string;
+    profile: {
+      automatically_verifiable: boolean;
+      verified: boolean;
+    };
+  };
+};
