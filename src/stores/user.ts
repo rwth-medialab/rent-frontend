@@ -41,6 +41,10 @@ export const useUserStore = defineStore("user", {
     inventory_rights: false,
     lending_rights: false,
     is_staff: false,
+    verificationData: {
+      max_refresh_interval: 5,
+      url: "",
+    } as { url: string; max_refresh_interval: number },
   }),
 
   actions: {
@@ -369,31 +373,76 @@ export const useUserStore = defineStore("user", {
             );
             this.user = {} as userType;
             this.isLoggedIn = false;
-            this.func_has_inventory_rights()
-            this.func_has_lending_rights()
-            this.func_isStaff()
+            this.func_has_inventory_rights();
+            this.func_has_lending_rights();
+            this.func_isStaff();
             return false;
           }
-           this.isLoggedIn = true;
-           this.func_has_inventory_rights()
-           this.func_has_lending_rights()
-           this.func_isStaff()
-           return true;
+          this.isLoggedIn = true;
+          const user = await res.json()
+          this.user.user = user
+          this.func_has_inventory_rights();
+          this.func_has_lending_rights();
+          this.func_isStaff();
+          return true;
         } catch (error) {
           this.user = {} as userType;
           this.isLoggedIn = false;
-          this.func_has_inventory_rights()
-          this.func_has_lending_rights()
-          this.func_isStaff()
+          this.func_has_inventory_rights();
+          this.func_has_lending_rights();
+          this.func_isStaff();
           return false;
         }
       } else {
         this.isLoggedIn = false;
-        this.func_has_inventory_rights()
-        this.func_has_lending_rights()
-        this.func_isStaff()
+        this.func_has_inventory_rights();
+        this.func_has_lending_rights();
+        this.func_isStaff();
         return false;
       }
+    },
+    accountVerification() {
+      //helper function for recursive call to check for authorization
+      function verify(that, openedWindow) {
+        that.postURLWithAuth({ url: "users/oauth/token" }).then((verifyres) => {
+          console.log(verifyres);
+          if (
+            String(verifyres["status"]).includes("error: authorization pending")
+          ) {
+            if (openedWindow != null) {
+              // spawn a process which will call the api all defined seconds
+              setTimeout(
+                () => verify(that, openedWindow),
+                (that.verificationData.max_refresh_interval + 2) * 1000
+              );
+            }
+          } else {
+            that.alert("Dein Account wurde automatisch verifiziert.", "success")
+            if (openedWindow != null) {
+              openedWindow.close();
+            }
+          }
+          if("automatically_verifiable" in verifyres){
+           that.alert("we couldn't verify you automatically, please verify manually at your first rental")
+          }
+          //refresh local profile, this will overwrite the verified state 
+          that.checkCredentials()
+        });
+      }
+      // first we create the verifikation url. this will return {url: "", max_refresh_interval:0} if verification process has already has been finished and there is a access_token.
+      this.postURLWithAuth({ url: "users/oauth/verify" }).then((response) => {
+        this.verificationData = response;
+        if (this.verificationData.url != "") {
+          // if we receive "", the process has been finished something went wrong
+          const openedWindow = window.open(this.verificationData.url, "_blank");
+          setTimeout(
+            () => verify(this, openedWindow),
+            this.verificationData.max_refresh_interval + 2 * 1000
+          );
+        } else {
+          verify(this, null);
+        }
+      });
     },
     func_isStaff() {
       this.is_staff =

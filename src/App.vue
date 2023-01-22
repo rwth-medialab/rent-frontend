@@ -225,6 +225,20 @@ export default {
     </v-app-bar>
     <v-main fluid>
       <v-alert
+        class="ma-3"
+        type="info"
+        v-if="userStore.isLoggedIn && 'user' in userStore.user && userStore.user.user.profile.automatically_verifiable && !userStore.user.user.profile.verified"
+        ><div class="text-center">
+          <!-- Aktuell nur möglich wenn direkte Mitlgiedschaft zur Fakultät 7.2 besteht-->
+          Es besteht die Zugehörigkeit zu einem leramtsbezogenen Studiengang automatisch über das OAuth der
+          RWTH zu verifizieren. Klicke dafür auf den folgenden Button und folge den
+          Anweisungen.
+        </div>
+        <div class="d-flex justify-center">
+          <v-btn flat variant="tonal" @click="userStore.accountVerification">Verifizierung starten</v-btn>
+        </div>
+      </v-alert>
+      <v-alert
         v-if="
           userStore.message.alert && !userStore.message.text.includes('html')
         "
