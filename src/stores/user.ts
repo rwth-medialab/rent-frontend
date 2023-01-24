@@ -115,7 +115,6 @@ export const useUserStore = defineStore("user", {
         responseType: "blob",
         headers: headers,
       }).then((response) => {
-        console.log(response.data);
         var fileURL = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
 
@@ -148,7 +147,6 @@ export const useUserStore = defineStore("user", {
         responseType: "blob",
         headers: headers,
       }).then((response) => {
-        console.log(response.data);
         var fileURL = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
 
@@ -393,7 +391,6 @@ export const useUserStore = defineStore("user", {
       //helper function for recursive call to check for authorization
       function verify(that, openedWindow) {
         that.postURLWithAuth({ url: "users/oauth/token" }).then((verifyres) => {
-          console.log(verifyres);
           if (
             String(verifyres["status"]).includes("error: authorization pending")
           ) {
@@ -464,7 +461,7 @@ export const useUserStore = defineStore("user", {
       const tempSettings = await this.getFromURLWithoutAuth({
         url: "settings",
       });
-      const sortedSettings = {};
+      const sortedSettings = {} as SettingsType;
       tempSettings.forEach(
         (x) => (sortedSettings[x.type] = { value: x.value, id: x.id })
       );

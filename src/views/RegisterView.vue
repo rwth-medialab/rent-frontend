@@ -63,7 +63,6 @@ export default {
           url: "users",
           params: this.registrationForm.data,
         });
-        console.log(this.registrationForm.data)
         msg =
           "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
         if(typeof ret !='undefined'){

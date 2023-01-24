@@ -66,8 +66,8 @@ export default {
     },
   },
   methods: {
-    getDate(date){
-      return dateFormat(date, "yyyy-mm-dd HH:ss")
+    getDate(date) {
+      return dateFormat(date, "yyyy-mm-dd HH:ss");
     },
     async updateData(reservation?: boolean, rental?: boolean) {
       if (typeof reservation == "undefined") {
@@ -79,7 +79,7 @@ export default {
       if (reservation) {
         let reservationData = await this.userStore.getFromURLWithAuth({
           url: "reservations",
-          params: { open: this.reservations.open },
+          params: { open: this.reservations.open, canceled: false },
         });
         this.reservations.data = reservationData.map((x) => {
           return {
@@ -240,7 +240,11 @@ export default {
         </v-icon>
       </template>
       <template v-slot:item.received_back_at="{ item }">
-        {{ item.raw.received_back_at != null? getDate( new Date(Date.parse(item.raw.received_back_at))):"" }}
+        {{
+          item.raw.received_back_at != null
+            ? getDate(new Date(Date.parse(item.raw.received_back_at)))
+            : ""
+        }}
       </template>
       <template v-slot:top>
         <v-toolbar flat>

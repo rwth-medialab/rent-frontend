@@ -136,6 +136,9 @@ export default {
         <v-list-item to="/onpremise">
           <v-list-item-title> Vorortnutzung </v-list-item-title>
         </v-list-item>
+        <v-list-item to="/account">
+          <v-list-item-title> Account </v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar dense>

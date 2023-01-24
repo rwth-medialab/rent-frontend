@@ -19,7 +19,6 @@ export default {
     this.thing = await this.userStore.getFromURLWithoutAuth({
       url: "/rentalobjecttypes/" + this.$route.params.id,
     });
-    console.log(this.tags);
   },
 };
 </script>
