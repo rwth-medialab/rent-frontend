@@ -280,6 +280,7 @@ export default {
         class="pa-3"
         min-height="290px"
         v-for="reservation in handleDialog.reservations"
+        :key="reservation.id"
       >
         <v-row>
           <v-col>
