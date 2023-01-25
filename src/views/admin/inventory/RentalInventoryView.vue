@@ -10,13 +10,17 @@ export default {
   components: { QrcodeVue },
   data() {
     return {
+      qrcodeCanvas: true,
       categories: [],
       objecttypes: {} as RentalObjectTypeType,
+      rentalObjectTypes: [] as RentalObjectTypeType[],
       objects: [],
       isCategoryEditDialogOpen: false,
       toBeEditedCategory: {},
       isTypeDetailsDialogOpen: false,
       toBeEditedObjectsType: {},
+      suggestions: [],
+      selected_suggestions: [],
       openTypeImage: null,
       toBeUploadedImage: null,
       tags: [] as TagType[],
@@ -139,6 +143,28 @@ export default {
       this.selectedTags = this.tags.filter((tag) =>
         this.toBeEditedObjectsType["tags"].includes(tag["id"])
       );
+      this.suggestions = await this.userStore.getFromURLWithAuth({
+        url: "rentalobjecttypes/" + type.id + "/suggestions/",
+      });
+      this.suggestions.forEach((x) => {
+        if (x.suggestion != type.id) {
+          this.selected_suggestions.push(x.suggestion);
+        }
+      });
+      this.rentalObjectTypes.forEach((rentaltype) => {
+        if (
+          this.suggestions.filter(
+            (suggestion) => suggestion.suggestion == rentaltype.id
+          ).length == 0
+        ) {
+          this.suggestions.push({
+            suggestion: rentaltype.id,
+            suggestion_for: type.id,
+            description: "",
+          });
+        }
+      });
+      console.log(this.suggestions);
     },
     saveEditedObjectsType() {
       let formData = new FormData();
@@ -216,6 +242,20 @@ export default {
             url: "duration/" + this.duration[x].id,
           });
         }
+      });
+      console.log(
+        this.suggestions.filter(
+          (x) => x.suggestion in this.selected_suggestions
+        )
+      );
+      this.userStore.patchURLWithAuth({
+        url:
+          "rentalobjecttypes/" +
+          this.toBeEditedObjectsType["id"] +
+          "/suggestions",
+        params: this.suggestions.filter((x) =>
+          this.selected_suggestions.includes(x.suggestion)
+        ),
       });
       this.isTypeDetailsDialogOpen = false;
       setTimeout(this.updateData, 200);
@@ -306,6 +346,10 @@ export default {
         });
       });
       this.objecttypes = resulttypes;
+      this.rentalObjectTypes = await this.userStore.getFromURLWithAuth({
+        url: "rentalobjecttypes",
+      });
+      console.log(this.rentalObjectTypes);
       this.objects.splice(
         0,
         this.objects.length,
@@ -372,6 +416,8 @@ export default {
         this.selectedTags = [];
         this.toBeUploadedImage = "";
         this.openTypeImage = "";
+        this.suggestions = [];
+        this.selected_suggestions = [];
       }
     },
   },
@@ -511,7 +557,6 @@ export default {
       <v-row>
         <v-avatar class="ma-3" size="100" rounded="0">
           <v-img cover aspect-ratio="1" :src="openTypeImage"></v-img>
-          <!-- TODO Suggestions between types-->
         </v-avatar>
         <v-col>
           <v-file-input
@@ -523,29 +568,52 @@ export default {
           ></v-file-input>
         </v-col>
       </v-row>
-      <div class="text-h5">
-        Verleihdauern in Tagen
-        <v-tooltip activator="parent" location="top">
-          Es wird aber immer bis zum nächsten Rückgabetag aufgerundet
-        </v-tooltip>
-      </div>
-      <div
-        v-for="priority in priorityClasses"
-        :key="priority.id"
-        class="d-flex"
-      >
-        <v-tooltip activator="parent" location="top">
-          {{ priority.description }}
-        </v-tooltip>
-        <v-text-field
-          :label="priority.name + ' (Prio: ' + priority.prio + ')'"
-          v-model="duration[priority.id]['duration']"
-          type="number"
-          :readonly="!userStore.inventory_rights"
-          hint="Verleihdauer in Tagen"
+      <div class="border px-3" v-if="'id' in toBeEditedObjectsType">
+        <div class="text-h5">Vorschläge</div>
+        <!-- show every objecttype as a possible suggestion, but not the item itself-->
+        <div>Auswahl der Vorschlagstypen</div>
+        <v-select
+          v-model="selected_suggestions"
+          :items="
+            rentalObjectTypes.filter((x) => x.id != toBeEditedObjectsType['id'])
+          "
+          item-title="name"
+          item-value="id"
+          multiple
         >
-          <template #append-inner>Tage</template>
-        </v-text-field>
+        </v-select>
+
+        <div class="text-h6">Vorschläge und die Verknüpfungen</div>
+        <div v-for="suggestion in selected_suggestions" :key="suggestion">
+          {{ rentalObjectTypes.find((x) => x.id == suggestion).name
+          }}<v-text-field
+            label="Beschreibung der Verknüpfung"
+            v-model="
+              suggestions.find((x) => x.suggestion == suggestion).description
+            "
+          ></v-text-field>
+        </div>
+      </div>
+      <div class="border pa-3" v-if="'id' in toBeEditedObjectsType">
+        <div class="text-h5">Verleihdauern in Tagen</div>
+        <div
+          v-for="priority in priorityClasses"
+          :key="priority.id"
+          class="d-flex"
+        >
+          <v-tooltip activator="parent" location="top">
+            {{ priority.description }}
+          </v-tooltip>
+          <v-text-field
+            :label="priority.name + ' (Prio: ' + priority.prio + ')'"
+            v-model="duration[priority.id]['duration']"
+            type="number"
+            :readonly="!userStore.inventory_rights"
+            hint="Verleihdauer in Tagen"
+          >
+            <template #append-inner>Tage</template>
+          </v-text-field>
+        </div>
       </div>
       <v-card-actions>
         <v-spacer></v-spacer

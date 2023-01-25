@@ -48,7 +48,7 @@ export default {
   },
   setup() {
     const userStore = useUserStore();
-    userStore.checkCredentials()
+    userStore.checkCredentials();
     return { userStore };
   },
   computed: {
@@ -291,4 +291,108 @@ export default {
       </v-card-actions>
     </v-card>
   </v-card>
+
+  <v-dialog v-model="userStore.suggestions.dialogOpen">
+    <v-card class="text-center mx-auto" scrollbar>
+      <div class="pa-2 text-h6">
+        Hier werden Gegenstände gezeigt die zu dem gerade hinzugefügten
+        Gegenstand passen:
+      </div>
+      <v-card
+        v-for="thing in rentableTypes.filter((x) =>
+          userStore.suggestions.data.map((x) => x.suggestion).includes(x.id)
+        )"
+        :key="thing['id']"
+        @click="$router.push('/type/' + thing['id'])"
+      >
+        <v-card flat class="d-flex flex-row" height="100">
+          <v-avatar class="ma-3" size="90" rounded="0">
+            <v-img cover aspect-ratio="1" :src="thing['image']"></v-img>
+          </v-avatar>
+          <v-sheet>
+            <v-card elevation="0" class="overflow-auto">{{
+              thing.shortdescription
+            }}</v-card>
+          </v-sheet>
+        </v-card>
+        <template v-slot:title
+          >
+          <v-card>
+          <v-card class="overflow-auto text-wrap" flat>Grund für den Vorschlag:<br/>
+            {{ userStore.suggestions.data.find(x => x.suggestion == thing.id).description }}</v-card>
+          <v-card flat class="d-flex flex-wrap">
+            <v-sheet class="mr-2">{{ thing["name"] }}</v-sheet>
+            <v-chip v-for="tag in thing['tags']" :key="thing['id'] + tag">{{
+              tags.filter((x) => x.id == tag)[0]["name"]
+            }}</v-chip>
+          </v-card>
+          <hr />
+        </v-card>
+        </template>
+        <v-card-actions @click.stop>
+          <!-- display +- chip if objecttypecount>0 else display cart-->
+          <v-chip
+            v-if="
+              userStore.isLoggedIn &&
+              userStore.shoppingCart.filter((x) => x['id'] == thing['id'])
+                .length > 0
+            "
+          >
+            <template #prepend>
+              <v-btn
+                @click.stop
+                @click="userStore.removeFromCart(thing)"
+                icon="mdi-minus"
+                size="small"
+              ></v-btn
+            ></template>
+            {{
+              userStore.shoppingCart.filter((x) => x["id"] == thing["id"])[0]
+                .count
+            }}
+            <template #append>
+              <v-btn
+                @click.stop
+                @click="userStore.addToCart(thing, false)"
+                icon="mdi-plus"
+                size="small"
+                :disabled="
+                  !(thing.id in userStore.available) ||
+                  userStore.getNumberInCart(thing) >=
+                    userStore.available[thing.id].available
+                "
+              ></v-btn
+            ></template>
+          </v-chip>
+          <v-btn
+            v-else-if="userStore.isLoggedIn"
+            @click.stop
+            @click="userStore.addToCart(thing, false)"
+            icon="mdi-basket"
+            :disabled="
+              !(thing.id in userStore.available) ||
+              userStore.getNumberInCart(thing) >=
+                userStore.available[thing.id].available
+            "
+          ></v-btn>
+          <v-chip
+            v-if="thing.id in userStore.available"
+            :color="
+              userStore.available[thing.id].available > 5
+                ? 'green'
+                : userStore.available[thing.id].available > 0
+                ? 'yellow'
+                : 'red'
+            "
+            >{{ userStore.available[thing.id].available }} verfügbar</v-chip
+          >
+        </v-card-actions>
+      </v-card>
+      <v-card-actions
+        ><v-spacer /><v-btn @click="userStore.suggestions.dialogOpen = false"
+          >Schließen</v-btn
+        ></v-card-actions
+      >
+    </v-card>
+  </v-dialog>
 </template>

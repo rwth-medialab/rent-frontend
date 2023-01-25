@@ -33,21 +33,35 @@ export const useUserStore = defineStore("user", {
       max_refresh_interval: 5,
       url: "",
     } as { url: string; max_refresh_interval: number },
+    suggestions: {
+      dialogOpen: false,
+      data: [],
+    },
   }),
 
   actions: {
-    addToCart(objectType: RentalObjectTypeType) {
+    addToCart(objectType: RentalObjectTypeType, openSuggestion=true) {
       //check if this type is already in cart
       if (this.shoppingCart.filter((x) => x.id == objectType.id).length > 0) {
         // increase count by one
         this.shoppingCart.filter((x) => x.id == objectType.id)[0].count++;
       } else {
-        // add type and add count = 1 to the object
-        this.shoppingCart.push({
-          ...objectType,
-          count: 1,
-          start: this.rentRange.start,
-          end: null,
+        //fetch suggestions
+        this.getFromURLWithAuth({
+          url: "rentalobjecttypes/" + objectType["id"] + "/suggestions",
+        }).then((data) => {
+          if (openSuggestion && data.length > 0 ){
+            this.suggestions.data = data
+            this.suggestions.dialogOpen = true
+          }
+
+          // add type and add count = 1 to the object
+          this.shoppingCart.push({
+            ...objectType,
+            count: 1,
+            start: this.rentRange.start,
+            end: null,
+          });
         });
       }
     },
