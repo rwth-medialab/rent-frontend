@@ -40,7 +40,7 @@ export const useUserStore = defineStore("user", {
   }),
 
   actions: {
-    addToCart(objectType: RentalObjectTypeType, openSuggestion=true) {
+    addToCart(objectType: RentalObjectTypeType, openSuggestion = true) {
       //check if this type is already in cart
       if (this.shoppingCart.filter((x) => x.id == objectType.id).length > 0) {
         // increase count by one
@@ -50,9 +50,9 @@ export const useUserStore = defineStore("user", {
         this.getFromURLWithAuth({
           url: "rentalobjecttypes/" + objectType["id"] + "/suggestions",
         }).then((data) => {
-          if (openSuggestion && data.length > 0 ){
-            this.suggestions.data = data
-            this.suggestions.dialogOpen = true
+          if (openSuggestion && data.length > 0) {
+            this.suggestions.data = data;
+            this.suggestions.dialogOpen = true;
           }
 
           // add type and add count = 1 to the object
@@ -129,8 +129,8 @@ export const useUserStore = defineStore("user", {
         responseType: "blob",
         headers: headers,
       }).then((response) => {
-        var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-        var fileLink = document.createElement("a");
+        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        const fileLink = document.createElement("a");
 
         fileLink.href = fileURL;
         fileLink.setAttribute("download", "file.docx");
@@ -161,8 +161,8 @@ export const useUserStore = defineStore("user", {
         responseType: "blob",
         headers: headers,
       }).then((response) => {
-        var fileURL = window.URL.createObjectURL(new Blob([response.data]));
-        var fileLink = document.createElement("a");
+        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        const fileLink = document.createElement("a");
 
         fileLink.href = fileURL;
         fileLink.setAttribute("download", "file.docx");

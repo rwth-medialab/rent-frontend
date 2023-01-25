@@ -25,7 +25,7 @@ export default {
           open: true,
           reserved_from: dateFormat(new Date(), "yyyy-mm-dd"),
           reserved_until: null,
-          canceled:false,
+          canceled: false,
         },
       },
       rentals: {
@@ -80,7 +80,7 @@ export default {
       let reservationparams = {
         self: true,
         open: this.reservations.filter.open,
-        canceled: this.reservations.filter.canceled
+        canceled: this.reservations.filter.canceled,
       };
       if (this.reservations.filter.reserved_from != null) {
         reservationparams["reserved_from"] = dateFormat(
@@ -124,7 +124,10 @@ export default {
         })
         .then((response) => {
           this.rentals.data = response;
-          this.userStore.patchURLWithAuth({url:"rentals/" + response[0].id, params: response[0]})
+          this.userStore.patchURLWithAuth({
+            url: "rentals/" + response[0].id,
+            params: response[0],
+          });
         });
     },
     cancelReservation(item) {
@@ -137,15 +140,18 @@ export default {
         .postURLWithAuth({ url: "rentals/" + item.id + "/extend" })
         .then(() => this.updateData());
     },
-    getDisabledExtensionButtonState(item):boolean{
-      let until_date = new Date(Date.parse(item.reserved_until))
+    getDisabledExtensionButtonState(item): boolean {
+      let until_date = new Date(Date.parse(item.reserved_until));
       // only allow extentsions of rentals if they are less than 3 days in the future
-      return !item.extendable || Math.floor((until_date.getTime() - new Date().getTime())/(24*3600*1000))>2
-    }
+      return (
+        !item.extendable ||
+        Math.floor(
+          (until_date.getTime() - new Date().getTime()) / (24 * 3600 * 1000)
+        ) > 2
+      );
+    },
   },
-  computed:{
-
-  }
+  computed: {},
 };
 </script>
 
@@ -223,7 +229,9 @@ export default {
           <v-tooltip
             location="start"
             :text="
-              item.raw.canceled == null && !item.raw.fullfilled ? 'stornieren' : 'bereits storniert/nicht stornierbar'
+              item.raw.canceled == null && !item.raw.fullfilled
+                ? 'stornieren'
+                : 'bereits storniert/nicht stornierbar'
             "
           >
             <template v-slot:activator="{ props }">
@@ -319,7 +327,9 @@ export default {
           <v-tooltip
             location="start"
             :text="
-              getDisabledExtensionButtonState(item.raw) ? 'Verlängerung nicht möglich' : 'Um eine Woche verlängern'
+              getDisabledExtensionButtonState(item.raw)
+                ? 'Verlängerung nicht möglich'
+                : 'Um eine Woche verlängern'
             "
           >
             <template v-slot:activator="{ props }">

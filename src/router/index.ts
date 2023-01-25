@@ -133,8 +133,9 @@ router.beforeEach(async (to) => {
     if (!userStore.is_staff) {
       return { path: "/" };
     }
-  }else{
-    userStore.checkCredentials();}
+  } else {
+    userStore.checkCredentials();
+  }
 });
 
 export default router;

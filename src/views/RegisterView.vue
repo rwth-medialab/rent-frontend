@@ -65,7 +65,7 @@ export default {
         });
         msg =
           "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
-        if(typeof ret !='undefined'){
+        if (typeof ret != "undefined") {
           this.userStore.alert(msg, type, 10000);
         }
       }

@@ -41,9 +41,9 @@ export type AvailableType = {
 };
 
 export type SettingsType = {
-  returning_day: {value:string, id:number},
-  lenting_day: {value:string, id:number},  
-  [type: string]: { value: string, id:number };
+  returning_day: { value: string; id: number };
+  lenting_day: { value: string; id: number };
+  [type: string]: { value: string; id: number };
 };
 
 export type MaxdurationType = {

@@ -315,19 +315,23 @@ export default {
             }}</v-card>
           </v-sheet>
         </v-card>
-        <template v-slot:title
-          >
+        <template v-slot:title>
           <v-card>
-          <v-card class="overflow-auto text-wrap" flat>Grund für den Vorschlag:<br/>
-            {{ userStore.suggestions.data.find(x => x.suggestion == thing.id).description }}</v-card>
-          <v-card flat class="d-flex flex-wrap">
-            <v-sheet class="mr-2">{{ thing["name"] }}</v-sheet>
-            <v-chip v-for="tag in thing['tags']" :key="thing['id'] + tag">{{
-              tags.filter((x) => x.id == tag)[0]["name"]
-            }}</v-chip>
+            <v-card class="overflow-auto text-wrap" flat
+              >Grund für den Vorschlag:<br />
+              {{
+                userStore.suggestions.data.find((x) => x.suggestion == thing.id)
+                  .description
+              }}</v-card
+            >
+            <v-card flat class="d-flex flex-wrap">
+              <v-sheet class="mr-2">{{ thing["name"] }}</v-sheet>
+              <v-chip v-for="tag in thing['tags']" :key="thing['id'] + tag">{{
+                tags.filter((x) => x.id == tag)[0]["name"]
+              }}</v-chip>
+            </v-card>
+            <hr />
           </v-card>
-          <hr />
-        </v-card>
         </template>
         <v-card-actions @click.stop>
           <!-- display +- chip if objecttypecount>0 else display cart-->

@@ -11,11 +11,14 @@ export default {
     };
   },
   async mounted() {
-    this.settings = (await this.userStore.getFromURLWithAuth({
-      url: "settings",
-    })).sort((a,b) => {
-      const result = a.type.charCodeAt(0)-b.type.charCodeAt(0)
-      return result });
+    this.settings = (
+      await this.userStore.getFromURLWithAuth({
+        url: "settings",
+      })
+    ).sort((a, b) => {
+      const result = a.type.charCodeAt(0) - b.type.charCodeAt(0);
+      return result;
+    });
   },
   methods: {
     async uploadDocxTemplate() {
@@ -90,14 +93,29 @@ export default {
     </v-row>
   </v-card>
   <v-card class="pa-5 ma-2">
-    <div class="text-h4">Settings </div>
-    <div class="ml-2">(Aktuell ohne Validation. Also bitte aufpassen :) Tage sind 1-7 Mon-Son)</div>
-      <v-list> 
-        <v-list-item v-for="setting in settings" :key="setting.id">
-          <v-list-item-title>{{ setting.type }}</v-list-item-title>
-          <v-list-item> <div class="d-flex"><v-text-field v-model="setting.value"></v-text-field><v-btn @click="userStore.patchURLWithAuth({url:'settings/'+setting.id , params:{ value:setting.value}})"> Update</v-btn></div></v-list-item>
-        
-          </v-list-item>
-      </v-list>
+    <div class="text-h4">Settings</div>
+    <div class="ml-2">
+      (Aktuell ohne Validation. Also bitte aufpassen :) Tage sind 1-7 Mon-Son)
+    </div>
+    <v-list>
+      <v-list-item v-for="setting in settings" :key="setting.id">
+        <v-list-item-title>{{ setting.type }}</v-list-item-title>
+        <v-list-item>
+          <div class="d-flex">
+            <v-text-field v-model="setting.value"></v-text-field
+            ><v-btn
+              @click="
+                userStore.patchURLWithAuth({
+                  url: 'settings/' + setting.id,
+                  params: { value: setting.value },
+                })
+              "
+            >
+              Update</v-btn
+            >
+          </div></v-list-item
+        >
+      </v-list-item>
+    </v-list>
   </v-card>
 </template>

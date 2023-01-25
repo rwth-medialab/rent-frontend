@@ -12,8 +12,7 @@ export default {
     };
   },
   async created() {},
-  mounted() {
-  },
+  mounted() {},
   methods: {
     refreshMaxDuration() {
       this.userStore.shoppingCart.forEach((thing) => {
@@ -29,7 +28,7 @@ export default {
 
     async validate_and_reserve() {
       let reservation = [];
-      let ret = false
+      let ret = false;
       this.userStore.shoppingCart.forEach((thing) => {
         // check if available has been calculated if not => a date is missing in selection
         if (!("available" in thing)) {
@@ -74,11 +73,11 @@ export default {
           count: thing.count,
         });
 
-        ret = true
+        ret = true;
       });
-      if(!ret){
+      if (!ret) {
         // do not remove stuff from shoppingcart
-        return
+        return;
       }
       const result = await this.userStore.postURLWithAuth({
         url: "reservations/bulk",
@@ -166,7 +165,7 @@ export default {
   computed: {
     shit() {
       // we fetch it two times, since vue got some problems with it
-      this.refreshMaxDuration()
+      this.refreshMaxDuration();
       return this.userStore.shoppingCart;
     },
     disabledLentingWeekdays() {

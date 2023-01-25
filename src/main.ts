@@ -13,14 +13,14 @@ import { aliases, mdi } from "vuetify/iconsets/mdi";
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import "@vueup/vue-quill/dist/vue-quill.bubble.css";
-import * as labs from 'vuetify/labs/components'
+import * as labs from "vuetify/labs/components";
 
 // import "./assets/main.css";
 
 const app = createApp(App);
 
 const vuetify = createVuetify({
-  components: {...components, ...labs},
+  components: { ...components, ...labs },
   directives,
   icons: {
     defaultSet: "mdi",

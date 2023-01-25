@@ -5,7 +5,7 @@ import "@vueup/vue-quill/dist/vue-quill.bubble.css";
 import type { TextType } from "@/ts/rent.types";
 import { useUserStore } from "@/stores/user";
 
-import {htmlEditButton} from "quill-html-edit-button";
+import { htmlEditButton } from "quill-html-edit-button";
 
 export default {
   components: { QuillEditor },
