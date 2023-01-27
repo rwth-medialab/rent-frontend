@@ -76,7 +76,7 @@ export type ReservationType = {
   selectedObjects?: RentalObjectType[];
   selectableObjects?: RentalObjectType[];
   objecttype: RentalObjectTypeType;
-  reserver: { user: UserType };
+  reserver: { user: UserType, verified: boolean };
   reserved_from: string;
   reserved_until: string;
   count: number;

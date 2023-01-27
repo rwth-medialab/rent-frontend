@@ -17,7 +17,12 @@ export default {
         //the grouping keys are generated in updateData
         groupBy: [{ key: "grouping1" }, { key: "grouping2" }],
         sortBy: [{ key: "reserved_from" }],
-        filter: { open: true, reserved_from: new Date(), reserved_until: null, canceled: false },
+        filter: {
+          open: true,
+          reserved_from: new Date(),
+          reserved_until: null,
+          canceled: false,
+        },
         headers: [
           { title: "Actions", key: "actions", sortable: false },
           { title: "Gegenstand", key: "objecttype.name" },
@@ -50,6 +55,8 @@ export default {
       },
       handleDialog: {
         open: false,
+        possiblePriorities:[] ,
+        selectedPriority:null,
         reservations: [] as ReservationType[],
       },
     };
@@ -84,8 +91,13 @@ export default {
     getDate(date) {
       return dateFormat(date, "yyyy-mm-dd HH:ss");
     },
+    commitPriority(userpk){
+      console.log(userpk)
+      this.userStore.postURLWithAuth({url:"users/" + userpk + "/setpriority", params:{prio: this.handleDialog.selectedPriority}})
+      this.updateData()
+
+    },
     async updateData() {
-      
       let reservationparams = {
         open: this.reservations.filter.open,
         canceled: this.reservations.filter.canceled,
@@ -156,11 +168,14 @@ export default {
       //console.log(this.rentals.data);
     },
     async openHandleDialog(item) {
+      console.log(this.reservations.data);
       this.handleDialog.reservations = this.reservations.data.filter(
         (x) =>
           x.reserver.id == item.reserver.id &&
-          x.reserved_from == item.reserved_from
+          x.reserved_from == item.reserved_from &&
+          x.canceled == null
       );
+      console.log(this.handleDialog.reservations);
       this.handleDialog.reservations.forEach(async (selectedReservation) => {
         selectedReservation["selectedObjects"] = [];
         selectedReservation["selectableObjects"] = (
@@ -180,6 +195,10 @@ export default {
           };
         });
       });
+      if(!item.reserver.verified){
+        this.handleDialog.possiblePriorities = await this.userStore.getFromURLWithAuth({url: "priority"})
+      }
+      console.log(this.handleDialog.possiblePriorities)
       this.handleDialog.open = true;
     },
     openRentalDialog(item) {
@@ -234,56 +253,61 @@ export default {
           <v-toolbar-title>Reservierungen</v-toolbar-title>
 
           <template #append>
-              <v-menu location="bottom">
-                <template v-slot:activator="{ props }">
-                  <v-btn icon v-bind="props">
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </template>
+            <v-menu location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn icon v-bind="props">
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
 
-                <v-list density="compact">
-                  <v-list-item>
-                    Von:
-                    <datepicker
-                      auto-apply
-                      :dark="userStore.theme == 'dark'"
-                      v-model="reservations.filter.reserved_from"
-                      :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
-                      :time-picker="false"
-                    >
-                    </datepicker>
-                  </v-list-item>
-                  <v-list-item>
-                    Bis:
-                    <datepicker
-                      auto-apply
-                      :dark="userStore.theme == 'dark'"
-                      v-model="reservations.filter.reserved_until"
-                      :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
-                      :time-picker="false"
-                    >
-                    </datepicker>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-checkbox-btn
-                      label="Nur offene Vorgänge anzeigen"
-                      v-model="reservations.filter.open"
-                    />
-                  </v-list-item>
-                  <v-list-item>
-                    <v-checkbox-btn
-                      label="Zeige stornierte Vorgänge"
-                      v-model="reservations.filter.canceled"
-                    />
-                  </v-list-item>
-                </v-list> </v-menu
-            ></template>
+              <v-list density="compact">
+                <v-list-item>
+                  Von:
+                  <datepicker
+                    auto-apply
+                    :dark="userStore.theme == 'dark'"
+                    v-model="reservations.filter.reserved_from"
+                    :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                    :time-picker="false"
+                  >
+                  </datepicker>
+                </v-list-item>
+                <v-list-item>
+                  Bis:
+                  <datepicker
+                    auto-apply
+                    :dark="userStore.theme == 'dark'"
+                    v-model="reservations.filter.reserved_until"
+                    :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                    :time-picker="false"
+                  >
+                  </datepicker>
+                </v-list-item>
+                <v-list-item>
+                  <v-checkbox-btn
+                    label="Nur offene Vorgänge anzeigen"
+                    v-model="reservations.filter.open"
+                  />
+                </v-list-item>
+                <v-list-item>
+                  <v-checkbox-btn
+                    label="Zeige stornierte Vorgänge"
+                    v-model="reservations.filter.canceled"
+                  />
+                </v-list-item>
+              </v-list> </v-menu
+          ></template>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon size="small" class="mr-2" @click="openHandleDialog(item.raw)">
-          mdi-pencil
-        </v-icon>
+        <v-btn
+          size="small"
+          class="mr-2"
+          flat
+          @click="openHandleDialog(item.raw)"
+          icon="mdi-pencil"
+          :disabled="item.raw.canceled != null"
+        ></v-btn>
       </template>
       <template v-slot:no-data>
         <div class="text-center">Keine Reservierungen</div>
@@ -364,11 +388,13 @@ export default {
   </v-card>
   <v-dialog v-model="handleDialog.open">
     <v-card class="pa-3">
-      <v-sheet v-if="handleDialog.reservations[0].reserver">
-        
-
-      </v-sheet>
       <div class="text-h4">Verleih</div>
+      <v-sheet class="my-3" v-if="!handleDialog.reservations[0].reserver.verified"
+        >
+        Bitte einmal bitte die Berechtigung des Nutzers überprüfen und die passende Klasse wählen:<br/>
+        <v-select :items="handleDialog.possiblePriorities" item-value="id" item-title="name" v-model="handleDialog.selectedPriority" label="Priorität"/>
+        <v-btn @click="commitPriority(handleDialog.reservations[0].reserver.user.id)">bestätigen</v-btn>
+      </v-sheet>
       <v-card
         class="pa-3"
         min-height="290px"
@@ -434,6 +460,12 @@ export default {
       >
         Die ausgewählten Anzahlen passen irgendwo nicht
       </div>
+      <div
+        v-if="!handleDialog.reservations[0].reserver.verified"
+        class="text-red"
+      >
+        Der Nutzer ist nicht verifiziert, bitte Berechtigung prüfen.
+      </div>
       <v-card-actions
         ><v-spacer />
         <!-- enable button if number of selectedObjects equals the count  for each reservation-->
@@ -451,7 +483,7 @@ export default {
           :disabled="
             handleDialog.reservations.filter(
               (x) => x.count != x.selectedObjects.length
-            ).length != 0
+            ).length != 0 && !handleDialog.reservations[0].reserver.verified
           "
           @click="turnReservationsIntoRentals"
           >Verleihen</v-btn
