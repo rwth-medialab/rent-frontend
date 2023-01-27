@@ -17,6 +17,7 @@ export default {
         //the grouping keys are generated in updateData
         groupBy: [{ key: "grouping1" }, { key: "grouping2" }],
         sortBy: [{ key: "reserved_from" }],
+        filter: { open: true, reserved_from: new Date(), reserved_until: null, canceled: false },
         headers: [
           { title: "Actions", key: "actions", sortable: false },
           { title: "Gegenstand", key: "objecttype.name" },
@@ -28,6 +29,7 @@ export default {
       },
       rentals: {
         data: [],
+        filter: { open: true, rented_from: new Date(), rented_until: null },
         groupBy: [{ key: "grouping1" }, { key: "grouping2" }],
         sortBy: [{ key: "reserved_until" }],
         headers: [
@@ -40,7 +42,6 @@ export default {
           // { title: "Nachname", key: "reservation.reserver.user.last_name" },
         ],
         rentalsDialog: {
-          filter: { open: true },
           open: false,
           selectedAsReturned: [],
           // relatedItem is the item which has been selected in the table and from which properties we will fetch the rest
@@ -57,12 +58,26 @@ export default {
     this.updateData();
   },
   watch: {
-    "reservations.open": function () {
-      setTimeout(this.updateData, 500);
-      //this.updateData();
+    "reservations.filter.open": function () {
+      this.updateData();
     },
-    "rentals.rentalsDialog.filter.open": function () {
-      setTimeout(this.updateData, 500);
+    "reservations.filter.reserved_from": function () {
+      this.updateData();
+    },
+    "reservations.filter.reserved_until": function () {
+      this.updateData();
+    },
+    "reservations.filter.canceled": function () {
+      this.updateData();
+    },
+    "rentals.filter.rented_from": function () {
+      this.updateData();
+    },
+    "rentals.filter.rented_until": function () {
+      this.updateData();
+    },
+    "rentals.filter.open": function () {
+      this.updateData();
     },
   },
   methods: {
@@ -70,31 +85,55 @@ export default {
       return dateFormat(date, "yyyy-mm-dd HH:ss");
     },
     async updateData(reservation?: boolean, rental?: boolean) {
-      if (typeof reservation == "undefined") {
-        reservation = true;
+      
+      let reservationparams = {
+        open: this.reservations.filter.open,
+        canceled: this.reservations.filter.canceled,
+      };
+      if (this.reservations.filter.reserved_from != null) {
+        reservationparams["reserved_from"] = dateFormat(
+          this.reservations.filter.reserved_from,
+          "yyyy-mm-dd"
+        );
       }
-      if (typeof rental == "undefined") {
-        rental = true;
+      if (this.reservations.filter.reserved_until != null) {
+        reservationparams["reserved_until"] = dateFormat(
+          this.reservations.filter.reserved_until,
+          "yyyy-mm-dd"
+        );
       }
-      if (reservation) {
-        let reservationData = await this.userStore.getFromURLWithAuth({
-          url: "reservations",
-          params: { open: this.reservations.open, canceled: false },
-        });
-        this.reservations.data = reservationData.map((x) => {
-          return {
-            ...x,
-            grouping1: "Abholdatum: " + x.reserved_from,
-            grouping2:
-              x.reserver.user.first_name + " " + x.reserver.user.last_name,
-          };
-        });
+      // fetch rentals
+      let rentalparams = { open: this.rentals.filter.open };
+      if (this.rentals.filter.rented_from != null) {
+        rentalparams["from"] = dateFormat(
+          this.rentals.filter.rented_from,
+          "yyyy-mm-dd"
+        );
       }
+      if (this.rentals.filter.rented_until != null) {
+        rentalparams["until"] = dateFormat(
+          this.rentals.filter.rented_until,
+          "yyyy-mm-dd"
+        );
+      }
+      let reservationData = await this.userStore.getFromURLWithAuth({
+        url: "reservations",
+        params: { open: this.reservations.open, canceled: false },
+      });
+      this.reservations.data = reservationData.map((x) => {
+        return {
+          ...x,
+          grouping1: "Abholdatum: " + x.reserved_from,
+          grouping2:
+            x.reserver.user.first_name + " " + x.reserver.user.last_name,
+        };
+      });
       let data = [];
+
       this.userStore
         .getFromURLWithAuth({
           url: "rentals",
-          params: { open: this.rentals.rentalsDialog.filter.open },
+          params: { open: this.rentals.filter.open, },
         })
         .then((response) => {
           response.map((x) => {
@@ -194,23 +233,52 @@ export default {
       <template v-slot:top>
         <v-toolbar flat>
           <v-toolbar-title>Reservierungen</v-toolbar-title>
-          <!-- <v-spacer />
-          <v-menu location="bottom">
-            <template v-slot:activator="{ props }">
-              <v-btn icon v-bind="props">
-                <v-icon>mdi-dots-vertical</v-icon>
-              </v-btn>
-            </template>
 
-            <v-list>
-              <v-list-item>
-                <v-checkbox
-                  label="Nur offene Reservierungen anzeigen"
-                  v-model="reservations.open"
-                />
-              </v-list-item>
-            </v-list>
-          </v-menu> -->
+          <template #append>
+              <v-menu location="bottom">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon v-bind="props">
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list density="compact">
+                  <v-list-item>
+                    Von:
+                    <datepicker
+                      auto-apply
+                      :dark="userStore.theme == 'dark'"
+                      v-model="reservations.filter.reserved_from"
+                      :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                      :time-picker="false"
+                    >
+                    </datepicker>
+                  </v-list-item>
+                  <v-list-item>
+                    Bis:
+                    <datepicker
+                      auto-apply
+                      :dark="userStore.theme == 'dark'"
+                      v-model="reservations.filter.reserved_until"
+                      :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                      :time-picker="false"
+                    >
+                    </datepicker>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-checkbox-btn
+                      label="Nur offene Vorgänge anzeigen"
+                      v-model="reservations.filter.open"
+                    />
+                  </v-list-item>
+                  <v-list-item>
+                    <v-checkbox-btn
+                      label="Zeige stornierte Vorgänge"
+                      v-model="reservations.filter.canceled"
+                    />
+                  </v-list-item>
+                </v-list> </v-menu
+            ></template>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -259,9 +327,31 @@ export default {
 
             <v-list>
               <v-list-item>
+                Von:
+                <datepicker
+                  auto-apply
+                  :dark="userStore.theme == 'dark'"
+                  v-model="rentals.filter.rented_from"
+                  :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                  :time-picker="false"
+                >
+                </datepicker>
+              </v-list-item>
+              <v-list-item>
+                Bis:
+                <datepicker
+                  auto-apply
+                  :dark="userStore.theme == 'dark'"
+                  v-model="rentals.filter.rented_until"
+                  :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                  :time-picker="false"
+                >
+                </datepicker>
+              </v-list-item>
+              <v-list-item>
                 <v-checkbox
-                  label="Nur offene Vorgänge anzeigen"
-                  v-model="rentals.rentalsDialog.filter.open"
+                  label="Nur Unzurückgegebene zeigen"
+                  v-model="rentals.filter.open"
                 />
               </v-list-item>
             </v-list>
