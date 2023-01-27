@@ -84,7 +84,7 @@ export default {
     getDate(date) {
       return dateFormat(date, "yyyy-mm-dd HH:ss");
     },
-    async updateData(reservation?: boolean, rental?: boolean) {
+    async updateData() {
       
       let reservationparams = {
         open: this.reservations.filter.open,
@@ -118,7 +118,7 @@ export default {
       }
       let reservationData = await this.userStore.getFromURLWithAuth({
         url: "reservations",
-        params: { open: this.reservations.open, canceled: false },
+        params: reservationparams,
       });
       this.reservations.data = reservationData.map((x) => {
         return {
@@ -133,7 +133,7 @@ export default {
       this.userStore
         .getFromURLWithAuth({
           url: "rentals",
-          params: { open: this.rentals.filter.open, },
+          params: rentalparams,
         })
         .then((response) => {
           response.map((x) => {
@@ -152,7 +152,6 @@ export default {
             //console.log(data);
           });
           this.rentals.data = data;
-          console.log(this.rentals.data);
         });
       //console.log(this.rentals.data);
     },
@@ -365,6 +364,10 @@ export default {
   </v-card>
   <v-dialog v-model="handleDialog.open">
     <v-card class="pa-3">
+      <v-sheet v-if="handleDialog.reservations[0].reserver">
+        
+
+      </v-sheet>
       <div class="text-h4">Verleih</div>
       <v-card
         class="pa-3"
