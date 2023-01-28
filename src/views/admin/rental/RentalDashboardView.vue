@@ -91,10 +91,9 @@ export default {
     getDate(date) {
       return dateFormat(date, "yyyy-mm-dd HH:ss");
     },
-    commitPriority(userpk){
-      console.log(userpk)
-      this.userStore.postURLWithAuth({url:"users/" + userpk + "/setpriority", params:{prio: this.handleDialog.selectedPriority}})
-      this.updateData()
+    commitPriority(userProfile){
+      this.userStore.patchURLWithAuth({url:"profile/" + userProfile.id, params:{prio_id: this.handleDialog.selectedPriority, verified: true}})
+      window.history.go()
 
     },
     async updateData() {
@@ -393,7 +392,7 @@ export default {
         >
         Bitte einmal bitte die Berechtigung des Nutzers überprüfen und die passende Klasse wählen:<br/>
         <v-select :items="handleDialog.possiblePriorities" item-value="id" item-title="name" v-model="handleDialog.selectedPriority" label="Priorität"/>
-        <v-btn @click="commitPriority(handleDialog.reservations[0].reserver.user.id)">bestätigen</v-btn>
+        <v-btn @click="commitPriority(handleDialog.reservations[0].reserver)">bestätigen</v-btn>
       </v-sheet>
       <v-card
         class="pa-3"
@@ -481,9 +480,9 @@ export default {
         >
         <v-btn
           :disabled="
-            handleDialog.reservations.filter(
+            (handleDialog.reservations.filter(
               (x) => x.count != x.selectedObjects.length
-            ).length != 0 && !handleDialog.reservations[0].reserver.verified
+            ).length != 0) || !handleDialog.reservations[0].reserver.verified
           "
           @click="turnReservationsIntoRentals"
           >Verleihen</v-btn
