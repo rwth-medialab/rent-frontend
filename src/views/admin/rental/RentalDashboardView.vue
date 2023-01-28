@@ -65,6 +65,7 @@ export default {
     this.updateData();
   },
   watch: {
+    // update data if one of our filter changes
     "reservations.filter.open": function () {
       this.updateData();
     },
