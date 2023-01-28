@@ -443,19 +443,29 @@ export default {
         label="ausleihbar(also z.B. nicht defekt)"
         v-model="objectEditData['rentable']"
       ></v-checkbox>
-      <v-img>
-        <qrcode-vue
-          id="qrcode"
-          class="ma-2"
-          v-if="objectEditData['id']"
-          :value="objectEditData['id'] + ''"
-          :size="150"
-          render-as="svg"
-        ></qrcode-vue
-      ></v-img>
-      <v-btn variant="outlined" width="200" @click="downloadQrCode()"
-        >Download Qr-Code</v-btn
-      >
+      <span class="border">
+        <v-img>
+          <qrcode-vue
+            id="qrcode"
+            class="ma-2"
+            v-if="objectEditData['id']"
+            :value="objectEditData['id'] + ''"
+            :size="150"
+            :render-as="qrcodeCanvas ? 'canvas' : 'svg'"
+          ></qrcode-vue
+        ></v-img>
+        <v-btn
+          v-if="!qrcodeCanvas"
+          variant="outlined"
+          width="200"
+          @click="downloadQrCode()"
+          >Download Qr-Code</v-btn
+        >
+        <v-checkbox
+          v-model="qrcodeCanvas"
+          label="Als Bild rendern"
+        ></v-checkbox>
+      </span>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn @click.stop @click="isObjectDetailsDialogOpen = false">
@@ -465,10 +475,16 @@ export default {
           v-if="objectEditData['id']"
           @click.stop
           @click="saveObjectFromDialog(false)"
+          :disabled="!userStore.inventory_rights"
         >
           Speichern
         </v-btn>
-        <v-btn v-else @click.stop @click="saveObjectFromDialog(true)">
+        <v-btn
+          v-else
+          @click.stop
+          @click="saveObjectFromDialog(true)"
+          :disabled="!userStore.inventory_rights"
+        >
           Erstellen</v-btn
         >
       </v-card-actions>
@@ -491,10 +507,18 @@ export default {
         <v-spacer></v-spacer>
         <v-btn @click="isCategoryEditDialogOpen = false">Abbrechen</v-btn>
         <template v-if="userStore.inventory_rights">
-          <v-btn v-if="toBeEditedCategory['id']" @click="saveEditedCategory"
+          <v-btn
+            v-if="toBeEditedCategory['id']"
+            @click="saveEditedCategory"
+            :disabled="!userStore.inventory_rights"
             >Speichern</v-btn
           >
-          <v-btn v-else @click="createEditedCategory">Erstellen</v-btn>
+          <v-btn
+            v-else
+            @click="createEditedCategory"
+            :disabled="!userStore.inventory_rights"
+            >Erstellen</v-btn
+          >
         </template>
       </v-card-actions></v-card
     >
