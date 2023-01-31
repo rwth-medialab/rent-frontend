@@ -162,7 +162,9 @@ export default {
         "
       >
         <v-tab to="/admin/rental"> Verleih </v-tab>
-        <v-tab to="/admin/inventory"> Inventar </v-tab>
+        <v-tab v-if="userStore.inventory_rights" to="/admin/inventory">
+          Inventar
+        </v-tab>
         <v-tab v-if="userStore.inventory_rights" to="/admin/settings">
           Einstellungen
         </v-tab>
