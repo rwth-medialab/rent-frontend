@@ -311,6 +311,17 @@ export default {
           icon="mdi-pencil"
           :disabled="item.raw.canceled != null"
         ></v-btn>
+        <v-btn
+          @click="
+            userStore.postURLWithAuth({
+              url: 'reservations/' + item.raw.id + '/cancel',
+            });
+            updateData();
+          "
+          icon="mdi-cancel"
+          variant="plain"
+          color="red"
+        ></v-btn>
       </template>
       <template v-slot:no-data>
         <div class="text-center">Keine Reservierungen</div>
