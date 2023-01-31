@@ -55,8 +55,8 @@ export default {
       },
       handleDialog: {
         open: false,
-        possiblePriorities:[] ,
-        selectedPriority:null,
+        possiblePriorities: [],
+        selectedPriority: null,
         reservations: [] as ReservationType[],
       },
     };
@@ -92,10 +92,12 @@ export default {
     getDate(date) {
       return dateFormat(date, "yyyy-mm-dd HH:ss");
     },
-    commitPriority(userProfile){
-      this.userStore.patchURLWithAuth({url:"profile/" + userProfile.id, params:{prio_id: this.handleDialog.selectedPriority, verified: true}})
-      window.history.go()
-
+    commitPriority(userProfile) {
+      this.userStore.patchURLWithAuth({
+        url: "profile/" + userProfile.id,
+        params: { prio_id: this.handleDialog.selectedPriority, verified: true },
+      });
+      window.history.go();
     },
     async updateData() {
       let reservationparams = {
@@ -195,10 +197,11 @@ export default {
           };
         });
       });
-      if(!item.reserver.verified){
-        this.handleDialog.possiblePriorities = await this.userStore.getFromURLWithAuth({url: "priority"})
+      if (!item.reserver.verified) {
+        this.handleDialog.possiblePriorities =
+          await this.userStore.getFromURLWithAuth({ url: "priority" });
       }
-      console.log(this.handleDialog.possiblePriorities)
+      console.log(this.handleDialog.possiblePriorities);
       this.handleDialog.open = true;
     },
     openRentalDialog(item) {
@@ -389,11 +392,22 @@ export default {
   <v-dialog v-model="handleDialog.open">
     <v-card class="pa-3">
       <div class="text-h4">Verleih</div>
-      <v-sheet class="my-3" v-if="!handleDialog.reservations[0].reserver.verified"
+      <v-sheet
+        class="my-3"
+        v-if="!handleDialog.reservations[0].reserver.verified"
+      >
+        Bitte einmal bitte die Berechtigung des Nutzers überprüfen und die
+        passende Klasse wählen:<br />
+        <v-select
+          :items="handleDialog.possiblePriorities"
+          item-value="id"
+          item-title="name"
+          v-model="handleDialog.selectedPriority"
+          label="Priorität"
+        />
+        <v-btn @click="commitPriority(handleDialog.reservations[0].reserver)"
+          >bestätigen</v-btn
         >
-        Bitte einmal bitte die Berechtigung des Nutzers überprüfen und die passende Klasse wählen:<br/>
-        <v-select :items="handleDialog.possiblePriorities" item-value="id" item-title="name" v-model="handleDialog.selectedPriority" label="Priorität"/>
-        <v-btn @click="commitPriority(handleDialog.reservations[0].reserver)">bestätigen</v-btn>
       </v-sheet>
       <v-card
         class="pa-3"
@@ -481,9 +495,9 @@ export default {
         >
         <v-btn
           :disabled="
-            (handleDialog.reservations.filter(
+            handleDialog.reservations.filter(
               (x) => x.count != x.selectedObjects.length
-            ).length != 0) || !handleDialog.reservations[0].reserver.verified
+            ).length != 0 || !handleDialog.reservations[0].reserver.verified
           "
           @click="turnReservationsIntoRentals"
           >Verleihen</v-btn

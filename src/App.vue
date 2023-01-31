@@ -17,6 +17,8 @@ export default {
       }
     },
   },
+  created() {
+  },
   methods: {
     getRouteLinks() {
       let val = [];
@@ -46,7 +48,6 @@ export default {
   },
   async mounted() {
     document.title = this.siteName;
-    this.userStore.refreshSettings();
     this.currentLinks = this.getRouteLinks();
   },
   data: () => {
@@ -133,7 +134,10 @@ export default {
         <v-list-item to="/">
           <v-list-item-title> Verleih </v-list-item-title>
         </v-list-item>
-        <v-list-item to="/onpremise">
+        <v-list-item
+          v-if="userStore.settings.onpremise_activated.value"
+          to="/onpremise"
+        >
           <v-list-item-title> Vorortnutzung </v-list-item-title>
         </v-list-item>
         <v-list-item to="/account">
@@ -162,6 +166,26 @@ export default {
         <v-tab to="/admin/inventory"> Inventar </v-tab>
         <v-tab v-if="userStore.inventory_rights" to="/admin/settings">
           Einstellungen
+        </v-tab>
+      </v-tabs>
+      <!-- Main Page /Not admin Top bar-->
+      <v-tabs
+        v-if="
+          userStore.settings.onpremise_activated.value &&
+          !$vuetify.display.mobile &&
+          !$router.currentRoute.value.path.includes('admin')
+        "
+      >
+        <v-tab to="/"> Verleih </v-tab>
+        <v-tab
+          v-if="
+            userStore.settings.onpremise_activated.value &&
+            !$vuetify.display.mobile &&
+            !$router.currentRoute.value.path.includes('admin')
+          "
+          to="/onpremise"
+        >
+          Vorortnutzung
         </v-tab>
       </v-tabs>
       <v-spacer v-if="!$vuetify.display.mobile"></v-spacer>

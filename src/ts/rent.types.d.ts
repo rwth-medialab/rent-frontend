@@ -43,6 +43,8 @@ export type AvailableType = {
 export type SettingsType = {
   returning_day: { value: string; id: number };
   lenting_day: { value: string; id: number };
+  onpremise_activated: { value: boolean; id: number };
+  onpremise_weekdays: { value: number[]; id: number };
   [type: string]: { value: string; id: number };
 };
 
@@ -76,7 +78,7 @@ export type ReservationType = {
   selectedObjects?: RentalObjectType[];
   selectableObjects?: RentalObjectType[];
   objecttype: RentalObjectTypeType;
-  reserver: { user: UserType, verified: boolean };
+  reserver: { user: UserType; verified: boolean };
   reserved_from: string;
   reserved_until: string;
   count: number;
@@ -105,4 +107,21 @@ export type UserStoreType = {
       verified: boolean;
     };
   };
+};
+
+export type WorkplaceStatusType = {
+  id?: number;
+  reason: string;
+  from_date: date | string;
+  until_date: date | string;
+};
+
+export type WorkplaceType = {
+  id?: number;
+  name: string;
+  description: string;
+  status: WorkplaceStatusType[];
+  image: string;
+  displayed: boolean;
+  exclusions: number[];
 };

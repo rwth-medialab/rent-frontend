@@ -25,7 +25,7 @@ export const useUserStore = defineStore("user", {
     available: {} as AvailableType,
     rentRange: { start: null, end: null, valid: false },
     theme: useStorage("theme", "dark"),
-    settings: {} as SettingsType,
+    settings: { onpremise_activated: { value: false } } as SettingsType,
     inventory_rights: false,
     lending_rights: false,
     is_staff: false,
@@ -223,6 +223,13 @@ export const useUserStore = defineStore("user", {
         })
         .then(function (response) {
           return response.data;
+        })
+        .catch((error) => {
+          let msg = "";
+          Object.keys(error["response"]["data"]).forEach(
+            (errorkey) => (msg += error["response"]["data"][errorkey])
+          );
+          this.alert(msg, "warning", 10000);
         });
     },
     async deleteURLWithAuth({ url = "" }) {
@@ -269,7 +276,7 @@ export const useUserStore = defineStore("user", {
         .catch((error) => {
           let msg = "";
           Object.keys(error["response"]["data"]).forEach(
-            (errorkey) => (msg += error["response"]["data"][errorkey])
+            (errorkey) => (msg += errorkey+": " +error["response"]["data"][errorkey])
           );
           this.alert(msg, "warning", 10000);
         });
@@ -476,9 +483,21 @@ export const useUserStore = defineStore("user", {
         url: "settings",
       });
       const sortedSettings = {} as SettingsType;
-      tempSettings.forEach(
-        (x) => (sortedSettings[x.type] = { value: x.value, id: x.id })
-      );
+      tempSettings.forEach((x) => {
+        if (x.type == "onpremise_activated") {
+          sortedSettings.onpremise_activated = {
+            value: Boolean(x.value),
+            id: x.id,
+          };
+        } else if (x.type == "onpremise_weekdays") {
+          sortedSettings.onpremise_weekdays = {
+            value: [x.value.split(",").map((day) => Number(day))],
+            id: x.id,
+          };
+        } else {
+          sortedSettings[x.type] = { value: x.value, id: x.id };
+        }
+      });
       this.settings = sortedSettings;
     },
   },

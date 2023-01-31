@@ -34,6 +34,18 @@ const router = createRouter({
       meta: { requiresAdmin: false },
     },
     {
+      path: "/onpremise",
+      name: "onpremiseView",
+      component: () => import("@/views/OnPremiseBookingView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
+      path: "/onpremise/:id",
+      name: "onpremise",
+      component: () => import("@/views/OnPremiseBookingView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
       path: "/cart",
       name: "cartView",
       component: () => import("@/views/CartView.vue"),
@@ -52,6 +64,12 @@ const router = createRouter({
       meta: { requiresAdmin: true },
     },
     {
+      path: "/admin/rental/onpremise",
+      name: "onpremiseDashboard",
+      component: () => import("@/views/admin/rental/OnPremiseView.vue"),
+      meta: { requiresAdmin: true },
+    },
+    {
       path: "/admin/inventory/rental",
       name: "rentalinventoryview",
       component: () =>
@@ -62,6 +80,12 @@ const router = createRouter({
       path: "/admin/inventory/tags",
       name: "tagsView",
       component: () => import("@/views/admin/inventory/TagView.vue"),
+      meta: { requiresAdmin: true },
+    },
+    {
+      path: "/admin/inventory/onpremise",
+      name: "onPremiseInventoryView",
+      component: () => import("@/views/admin/inventory/OnPremiseInventoryView.vue"),
       meta: { requiresAdmin: true },
     },
     {
@@ -127,6 +151,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   // only allow access to areas that people are supposed
   const userStore = useUserStore();
+  await userStore.refreshSettings();
   if (to.meta.requiresAdmin) {
     // hits performance but only the admin site
     await userStore.checkCredentials();

@@ -47,6 +47,24 @@ export default {
           open: true,
         },
       },
+      workplaces: [],
+      bookings: {
+        data: [],
+        headers: [
+          { title: "Tag", key: "date" },
+          { title: "Von:", key: "slot_start_time" },
+          { title: "Bis:", key: "slot_end_time" },
+          { title: "Arbeitsplatz", key: "workplaceobj.name" },
+          { title: "Aktionen", key: "actions", sortable: false },
+        ],
+        sortBy: [{ key: "date" }, { key: "slot_start_time" }],
+        changeable: false,
+        filter: {
+          from_date: new Date(),
+          until_date: null,
+          canceled: false,
+        },
+      },
     };
   },
   mounted() {
@@ -74,9 +92,34 @@ export default {
     "rentals.filter.open": function () {
       this.updateData();
     },
+    "bookings.filter.from_date": function () {
+      this.updateData();
+    },
+    "bookings.filter.until_date": function () {
+      this.updateData();
+    },
+    "bookings.filter.canceled": function () {
+      this.updateData();
+    },
   },
   methods: {
     updateData() {
+      let generatedFilter = { self: true };
+      if (this.bookings.filter.from_date != null) {
+        generatedFilter["from_date"] = dateFormat(
+          this.bookings.filter.from_date,
+          "isoDate"
+        );
+      }
+      if (this.bookings.filter.until_date != null) {
+        generatedFilter["until_date"] = dateFormat(
+          this.bookings.filter.until_date,
+          "isoDate"
+        );
+      }
+      if (this.bookings.filter.canceled != null) {
+        generatedFilter["canceled"] = this.bookings.filter.canceled;
+      }
       let reservationparams = {
         self: true,
         open: this.reservations.filter.open,
@@ -124,10 +167,29 @@ export default {
         })
         .then((response) => {
           this.rentals.data = response;
-          this.userStore.patchURLWithAuth({
-            url: "rentals/" + response[0].id,
-            params: response[0],
-          });
+        });
+      this.userStore
+        .getFromURLWithAuth({ url: "workplace"})
+        .then((fetchedworkplaces) => {
+          this.workplaces = fetchedworkplaces;
+          this.userStore
+            .getFromURLWithAuth({ url: "onpremisebooking", params: generatedFilter  })
+            .then((data) => {
+              data = data.map((booking) => {
+                return {
+                  // add more information
+                  date: dateFormat(booking.slot_start, "isoDate"),
+                  slot_start_time: dateFormat(booking.slot_start, "HH:MM"),
+                  slot_end_time: dateFormat(booking.slot_end, "HH:MM"),
+                  workplaceobj: this.workplaces.find(
+                    (x) => booking.workplace == x.id
+                  ),
+                  ...booking,
+                };
+              });
+              this.bookings.data = data;
+              console.log(this.bookings.data);
+            });
         });
     },
     cancelReservation(item) {
@@ -247,7 +309,7 @@ export default {
             </template>
           </v-tooltip>
         </template>
-        <!-- Footer with legends-->
+        <!-- Footer with legend-->
         <template #footer.prepend
           >Legende:<v-chip color="red">storniert</v-chip
           ><v-chip color="green">abgeholt</v-chip
@@ -255,7 +317,7 @@ export default {
       ></v-data-table>
     </v-card>
     <!-- Rental operations datatable-->
-    <v-card>
+    <v-card class="mb-2">
       <v-data-table :items="rentals.data" :headers="rentals.headers">
         <!-- Top Toolbar-->
         <template v-slot:top>
@@ -349,6 +411,91 @@ export default {
         <template #footer.prepend
           >Legende:<v-chip color="red">überfällig!!</v-chip
           ><v-chip color="green">zurückerhalten</v-chip><v-spacer></v-spacer
+        ></template>
+      </v-data-table>
+    </v-card>
+    <v-card>
+      <v-data-table
+        :items="bookings.data"
+        :headers="bookings.headers"
+        :sortBy="bookings.sortBy"
+      >
+        <template v-slot:item.date="{ item }">
+          <v-chip
+            v-if="item.raw.canceled != null"
+            color="red"
+            :text="item.raw.date"
+          />
+          <v-sheet v-else>{{ item.raw.date }}</v-sheet>
+        </template>
+        <!-- Toolbar on top of data-table -->
+        <template v-slot:top>
+          <v-toolbar flat>
+            <v-toolbar-title>Vorort-Reservierungen</v-toolbar-title><v-spacer />
+            <v-menu location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn icon v-bind="props">
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-subheader> Filter </v-list-subheader>
+                <v-list-item
+                  ><v-sheet class="d-flex align-center">
+                    <v-sheet class="mr-auto"> Von:</v-sheet>
+
+                    <datepicker
+                      auto-apply
+                      :dark="userStore.theme == 'dark'"
+                      v-model="bookings.filter.from_date"
+                      :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                      :time-picker="false"
+                    >
+                    </datepicker>
+                  </v-sheet>
+                </v-list-item>
+                <v-list-item
+                  ><v-sheet class="d-flex align-center">
+                    <v-sheet class="mr-auto"> Bis:</v-sheet>
+                    <datepicker
+                      auto-apply
+                      :dark="userStore.theme == 'dark'"
+                      v-model="bookings.filter.until_date"
+                      :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                      :time-picker="false"
+                    >
+                    </datepicker
+                  ></v-sheet>
+                </v-list-item>
+                <v-list-item>
+                  <v-checkbox-btn
+                    label="Auch stornierte anzeigen"
+                    v-model="bookings.filter.canceled"
+                  />
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-toolbar>
+        </template>
+        <!-- Aktionen -->
+        <template v-slot:item.actions="{ item }">
+          <v-btn
+            color="red"
+            variant="plain"
+            :disabled="item.raw.canceled != null"
+            icon="mdi-cancel"
+            @click="
+              userStore.postURLWithAuth({
+                url: 'onpremisebooking/' + item.raw.id + '/cancel',
+              });
+              updateData();
+            "
+          ></v-btn>
+        </template>
+        <!-- Footer with legends-->
+        <template #footer.prepend
+          >Legende:<v-chip color="red">storniert</v-chip><v-spacer></v-spacer
         ></template>
       </v-data-table>
     </v-card>
