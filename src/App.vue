@@ -17,8 +17,7 @@ export default {
       }
     },
   },
-  created() {
-  },
+  created() {},
   methods: {
     getRouteLinks() {
       let val = [];

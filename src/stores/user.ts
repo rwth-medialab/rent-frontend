@@ -276,7 +276,8 @@ export const useUserStore = defineStore("user", {
         .catch((error) => {
           let msg = "";
           Object.keys(error["response"]["data"]).forEach(
-            (errorkey) => (msg += errorkey+": " +error["response"]["data"][errorkey])
+            (errorkey) =>
+              (msg += errorkey + ": " + error["response"]["data"][errorkey])
           );
           this.alert(msg, "warning", 10000);
         });

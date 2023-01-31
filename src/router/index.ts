@@ -85,7 +85,8 @@ const router = createRouter({
     {
       path: "/admin/inventory/onpremise",
       name: "onPremiseInventoryView",
-      component: () => import("@/views/admin/inventory/OnPremiseInventoryView.vue"),
+      component: () =>
+        import("@/views/admin/inventory/OnPremiseInventoryView.vue"),
       meta: { requiresAdmin: true },
     },
     {

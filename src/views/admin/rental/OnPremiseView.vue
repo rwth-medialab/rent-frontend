@@ -72,7 +72,10 @@ export default {
         .then((fetchedworkplaces) => {
           this.workplaces = fetchedworkplaces;
           this.userStore
-            .getFromURLWithAuth({ url: "onpremisebooking", params: generatedFilter })
+            .getFromURLWithAuth({
+              url: "onpremisebooking",
+              params: generatedFilter,
+            })
             .then((data) => {
               data = data.map((booking) => {
                 return {
