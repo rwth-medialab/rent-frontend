@@ -417,7 +417,7 @@ export default {
         ></template>
       </v-data-table>
     </v-card>
-    <v-card>
+    <v-card v-if="userStore.settings.onpremise_activated">
       <v-data-table
         :items="bookings.data"
         :headers="bookings.headers"
