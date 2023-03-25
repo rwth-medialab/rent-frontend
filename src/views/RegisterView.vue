@@ -59,10 +59,12 @@ export default {
       if (this.registrationForm.valid) {
         let msg = "";
         let type = "success" as "warning" | "success" | "error" | "info";
-        const ret = await this.userStore.postURLWithoutAuth({
-          url: "users",
-          params: this.registrationForm.data,
-        });
+        const ret = (
+          await this.userStore.postURLWithoutAuth({
+            url: "users",
+            params: this.registrationForm.data,
+          })
+        ).data;
         msg =
           "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
         if (typeof ret != "undefined") {

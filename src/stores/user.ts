@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 
 import type {
   RentalObjectTypeType,
@@ -249,7 +249,11 @@ export const useUserStore = defineStore("user", {
           return response.data;
         });
     },
-    async postURLWithAuth({ url = "", params = {}, headers = {} }) {
+    async postURLWithAuth({
+      url = "",
+      params = {},
+      headers = {},
+    }): Promise<AxiosResponse> {
       headers["Authorization"] = "Token " + this.user.token;
       return this.postURLWithoutAuth({
         url: url,
@@ -257,7 +261,11 @@ export const useUserStore = defineStore("user", {
         headers: headers,
       });
     },
-    async postURLWithoutAuth({ url = "", params = {}, headers = {} }) {
+    async postURLWithoutAuth({
+      url = "",
+      params = {},
+      headers = {},
+    }): Promise<AxiosResponse> {
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -271,15 +279,17 @@ export const useUserStore = defineStore("user", {
           headers: headers,
         })
         .then(function (response) {
-          return response.data;
+          return response;
         })
         .catch((error) => {
+          console.log(error);
           let msg = "";
           Object.keys(error["response"]["data"]).forEach(
             (errorkey) =>
               (msg += errorkey + ": " + error["response"]["data"][errorkey])
           );
           this.alert(msg, "warning", 10000);
+          return error["reponse"];
         });
     },
     //TODO move to axios + move this.alert
@@ -443,7 +453,7 @@ export const useUserStore = defineStore("user", {
       }
       // first we create the verifikation url. this will return {url: "", max_refresh_interval:0} if verification process has already has been finished and there is a access_token.
       this.postURLWithAuth({ url: "users/oauth/verify" }).then((response) => {
-        this.verificationData = response;
+        this.verificationData = response.data;
         if (this.verificationData.url != "") {
           // if we receive "", the process has been finished something went wrong
           const openedWindow = window.open(this.verificationData.url, "_blank");

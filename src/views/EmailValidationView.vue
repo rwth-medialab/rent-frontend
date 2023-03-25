@@ -13,11 +13,13 @@ export default {
   async mounted() {
     let data = new FormData();
     data.append("hash", String(this.$route.params.hash));
-    this.retData = await this.userStore.postURLWithoutAuth({
-      url: "users/email_validation",
-      params: data,
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    this.retData = (
+      await this.userStore.postURLWithoutAuth({
+        url: "users/email_validation",
+        params: data,
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+    ).data;
   },
 };
 </script>

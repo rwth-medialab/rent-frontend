@@ -86,7 +86,7 @@ export default {
       if (
         typeof result != "undefined" &&
         "data" in result &&
-        result.data.length == this.userStore.shoppingCart.length
+        result.data.data.length == this.userStore.shoppingCart.length
       ) {
         this.userStore.alert("erfolgreich reserviert", "success");
       }

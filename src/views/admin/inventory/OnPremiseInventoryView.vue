@@ -309,7 +309,7 @@ export default {
                       params: newBlockedTime,
                     })
                     .then((data) => {
-                      data
+                      data.data
                         ? userStore.alert('Erfolgreich geändert', 'success')
                         : '';
                       newBlockedTime = { starttime: new Date(), endtime: null };
