@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/valid-v-slot -->
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
 import Datepicker from "@vuepic/vue-datepicker";

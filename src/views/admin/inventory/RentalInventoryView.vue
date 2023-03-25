@@ -243,11 +243,6 @@ export default {
           });
         }
       });
-      console.log(
-        this.suggestions.filter(
-          (x) => x.suggestion in this.selected_suggestions
-        )
-      );
       this.userStore.patchURLWithAuth({
         url:
           "rentalobjecttypes/" +
@@ -289,12 +284,21 @@ export default {
           }
         }
       }
-      this.userStore.postURLWithAuth({
+      const response = this.userStore.postURLWithAuth({
         url: "rentalobjecttypes/",
         params: formData,
       });
-      this.isTypeDetailsDialogOpen = false;
-      setTimeout(this.updateData, 200);
+      response.then((resp) => {
+        if (String(resp.status).startsWith("2")) {
+          this.isTypeDetailsDialogOpen = false;
+          setTimeout(this.updateData, 200);
+        } else if (String(resp.status).startsWith("5")) {
+          this.userStore.alert(
+            "irgendein interner Fehler. Bitte einmal einen Entwickler kontaktieren",
+            "warning"
+          );
+        }
+      });
     },
     openCreateTypeDetailsDialog(category: string) {
       this.isTypeDetailsDialogOpen = true;
@@ -638,6 +642,18 @@ export default {
             <template #append-inner>Tage</template>
           </v-text-field>
         </div>
+      </div>
+      <div>
+        <v-alert
+          v-if="
+            userStore.message.alert && !userStore.message.text.includes('html')
+          "
+          v-model="userStore.message['alert']"
+          class="ma-3"
+          :type="userStore.message['type']"
+          :text="userStore.message['text']"
+          closable
+        />
       </div>
       <v-card-actions>
         <v-spacer></v-spacer

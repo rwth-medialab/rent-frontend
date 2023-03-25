@@ -4,7 +4,6 @@ import type {
   MaxdurationType,
   PriorityType,
   RentalObjectTypeType,
-  TagType,
 } from "@/ts/rent.types";
 export default {
   setup() {

@@ -214,7 +214,7 @@ export default {
           url: "rentals/return",
           params: this.rentals.rentalsDialog.selectedAsReturned,
         })
-        .then((_res) =>
+        .then(() =>
           this.updateData().then(() => {
             this.rentals.rentalsDialog.open = false;
             this.rentals.rentalsDialog.selectedAsReturned = [];
@@ -227,7 +227,7 @@ export default {
           url: "rentals/bulk",
           params: this.handleDialog.reservations,
         })
-        .then((_response) => {
+        .then(() => {
           this.handleDialog.open = false;
           setTimeout(this.updateData, 500);
         });

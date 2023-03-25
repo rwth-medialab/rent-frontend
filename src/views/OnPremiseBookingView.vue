@@ -73,7 +73,7 @@ export default {
     openDialog(start, end) {
       this.dialog.data.slot_start = start;
       this.dialog.data.slot_end = end;
-      this.dialog.data.user = this.userStore.user.user.profile.user;
+      this.dialog.data.user = this.userStore.user.user.profile["user"];
       this.dialog.data.workplace = this.$route.params.id;
       this.dialog.open = true;
     },
@@ -105,8 +105,7 @@ export default {
               </v-avatar>
             </v-col>
             <v-col class="text-wrap overflow-hidden">
-              <v-sheet max-height="100px" v-html="workplace.description">
-              </v-sheet>
+              <div max-height="100px" v-html="workplace.description"></div>
             </v-col>
           </v-row>
           <v-card-actions class="mt-3"
@@ -124,6 +123,7 @@ export default {
       v-for="workplace in workplaces.filter(
         (x) => x.id == Number($route.params.id)
       )"
+      :key="workplace.id"
     >
       <v-card>
         <v-row>
@@ -135,7 +135,7 @@ export default {
           <v-col cols="9">
             <v-sheet class="py-5 text-h2">{{ workplace.name }}</v-sheet>
             <hr />
-            <v-sheet class="pa-3" v-html="workplace.description"> </v-sheet>
+            <div class="pa-3" v-html="workplace.description"></div>
           </v-col>
         </v-row>
         <v-row></v-row>
@@ -145,17 +145,18 @@ export default {
         <v-table class="ma-2">
           <thead>
             <tr>
-              <th v-for="day in days" :key="days.date">
+              <th v-for="day in days" :key="day.date">
                 {{ day.weekday }}
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td v-for="day in days" :key="days.date">
+              <td v-for="day in days" :key="day.date">
                 <v-sheet
                   :min-width="150"
                   v-for="slot in slots.filter((slo) => slo.date == day.date)"
+                  :key="slot.id"
                 >
                   <v-btn
                     class="my-2"

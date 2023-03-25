@@ -7,7 +7,7 @@ export default {
     return { userStore };
   },
   watch: {
-    $route: function (_newroute, oldroute) {
+    $route: function () {
       this.currentLinks = this.getRouteLinks();
       if (
         !this.userStore.is_staff &&
