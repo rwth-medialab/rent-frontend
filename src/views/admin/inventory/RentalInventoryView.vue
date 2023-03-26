@@ -258,7 +258,7 @@ export default {
     createEditedObjectsType() {
       // we have to use formdata here, otherwise we couldn't uplaod the image
       let formData = new FormData();
-      if (this.openTypeImage.includes("base64")) {
+      if (this.openTypeImage != null && this.openTypeImage.includes("base64")) {
         //string containes 'base64' => uploaded image
         formData.append(this.toBeUploadedImage["type"], this.toBeUploadedImage);
       }
