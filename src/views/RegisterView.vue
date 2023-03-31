@@ -6,6 +6,14 @@ export default {
     const userStore = useUserStore();
     return { userStore };
   },
+  created() {
+    // do not allow person here if they are already logged in
+    this.userStore.checkCredentials().then((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.$router.push("/");
+      }
+    });
+  },
   data() {
     return {
       registrationForm: {
@@ -59,16 +67,15 @@ export default {
       if (this.registrationForm.valid) {
         let msg = "";
         let type = "success" as "warning" | "success" | "error" | "info";
-        const ret = (
-          await this.userStore.postURLWithoutAuth({
-            url: "users",
-            params: this.registrationForm.data,
-          })
-        ).data;
-        msg =
-          "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
-        if (typeof ret != "undefined") {
+        const ret = await this.userStore.postURLWithoutAuth({
+          url: "users",
+          params: this.registrationForm.data,
+        });
+        if (String(ret.status).startsWith("2")) {
+          msg =
+            "Dein Account wurde angelegt, bitte klicke auf den Link in der Email.";
           this.userStore.alert(msg, type, 10000);
+          this.$router.push("/");
         }
       }
     },
