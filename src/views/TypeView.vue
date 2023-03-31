@@ -1,6 +1,7 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
 import type { RentalObjectTypeType, TagType } from "@/ts/rent.types";
+import SuggestionsDialog from "@/components/SuggestionsDialog.vue";
 export default {
   setup() {
     const userStore = useUserStore();
@@ -20,6 +21,7 @@ export default {
       url: "/rentalobjecttypes/" + this.$route.params.id,
     });
   },
+  components: { SuggestionsDialog },
 };
 </script>
 
@@ -118,6 +120,7 @@ export default {
           ></div></div></v-col
     ></v-row>
   </v-card>
+  <SuggestionsDialog />
 </template>
 
 <style></style>
