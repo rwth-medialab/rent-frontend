@@ -47,23 +47,29 @@ export const useUserStore = defineStore("user", {
         this.shoppingCart.filter((x) => x.id == objectType.id)[0].count++;
       } else {
         //fetch suggestions
-        this.getFromURLWithAuth({
-          url: "rentalobjecttypes/" + objectType["id"] + "/suggestions",
-        }).then((data) => {
-          if (openSuggestion && data.length > 0) {
-            this.suggestions.data = data;
-            this.suggestions.dialogOpen = true;
-          }
+        if (openSuggestion) {
+          this.openSuggestionsDialog(objectType);
+        }
 
-          // add type and add count = 1 to the object
-          this.shoppingCart.push({
-            ...objectType,
-            count: 1,
-            start: this.rentRange.start,
-            end: null,
-          });
+        this.shoppingCart.push({
+          ...objectType,
+          count: 1,
+          start: this.rentRange.start,
+          end: null,
         });
       }
+    },
+    openSuggestionsDialog(objectType: RentalObjectTypeType) {
+      this.getFromURLWithAuth({
+        url: "rentalobjecttypes/" + objectType["id"] + "/suggestions",
+      }).then((data) => {
+        if (!this.suggestions.dialogOpen && data.length > 0) {
+          this.suggestions.data = data;
+          this.suggestions.dialogOpen = true;
+        }
+
+        // add type and add count = 1 to the object
+      });
     },
     removeFromCart(objectType: RentalObjectTypeType, all?: boolean) {
       if (typeof all != "undefined" && all) {

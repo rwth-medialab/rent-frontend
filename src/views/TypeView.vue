@@ -2,6 +2,7 @@
 import { useUserStore } from "@/stores/user";
 import type { RentalObjectTypeType, TagType } from "@/ts/rent.types";
 import SuggestionsDialog from "@/components/SuggestionsDialog.vue";
+import CartButton from "@/components/CartButton.vue";
 export default {
   setup() {
     const userStore = useUserStore();
@@ -21,7 +22,7 @@ export default {
       url: "/rentalobjecttypes/" + this.$route.params.id,
     });
   },
-  components: { SuggestionsDialog },
+  components: { SuggestionsDialog, CartButton },
 };
 </script>
 
@@ -41,64 +42,7 @@ export default {
           <v-img cover aspect-ratio="1" :src="thing.image"></v-img>
         </v-avatar>
         <div>
-          <v-chip
-            v-if="
-              userStore.checkCredentials() &&
-              userStore.shoppingCart.filter((x) => x['id'] == thing['id'])
-                .length > 0
-            "
-          >
-            <template #prepend>
-              <v-btn
-                variant="plain"
-                @click.stop
-                @click="userStore.removeFromCart(thing)"
-                icon="mdi-minus"
-                size="small"
-              ></v-btn
-            ></template>
-            {{
-              userStore.shoppingCart.filter((x) => x["id"] == thing["id"])[0]
-                .count
-            }}
-            <template #append>
-              <v-btn
-                variant="plain"
-                @click.stop
-                @click="userStore.addToCart(thing)"
-                icon="mdi-plus"
-                size="small"
-                :disabled="
-                  !(thing.id in userStore.available) ||
-                  userStore.getNumberInCart(thing) >=
-                    userStore.available[thing.id].available
-                "
-              ></v-btn
-            ></template>
-          </v-chip>
-          <v-btn
-            v-else-if="userStore.checkCredentials()"
-            flat
-            @click.stop
-            @click="userStore.addToCart(thing)"
-            icon="mdi-basket"
-            :disabled="
-              !(thing.id in userStore.available) ||
-              userStore.getNumberInCart(thing) >=
-                userStore.available[thing.id].available
-            "
-          ></v-btn>
-          <v-chip
-            v-if="thing.id in userStore.available"
-            :color="
-              userStore.available[thing.id].available > 5
-                ? 'green'
-                : userStore.available[thing.id].available > 0
-                ? 'yellow'
-                : 'red'
-            "
-            >{{ userStore.available[thing.id].available }} verfügbar</v-chip
-          >
+          <CartButton :thing="thing"></CartButton>
         </div>
       </v-col>
       <!--- Take up full 12 points on small displays to keep the Text readable-->

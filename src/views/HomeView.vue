@@ -5,8 +5,9 @@ import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import dateFormat from "dateformat";
 import SuggestionsDialog from "@/components/SuggestionsDialog.vue";
+import TypeCard from "@/components/TypeCard.vue";
 export default {
-  components: { Datepicker, SuggestionsDialog },
+  components: { Datepicker, SuggestionsDialog, TypeCard },
   data: () => {
     return {
       rentableTypes: [] as RentalObjectTypeType[],
@@ -208,89 +209,12 @@ export default {
   </v-card>
   <!-- Type enumeration-->
   <v-card class="d-flex flex-wrap justify-left" flat>
-    <v-card
-      class="ma-2 pa-2"
-      :class="$vuetify.display.mobile ? 'w-100' : 'w-32'"
+    <TypeCard
       v-for="thing in filterTypes()"
       :key="thing['id']"
-      @click="$router.push('/type/' + thing['id'])"
-    >
-      <div class="d-flex flex-row">
-        <v-avatar class="ma-3" size="90" rounded="0">
-          <v-img cover aspect-ratio="1" :src="thing['image']"></v-img>
-        </v-avatar>
-        <v-card elevation="0" height="100" class="overflow-auto">{{
-          thing.shortdescription
-        }}</v-card>
-      </div>
-      <template v-slot:title
-        ><div class="d-flex flex-wrap">
-          <div class="mr-2">{{ thing["name"] }}</div>
-          <v-chip v-for="tag in thing['tags']" :key="thing['id'] + tag">{{
-            tags.filter((x) => x.id == tag)[0]["name"]
-          }}</v-chip>
-        </div>
-        <hr />
-      </template>
-      <v-card-actions @click.stop>
-        <!-- display +- chip if objecttypecount>0 else display cart-->
-        <v-chip
-          v-if="
-            userStore.isLoggedIn &&
-            userStore.shoppingCart.filter((x) => x['id'] == thing['id'])
-              .length > 0
-          "
-        >
-          <template #prepend>
-            <v-btn
-              @click.stop
-              @click="userStore.removeFromCart(thing)"
-              icon="mdi-minus"
-              size="small"
-            ></v-btn
-          ></template>
-          {{
-            userStore.shoppingCart.filter((x) => x["id"] == thing["id"])[0]
-              .count
-          }}
-          <template #append>
-            <v-btn
-              @click.stop
-              @click="userStore.addToCart(thing)"
-              icon="mdi-plus"
-              size="small"
-              :disabled="
-                !(thing.id in userStore.available) ||
-                userStore.getNumberInCart(thing) >=
-                  userStore.available[thing.id].available
-              "
-            ></v-btn
-          ></template>
-        </v-chip>
-        <v-btn
-          v-else-if="userStore.isLoggedIn"
-          @click.stop
-          @click="userStore.addToCart(thing)"
-          icon="mdi-basket"
-          :disabled="
-            !(thing.id in userStore.available) ||
-            userStore.getNumberInCart(thing) >=
-              userStore.available[thing.id].available
-          "
-        ></v-btn>
-        <v-chip
-          v-if="thing.id in userStore.available"
-          :color="
-            userStore.available[thing.id].available > 5
-              ? 'green'
-              : userStore.available[thing.id].available > 0
-              ? 'yellow'
-              : 'red'
-          "
-          >{{ userStore.available[thing.id].available }} verfügbar</v-chip
-        >
-      </v-card-actions>
-    </v-card>
+      :thing="thing"
+      :tags="tags"
+    ></TypeCard>
   </v-card>
   <SuggestionsDialog />
 </template>
