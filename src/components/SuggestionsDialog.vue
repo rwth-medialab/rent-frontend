@@ -45,7 +45,14 @@ userStore.getFromURLWithoutAuth({ url: "tags" }).then((data) => (tags = data));
             </v-card>
             <template v-slot:title>
               <v-card class="overflow-auto text-wrap" flat
-                >Grund für den Vorschlag:<br />
+                ><v-sheet
+                  v-if="
+                    userStore.suggestions.data.find(
+                      (x) => x.suggestion == thing.id
+                    ).description != ''
+                  "
+                  >Grund für den Vorschlag:</v-sheet
+                ><br />
                 {{
                   userStore.suggestions.data.find(
                     (x) => x.suggestion == thing.id
