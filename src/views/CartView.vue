@@ -233,7 +233,7 @@ export default {
             v-model="thing.start"
             class="mr-2"
             no-disabled-range
-            :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+            :format="'dd-MM-yyyy'"
             :time-picker="false"
             :min-date="new Date(new Date().setHours(0, 0, 0, 0))"
             :disabled-week-days="disabledLentingWeekdays"
@@ -247,7 +247,7 @@ export default {
             v-model="thing.end"
             class="mr-2"
             no-disabled-range
-            :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+            :format="'dd-MM-yyyy'"
             :time-picker="false"
             :min-date="
               new Date(

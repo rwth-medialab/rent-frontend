@@ -148,7 +148,7 @@ export default {
                     auto-apply
                     :dark="userStore.theme == 'dark'"
                     v-model="bookings.filter.from_date"
-                    :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                    :format="'dd-MM-yyyy'"
                     :time-picker="false"
                   >
                   </datepicker>
@@ -161,7 +161,7 @@ export default {
                     auto-apply
                     :dark="userStore.theme == 'dark'"
                     v-model="bookings.filter.until_date"
-                    :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                    :format="'dd-MM-yyyy'"
                     :time-picker="false"
                   >
                   </datepicker

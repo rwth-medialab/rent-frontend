@@ -270,7 +270,7 @@ export default {
                     auto-apply
                     :dark="userStore.theme == 'dark'"
                     v-model="reservations.filter.reserved_from"
-                    :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                    :format="'dd-MM-yyyy'"
                     :time-picker="false"
                   >
                   </datepicker>
@@ -281,7 +281,7 @@ export default {
                     auto-apply
                     :dark="userStore.theme == 'dark'"
                     v-model="reservations.filter.reserved_until"
-                    :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                    :format="'dd-MM-yyyy'"
                     :time-picker="false"
                   >
                   </datepicker>
@@ -369,7 +369,7 @@ export default {
                   auto-apply
                   :dark="userStore.theme == 'dark'"
                   v-model="rentals.filter.rented_from"
-                  :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                  :format="'dd-MM-yyyy'"
                   :time-picker="false"
                 >
                 </datepicker>
@@ -380,7 +380,7 @@ export default {
                   auto-apply
                   :dark="userStore.theme == 'dark'"
                   v-model="rentals.filter.rented_until"
-                  :format="(date:Date) =>( date.getFullYear() +'-'+ String(date.getMonth()+1)+'-'+date.getDate()  )"
+                  :format="'dd-MM-yyyy'"
                   :time-picker="false"
                 >
                 </datepicker>
