@@ -2,7 +2,7 @@
 // composition api not option api
 import type { RentalObjectTypeType, TagType } from "@/ts/rent.types";
 import CartButton from "./CartButton.vue";
-import { useUserStore } from "@/stores/user";
+//import { useUserStore } from "@/stores/user";
 defineProps<{
   thing: RentalObjectTypeType;
   tags: TagType[];

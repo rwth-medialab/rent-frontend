@@ -49,7 +49,10 @@ export default {
                   .description != ''
               "
             >
-              <v-sheet>Grund für den Vorschlag von {{  }}:<br /></v-sheet>
+              <v-sheet
+                >Grund für den Vorschlag von <em>{{ thing.name }}</em
+                >:<br
+              /></v-sheet>
               {{
                 userStore.suggestions.data.find((x) => x.suggestion == thing.id)
                   .description
