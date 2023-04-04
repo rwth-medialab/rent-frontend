@@ -214,7 +214,7 @@ export const useUserStore = defineStore("user", {
         headers: headers,
       });
     },
-    async patchURLWithAuth({ url = "", params = {} }) {
+    async patchURLWithAuth({ url = "", params = {} }): Promise<AxiosResponse> {
       if (url.slice(0, 1) != "/") {
         url = "/" + url;
       }
@@ -228,7 +228,7 @@ export const useUserStore = defineStore("user", {
           headers: { Authorization: "Token " + this.user.token },
         })
         .then(function (response) {
-          return response.data;
+          return response;
         })
         .catch((error) => {
           let msg = "";
@@ -236,6 +236,7 @@ export const useUserStore = defineStore("user", {
             (errorkey) => (msg += error["response"]["data"][errorkey])
           );
           this.alert(msg, "warning", 10000);
+          return error["response"];
         });
     },
     async deleteURLWithAuth({ url = "" }) {
