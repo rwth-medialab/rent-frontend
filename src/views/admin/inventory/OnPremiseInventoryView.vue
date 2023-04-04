@@ -264,8 +264,8 @@ export default {
                       url: 'onpremiseblockedtimes/' + block.id,
                       params: block,
                     })
-                    .then((data) =>
-                      data
+                    .then((rsp) =>
+                      String(rsp.status).startsWith('2')
                         ? userStore.alert('Erfolgreich geändert', 'success')
                         : ''
                     )

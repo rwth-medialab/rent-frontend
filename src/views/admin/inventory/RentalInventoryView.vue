@@ -212,48 +212,58 @@ export default {
           }
         }
       }
-      this.userStore.patchURLWithAuth({
-        url: "rentalobjecttypes/" + this.toBeEditedObjectsType["id"],
-        params: formData,
-      });
-      Object.keys(this.duration).forEach((x) => {
-        if (this.duration[x].duration != "" && this.duration[x].duration != 0) {
-          if ("id" in this.duration[x]) {
-            //this duration object already exists so patch it not post it
-            this.userStore.patchURLWithAuth({
-              url: "duration/" + this.duration[x].id,
-              params: { duration: this.duration[x].duration },
-            });
-          } else {
-            this.userStore.postURLWithAuth({
-              url: "duration",
-              params: {
-                duration: this.duration[x].duration,
-                prio: x,
-                rental_object_type: this.toBeEditedObjectsType["id"],
-              },
-            });
+      this.userStore
+        .patchURLWithAuth({
+          url: "rentalobjecttypes/" + this.toBeEditedObjectsType["id"],
+          params: formData,
+        })
+        .then((resp) => {
+          if (!String(resp.status).startsWith("2")) {
+            return;
           }
-        } else if (
-          (this.duration[x].duration == "" || this.duration[x].duration == 0) &&
-          "id" in this.duration[x]
-        ) {
-          this.userStore.deleteURLWithAuth({
-            url: "duration/" + this.duration[x].id,
+          Object.keys(this.duration).forEach((x) => {
+            if (
+              this.duration[x].duration != "" &&
+              this.duration[x].duration != 0
+            ) {
+              if ("id" in this.duration[x]) {
+                //this duration object already exists so patch it not post it
+                this.userStore.patchURLWithAuth({
+                  url: "duration/" + this.duration[x].id,
+                  params: { duration: this.duration[x].duration },
+                });
+              } else {
+                this.userStore.postURLWithAuth({
+                  url: "duration",
+                  params: {
+                    duration: this.duration[x].duration,
+                    prio: x,
+                    rental_object_type: this.toBeEditedObjectsType["id"],
+                  },
+                });
+              }
+            } else if (
+              (this.duration[x].duration == "" ||
+                this.duration[x].duration == 0) &&
+              "id" in this.duration[x]
+            ) {
+              this.userStore.deleteURLWithAuth({
+                url: "duration/" + this.duration[x].id,
+              });
+            }
           });
-        }
-      });
-      this.userStore.patchURLWithAuth({
-        url:
-          "rentalobjecttypes/" +
-          this.toBeEditedObjectsType["id"] +
-          "/suggestions",
-        params: this.suggestions.filter((x) =>
-          this.selected_suggestions.includes(x.suggestion)
-        ),
-      });
-      this.isTypeDetailsDialogOpen = false;
-      setTimeout(this.updateData, 200);
+          this.userStore.patchURLWithAuth({
+            url:
+              "rentalobjecttypes/" +
+              this.toBeEditedObjectsType["id"] +
+              "/suggestions",
+            params: this.suggestions.filter((x) =>
+              this.selected_suggestions.includes(x.suggestion)
+            ),
+          });
+          this.isTypeDetailsDialogOpen = false;
+          setTimeout(this.updateData, 200);
+        });
     },
     createEditedObjectsType() {
       // we have to use formdata here, otherwise we couldn't uplaod the image

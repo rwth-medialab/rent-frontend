@@ -33,8 +33,7 @@ export default {
         url: "files/" + data[0]["id"],
         params: formData,
       });
-      console.log(resp);
-      if (typeof resp == "undefined") {
+      if (!String(resp.status).startsWith("2")) {
         this.userStore.alert("upload Fehlgeschlagen", "error");
       }
     },
