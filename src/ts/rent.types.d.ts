@@ -120,6 +120,7 @@ export type WorkplaceType = {
   id?: number;
   name: string;
   description: string;
+  shortdescription: string;
   status: WorkplaceStatusType[];
   image: string;
   displayed: boolean;

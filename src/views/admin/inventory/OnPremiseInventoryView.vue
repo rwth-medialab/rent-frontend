@@ -122,6 +122,7 @@ export default {
         @click="
           selectedWorkplace = {
             name: '',
+            shortdescription: '',
             description: '',
             status: [],
             image: '',
@@ -135,6 +136,7 @@ export default {
     </v-sheet>
 
     <v-card v-if="selectedWorkplace != null">
+      <v-text-field v-model="selectedWorkplace.name" label="name" />
       <v-sheet class="d-flex" v-if="'id' in selectedWorkplace">
         <v-avatar
           class="ma-2"
@@ -157,10 +159,16 @@ export default {
           ></v-sheet
         ></v-sheet
       >
-      <v-text-field v-model="selectedWorkplace.name" label="name" />
+      <v-sheet v-else>
+        Ein Bild kann erst nach der Erstellung eines neuen Arbeitsplatzes hochgeladen werden.
+      </v-sheet>
       <v-sheet class="d-flex">
         <v-checkbox v-model="selectedWorkplace.displayed" label="Anzeigen" />
       </v-sheet>
+      <v-textarea
+        v-model="selectedWorkplace.shortdescription"
+        label="Kurzbeschreibung"
+      />
       <v-textarea
         v-model="selectedWorkplace.description"
         label="Beschreibung"
