@@ -97,15 +97,17 @@ export default {
         :key="workplace.id"
         :cols="$vuetify.display.mobile ? 12 : 4"
       >
-        <v-card class="ma-2" :title="workplace.name">
-          <v-row>
+        <v-card class="ma-2" :title="workplace.name" >
+          <v-row class="ml-2">
             <v-col cols="4">
               <v-avatar rounded="0" size="100%">
                 <v-img :src="workplace.image" aspect-ratio="1" />
               </v-avatar>
             </v-col>
-            <v-col class="text-wrap overflow-hidden">
-              <div max-height="100px" v-html="workplace.description"></div>
+            <v-col class="text-wrap overflow-hidden " >
+              <v-sheet max-height="200">
+                {{ workplace.shortdescription }}
+              </v-sheet>
             </v-col>
           </v-row>
           <v-card-actions class="mt-3"
@@ -135,7 +137,7 @@ export default {
           <v-col cols="9">
             <v-sheet class="py-5 text-h2">{{ workplace.name }}</v-sheet>
             <hr />
-            <div class="pa-3" v-html="workplace.description"></div>
+            <div class="pa-3 ql-editor ql-snow" v-html="workplace.description"></div>
           </v-col>
         </v-row>
         <v-row></v-row>

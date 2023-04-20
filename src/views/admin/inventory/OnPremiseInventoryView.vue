@@ -137,6 +137,7 @@ export default {
 
     <v-card v-if="selectedWorkplace != null">
       <v-text-field v-model="selectedWorkplace.name" label="name" />
+      <!-- Pictureupload is only possible after the object exists on the remote. this is due to some technical restrictions in the API-->
       <v-sheet class="d-flex" v-if="'id' in selectedWorkplace">
         <v-avatar
           class="ma-2"
@@ -160,7 +161,8 @@ export default {
         ></v-sheet
       >
       <v-sheet v-else>
-        Ein Bild kann erst nach der Erstellung eines neuen Arbeitsplatzes hochgeladen werden.
+        Ein Bild kann erst nach der Erstellung eines neuen Arbeitsplatzes
+        hochgeladen werden.
       </v-sheet>
       <v-sheet class="d-flex">
         <v-checkbox v-model="selectedWorkplace.displayed" label="Anzeigen" />
@@ -169,10 +171,23 @@ export default {
         v-model="selectedWorkplace.shortdescription"
         label="Kurzbeschreibung"
       />
-      <v-textarea
-        v-model="selectedWorkplace.description"
-        label="Beschreibung"
-      />
+      <v-sheet class="">
+        <v-sheet class="text-h6">
+          Beschreibung:
+        </v-sheet>
+        <quill-editor
+          content-type="html"
+          theme="snow"
+          :toolbar="userStore.inventory_rights ? 'full' : 'minimal'"
+          v-model:content="selectedWorkplace['description']"
+          :disabled="!userStore.inventory_rights"
+          :readOnly="!userStore.inventory_rights"
+        />
+      </v-sheet>
+      <v-sheet class="my-3">
+        <v-sheet class="text-h6">
+          Auswahl von sich ausschließenden Arbeitsplätzen:
+        </v-sheet>
       <v-select
         multiple
         label="Arbeitsplätze die nicht gleichzeitig besetzt sein sollten"
@@ -189,6 +204,7 @@ export default {
           })
         "
       />
+    </v-sheet>
       <v-expansion-panels>
         <v-expansion-panel title="Statusmeldungen">
           <v-expansion-panel-text>
