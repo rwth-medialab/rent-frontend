@@ -176,11 +176,9 @@ export default {
           @click.stop="drawer = !drawer"
         ></v-app-bar-nav-icon>
       </template>
-      <template v-slot:title
-        ><v-btn @click="$router.push('/')">{{ siteName }}</v-btn></template
+      <v-app-bar-title @click="$router.push('/')">{{ siteName }}</v-app-bar-title
       >
       <v-tabs
-        align-tabs="title"
         v-if="
           !$vuetify.display.mobile &&
           $router.currentRoute.value.path.includes('admin')
