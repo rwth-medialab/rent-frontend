@@ -32,6 +32,21 @@ export default {
       });
       return val;
     },
+    async login() {
+      if (this.loginMenu.loginValid) {
+        const isSuccessfull = await this.userStore.signIn(
+          this.loginMenu.username,
+          this.loginMenu.password
+        );
+        if (isSuccessfull) {
+          //reset logindata to prevent relogin after logout
+          this.loginMenu.username="";
+          this.loginMenu.password="";
+          this.loginMenu.loginValid=false;
+        }
+        this.userStore.checkCredentials()
+      }
+    },
     async logout() {
       //reset permissions
       await this.userStore.signOut();
@@ -54,6 +69,24 @@ export default {
       siteName: import.meta.env.VITE_SITENAME,
       drawer: false,
       currentLinks: [],
+      loginMenu: {
+        loginValid: false,
+        username: "",
+        password: "",
+        usernameRules: [
+          (v: string) => !!v || "Der Nutzername darf nicht leer sein",
+          (v: string) =>
+            v.length > 3 || "Der Nutzername besteht aus mindestens 3 Zeichen",
+          (v: string) =>
+            /^[0-9a-zA-Z]+$/.test(v) ||
+            "Der Nutzername besteht nur aus Ziffern und Buchstaben",
+        ],
+        passwordRules: [
+          (v: string) => !!v || "Das Passwortfeld darf nicht leer sein",
+          (v: string) =>
+            v.length > 3 || "Das Passwort besteht aus mindestens 3 Zeichen",
+        ],
+      },
       links: {
         admin: {
           inventory: {
@@ -96,14 +129,6 @@ export default {
 <template>
   <v-app :theme="userStore.theme">
     <v-navigation-drawer v-model="drawer" temporary right>
-      <template v-slot:append>
-        <v-btn
-          class="w-100"
-          @click="toggleLogin"
-          :color="userStore.isLoggedIn ? 'red' : 'green'"
-          >{{ userStore.isLoggedIn ? "Ausloggen" : "Einloggen" }}</v-btn
-        ></template
-      >
       <v-list nav dense>
         <template v-if="userStore.is_staff">
           <v-list-group no-action>
@@ -139,7 +164,7 @@ export default {
         >
           <v-list-item-title> Vorortnutzung </v-list-item-title>
         </v-list-item>
-        <v-list-item to="/account">
+        <v-list-item to="/account" v-if="userStore.isLoggedIn">
           <v-list-item-title> Account </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -217,11 +242,39 @@ export default {
         <div v-if="!$vuetify.display.mobile && userStore.is_staff">|</div>
 
         <!-- Account button, leads to account overview -->
-        <v-btn
-          v-if="!$vuetify.display.mobile && userStore.isLoggedIn"
-          icon="mdi-account"
-          @click="$router.push('/account')"
-        >
+        <v-btn icon>
+          <v-icon icon="mdi-account"></v-icon>
+          <v-menu activator="parent" :close-on-content-click="false">
+            <v-card min-width="300" class="pa-3">
+              <v-sheet v-if="!userStore.isLoggedIn">
+                <v-form @submit.prevent="login" v-model="loginMenu.loginValid">
+                  <v-text-field
+                    label="Nutzername"
+                    type="username"
+                    v-model="loginMenu.username"
+                    :rules="loginMenu.usernameRules"
+                  >
+                  </v-text-field>
+                  <v-text-field
+                    label="Passwort"
+                    type="password"
+                    v-model="loginMenu.password"
+                    :rules="loginMenu.passwordRules"
+                  >
+                  </v-text-field>
+                  <v-card-actions>
+                    <v-btn type="submit" color="green" variant="flat">Login</v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn @click="$router.push('/register')">Register</v-btn>
+                  </v-card-actions>
+                </v-form>
+              </v-sheet>
+              <v-sheet v-else>AB</v-sheet>
+              <v-card-actions v-if="userStore.isLoggedIn">
+                <v-btn color="red" variant="flat" @click="userStore.signOut">Ausloggen</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-menu>
         </v-btn>
         <div v-if="!$vuetify.display.mobile && userStore.isLoggedIn">|</div>
         <!-- Button to switch between light and dark theme-->
@@ -235,14 +288,6 @@ export default {
             userStore.theme = userStore.theme == 'light' ? 'dark' : 'light'
           "
         ></v-btn>
-        <div v-if="!$vuetify.display.mobile">|</div>
-        <!-- Login/Logout Button-->
-        <v-btn
-          v-if="!$vuetify.display.mobile"
-          :icon="userStore.isLoggedIn ? 'mdi-logout' : 'mdi-login'"
-          @click="toggleLogin()"
-        >
-        </v-btn>
         <div v-if="userStore.isLoggedIn">|</div>
         <v-btn v-if="userStore.isLoggedIn" icon @click="$router.push('/cart')">
           <v-badge floating :content="userStore.shoppingCart.length">
