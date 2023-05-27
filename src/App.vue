@@ -251,6 +251,9 @@ export default {
                     :rules="loginMenu.passwordRules"
                   >
                   </v-text-field>
+                  <router-link to="/account/passwordreset">
+                    Passwort vergessen?
+                  </router-link>
                   <v-card-actions>
                     <v-btn type="submit" color="green" variant="flat"
                       >Login</v-btn

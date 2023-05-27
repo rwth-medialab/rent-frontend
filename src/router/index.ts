@@ -17,6 +17,13 @@ const router = createRouter({
       meta: { requiresAdmin: false },
     },
     {
+      path: "/account/passwordreset/:hash?",
+      name: "AccountPasswordReset",
+      component: () => import("@/views/account/AccountPasswordResetView.vue"),
+      meta: { requiresAdmin: false },
+      props: true
+    },
+    {
       path: "/account",
       name: "Account",
       component: () => import("@/views/account/AccountOverviewView.vue"),
