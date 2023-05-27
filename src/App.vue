@@ -166,7 +166,7 @@ export default {
           @click.stop="drawer = !drawer"
         ></v-app-bar-nav-icon>
       </template>
-      <v-app-bar-title @click="$router.push('/')" style="cursor:pointer">
+      <v-app-bar-title @click="$router.push('/')" style="cursor: pointer">
         {{ siteName }}</v-app-bar-title
       >
       <v-tabs
@@ -269,14 +269,14 @@ export default {
                       ></template>
                       Account</v-btn
                     >
-                    <v-list-item-title>
-                      <v-btn class="w-100 justify-start" to="/account/processes">
-                        <template v-slot:prepend>
-                          <v-icon icon="mdi-animation-outline"> </v-icon
-                        ></template>
-                        Vorgänge</v-btn
-                      >
-                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-btn class="w-100 justify-start" to="/account/processes">
+                      <template v-slot:prepend>
+                        <v-icon icon="mdi-animation-outline"> </v-icon
+                      ></template>
+                      Vorgänge</v-btn
+                    >
                   </v-list-item>
                 </v-list>
               </v-sheet>
