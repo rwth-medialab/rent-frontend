@@ -30,7 +30,7 @@ const router = createRouter({
     {
       path: "/register",
       name: "registerView",
-      component: () => import("@/views/RegisterView.vue"),
+      component: () => import("@/views/account/RegisterView.vue"),
       meta: { requiresAdmin: false },
     },
     {
