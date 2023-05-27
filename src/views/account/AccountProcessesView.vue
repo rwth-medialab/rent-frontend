@@ -20,7 +20,7 @@ export default {
           { title: "reserviert von: ", key: "reserved_from" },
           { title: "reserviert bis: ", key: "reserved_until" },
           { title: "Aktionen", key: "actions", sortable: false },
-        ],
+        ] ,
         sortBy: [{ key: "reserved_from" }, { key: "objecttype.name" }],
         filter: {
           open: true,

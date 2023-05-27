@@ -40,24 +40,17 @@ export default {
         );
         if (isSuccessfull) {
           //reset logindata to prevent relogin after logout
-          this.loginMenu.username="";
-          this.loginMenu.password="";
-          this.loginMenu.loginValid=false;
+          this.loginMenu.username = "";
+          this.loginMenu.password = "";
+          this.loginMenu.loginValid = false;
         }
-        this.userStore.checkCredentials()
+        this.userStore.checkCredentials();
       }
     },
     async logout() {
       //reset permissions
       await this.userStore.signOut();
-      this.$router.push("/");
-    },
-    toggleLogin() {
-      if (this.userStore.isLoggedIn) {
-        this.logout();
-      } else {
-        this.$router.push("/login");
-      }
+      this.$router.go(0);
     },
   },
   async mounted() {
@@ -164,9 +157,6 @@ export default {
         >
           <v-list-item-title> Vorortnutzung </v-list-item-title>
         </v-list-item>
-        <v-list-item to="/account" v-if="userStore.isLoggedIn">
-          <v-list-item-title> Account </v-list-item-title>
-        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar dense>
@@ -176,7 +166,8 @@ export default {
           @click.stop="drawer = !drawer"
         ></v-app-bar-nav-icon>
       </template>
-      <v-app-bar-title @click="$router.push('/')">{{ siteName }}</v-app-bar-title
+      <v-app-bar-title @click="$router.push('/')" style="cursor:pointer">
+        {{ siteName }}</v-app-bar-title
       >
       <v-tabs
         v-if="
@@ -243,7 +234,7 @@ export default {
         <v-btn icon>
           <v-icon icon="mdi-account"></v-icon>
           <v-menu activator="parent" :close-on-content-click="false">
-            <v-card min-width="300" class="pa-3">
+            <v-card min-width="400" class="pa-3">
               <v-sheet v-if="!userStore.isLoggedIn">
                 <v-form @submit.prevent="login" v-model="loginMenu.loginValid">
                   <v-text-field
@@ -261,15 +252,38 @@ export default {
                   >
                   </v-text-field>
                   <v-card-actions>
-                    <v-btn type="submit" color="green" variant="flat">Login</v-btn>
+                    <v-btn type="submit" color="green" variant="flat"
+                      >Login</v-btn
+                    >
                     <v-spacer></v-spacer>
                     <v-btn @click="$router.push('/register')">Register</v-btn>
                   </v-card-actions>
                 </v-form>
               </v-sheet>
-              <v-sheet v-else>AB</v-sheet>
+              <v-sheet v-else>
+                <v-list>
+                  <v-list-item>
+                    <v-btn class="w-100 justify-start" to="/account">
+                      <template v-slot:prepend>
+                        <v-icon icon="mdi-account"> </v-icon
+                      ></template>
+                      Account</v-btn
+                    >
+                    <v-list-item-title>
+                      <v-btn class="w-100 justify-start" to="/account/processes">
+                        <template v-slot:prepend>
+                          <v-icon icon="mdi-animation-outline"> </v-icon
+                        ></template>
+                        Vorgänge</v-btn
+                      >
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-sheet>
               <v-card-actions v-if="userStore.isLoggedIn">
-                <v-btn color="red" variant="flat" @click="userStore.signOut">Ausloggen</v-btn>
+                <v-btn color="red" variant="flat" @click="logout"
+                  >Ausloggen</v-btn
+                >
               </v-card-actions>
             </v-card>
           </v-menu>

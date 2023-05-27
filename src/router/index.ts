@@ -11,9 +11,15 @@ const router = createRouter({
       meta: { requiresAdmin: false },
     },
     {
+      path: "/account/processes",
+      name: "AccountProcesses",
+      component: () => import("@/views/account/AccountProcessesView.vue"),
+      meta: { requiresAdmin: false },
+    },
+    {
       path: "/account",
       name: "Account",
-      component: () => import("@/views/AccountView.vue"),
+      component: () => import("@/views/account/AccountOverviewView.vue"),
       meta: { requiresAdmin: false },
     },
     {

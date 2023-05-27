@@ -225,6 +225,9 @@ export default {
             </v-text-field>
           </div>
         </div>
+        <v-sheet>
+          Bitte wähle den genauen Zeitraum:
+        </v-sheet>
         <v-card flat class="d-flex pa-2">
           <datepicker
             auto-apply

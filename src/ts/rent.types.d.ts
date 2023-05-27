@@ -70,7 +70,9 @@ export type RentalObjectType = {
 export type UserType = {
   last_name: string;
   first_name: string;
+  username: string;
   email: string;
+  id: number;
 };
 
 export type ReservationType = {
@@ -102,6 +104,7 @@ export type UserStoreType = {
     is_admin: boolean;
     user_permissions: [string];
     username: string;
+    id: number;
     profile: {
       automatically_verifiable: boolean;
       verified: boolean;
