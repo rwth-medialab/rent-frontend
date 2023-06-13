@@ -21,7 +21,6 @@ const router = createRouter({
       name: "AccountPasswordReset",
       component: () => import("@/views/account/AccountPasswordResetView.vue"),
       meta: { requiresAdmin: false },
-      props: true
     },
     {
       path: "/account",
