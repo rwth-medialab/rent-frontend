@@ -1,7 +1,6 @@
 <script lang="ts">
 import { useUserStore } from "@/stores/user";
-import type { UserStoreType, UserType, WorkplaceType } from "@/ts/rent.types";
-import dateFormat from "dateformat";
+import type { UserType } from "@/ts/rent.types";
 export default {
   setup() {
     const userStore = useUserStore();
