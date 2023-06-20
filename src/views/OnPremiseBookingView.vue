@@ -100,12 +100,12 @@ export default {
         <v-card class="ma-2" :title="workplace.name">
           <v-row class="ml-2">
             <v-col cols="4">
-              <v-avatar rounded="0" size="100%">
-                <v-img :src="workplace.image" aspect-ratio="1" />
+              <v-avatar rounded="0" :size="$vuetify.display.xs ? '150' : '150'">
+                <v-img :src="workplace.image" cover aspect-ratio="1" />
               </v-avatar>
             </v-col>
             <v-col class="text-wrap overflow-hidden">
-              <v-sheet max-height="200">
+              <v-sheet max-height="150">
                 {{ workplace.shortdescription }}
               </v-sheet>
             </v-col>
