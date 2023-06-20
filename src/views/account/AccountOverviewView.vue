@@ -28,6 +28,11 @@ export default {
 <template>
   <v-card class="ma-3">
     <v-sheet>
+      <v-alert type="warning">
+        Aktuell sind keine Bearbeiungen der Daten über diese Seite möglich
+      </v-alert>
+    </v-sheet>
+    <v-sheet>
       <v-text-field :readonly="true" label="Nutzername" v-model="user.username">
       </v-text-field>
       <v-text-field :readonly="true" label="Email" v-model="user.email">
