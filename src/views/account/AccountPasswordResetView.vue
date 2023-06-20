@@ -54,7 +54,7 @@ export default {
           })
           .then((rsp) => {
             if (rsp.status.toString().startsWith("2")) {
-              this.userStore.alert("Passwort erfolgreich geändert", "success")
+              this.userStore.alert("Passwort erfolgreich geändert", "success");
               this.$router.push("/");
             }
           });
