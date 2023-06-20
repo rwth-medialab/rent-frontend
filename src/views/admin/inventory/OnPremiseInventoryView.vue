@@ -172,9 +172,7 @@ export default {
         label="Kurzbeschreibung"
       />
       <v-sheet class="">
-        <v-sheet class="text-h6">
-          Beschreibung:
-        </v-sheet>
+        <v-sheet class="text-h6"> Beschreibung: </v-sheet>
         <quill-editor
           content-type="html"
           theme="snow"
@@ -188,23 +186,23 @@ export default {
         <v-sheet class="text-h6">
           Auswahl von sich ausschließenden Arbeitsplätzen:
         </v-sheet>
-      <v-select
-        multiple
-        label="Arbeitsplätze die nicht gleichzeitig besetzt sein sollten"
-        item-title="name"
-        item-value="id"
-        v-model="selectedWorkplace.exclusions"
-        :items="
-          workplaces.filter((x) => {
-            if ('id' in selectedWorkplace) {
-              return x.id != selectedWorkplace.id;
-            } else {
-              return true;
-            }
-          })
-        "
-      />
-    </v-sheet>
+        <v-select
+          multiple
+          label="Arbeitsplätze die nicht gleichzeitig besetzt sein sollten"
+          item-title="name"
+          item-value="id"
+          v-model="selectedWorkplace.exclusions"
+          :items="
+            workplaces.filter((x) => {
+              if ('id' in selectedWorkplace) {
+                return x.id != selectedWorkplace.id;
+              } else {
+                return true;
+              }
+            })
+          "
+        />
+      </v-sheet>
       <v-expansion-panels>
         <v-expansion-panel title="Statusmeldungen">
           <v-expansion-panel-text>
