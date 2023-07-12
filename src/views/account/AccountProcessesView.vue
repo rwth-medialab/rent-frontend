@@ -35,7 +35,7 @@ export default {
           { title: "Kennung", key: "rented_object.merged_identifier" },
           { title: "Gegenstand", key: "reservation.objecttype.name" },
           { title: "Ausgeliehen von:", key: "reservation.reserved_from" },
-          { title: "Ausgeliehen bis:", key: "reserved_until" },
+          { title: "Ausgeliehen bis:", key: "extended_until" },
           { title: "Aktionen", key: "actions", sortable: false },
         ],
         sortBy: [

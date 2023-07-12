@@ -36,10 +36,10 @@ export default {
         data: [],
         filter: { open: true, rented_from: new Date(), rented_until: null },
         groupBy: [{ key: "grouping1" }, { key: "grouping2" }],
-        sortBy: [{ key: "reserved_until" }],
+        sortBy: [{ key: "extended_until" }],
         headers: [
           { title: "Actions", key: "actions", sortable: false },
-          { title: "Rückgabedatum", key: "reserved_until" },
+          { title: "Rückgabedatum", key: "extended_until" },
           { title: "Gegenstand", key: "reservation.objecttype.name" },
           { title: "Identifier", key: "merged_identifier" },
           { title: "zurückerhalten", key: "received_back_at" },
@@ -157,7 +157,7 @@ export default {
               merged_identifier:
                 x.reservation.objecttype.prefix_identifier +
                 x.rented_object.internal_identifier,
-              grouping1: "Rückgabedatum: " + x.reserved_until,
+              grouping1: "Rückgabedatum: " + x.extended_until,
               grouping2:
                 x.reservation.reserver.user.first_name +
                 " " +
@@ -342,6 +342,14 @@ export default {
           @click="openRentalDialog(item.raw)"
         >
           mdi-pencil
+        </v-icon>
+        <v-icon v-if="item.raw.extendable"
+        size="small"
+        @click="userStore.postURLWithAuth({
+              url: 'rentals/' + item.raw.id + '/extend',
+            });
+            updateData();">
+            mdi-clock
         </v-icon>
       </template>
       <template v-slot:item.received_back_at="{ item }">
