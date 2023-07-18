@@ -28,7 +28,7 @@ export default {
   <v-card class="ma-3">
     <v-sheet>
       <v-alert type="warning">
-        Aktuell sind keine Bearbeiungen der Daten über diese Seite möglich
+        Aktuell ist die Bearbeitung deiner Daten nicht über diese Seite möglich.
       </v-alert>
     </v-sheet>
     <v-sheet>

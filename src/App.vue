@@ -323,9 +323,10 @@ export default {
         "
         ><div class="text-center">
           <!-- Aktuell nur möglich wenn direkte Mitlgiedschaft zur Fakultät 7.2 besteht-->
-          Es besteht die Zugehörigkeit zu einem leramtsbezogenen Studiengang
-          automatisch über das OAuth der RWTH zu verifizieren. Klicke dafür auf
-          den folgenden Button und folge den Anweisungen.
+          Die Zugehörigkeit zu einem leramtsbezogenen Studiengang kann
+          möglicherweise automatisch verifiziert werden(bei direkter
+          Zugehörigkeit zur Fakultät 7.2). Klicke dafür auf den folgenden Button
+          und folge den Anweisungen.
         </div>
         <div class="d-flex justify-center">
           <v-btn flat variant="tonal" @click="userStore.accountVerification"
