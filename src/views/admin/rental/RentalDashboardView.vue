@@ -19,7 +19,7 @@ export default {
         sortBy: [{ key: "reserved_from" }],
         filter: {
           open: true,
-          reserved_from: new Date(),
+          reserved_from: null,
           reserved_until: null,
           canceled: false,
         },
@@ -54,6 +54,7 @@ export default {
         },
       },
       handleDialog: {
+        valid_selection: false,
         open: false,
         possiblePriorities: [],
         selectedPriority: null,
@@ -86,6 +87,17 @@ export default {
     },
     "rentals.filter.open": function () {
       this.updateData();
+    },
+    "handleDialog.reservations": {
+      handler() {
+        var localreservations = this.handleDialog.reservations.filter((x) => {
+          if ("selectedObjects" in x) {
+            return x.count != x.selectedObjects.length;
+          }
+        });
+        this.handleDialog.valid_selection = localreservations.length == 0;
+      },
+      deep: true,
     },
   },
   methods: {
@@ -150,10 +162,12 @@ export default {
           params: rentalparams,
         })
         .then((response) => {
+          // reorder and prepare data
           response.map((x) => {
             // console.log(x);
             data.push({
               ...x,
+              //create human readable identifier
               merged_identifier:
                 x.reservation.objecttype.prefix_identifier +
                 x.rented_object.internal_identifier,
@@ -171,37 +185,59 @@ export default {
     },
     async openHandleDialog(item) {
       console.log(this.reservations.data);
-      this.handleDialog.reservations = this.reservations.data.filter(
+      this.handleDialog.reservations = await this.reservations.data.filter(
         (x) =>
           x.reserver.id == item.reserver.id &&
           x.reserved_from == item.reserved_from &&
           x.canceled == null
       );
       console.log(this.handleDialog.reservations);
-      this.handleDialog.reservations.forEach(async (selectedReservation) => {
-        selectedReservation["selectedObjects"] = [];
-        selectedReservation["selectableObjects"] = (
-          await this.userStore.getFromURLWithAuth({
-            url:
-              "rentalobjecttypes/" +
-              selectedReservation.objecttype.id +
-              "/freeobjects",
-          })
-        ).map((x) => {
-          // merge the identifiers for better recognition
-          return {
-            ...x,
-            merged_identifier:
-              selectedReservation.objecttype.prefix_identifier +
-              String(x.internal_identifier),
-          };
-        });
-      });
+      var tempselectedObjects = [];
+      await this.handleDialog.reservations.forEach(
+        async (selectedReservation) => {
+          tempselectedObjects = (
+            await this.userStore.getFromURLWithAuth({
+              url:
+                "reservations/" + selectedReservation.id + "/selectedobjects",
+            })
+          ).map((x) => {
+            // merge the identifiers for better recognition
+            return {
+              ...x,
+              merged_identifier:
+                selectedReservation.objecttype.prefix_identifier +
+                String(x.internal_identifier),
+            };
+          });
+          selectedReservation["selectableObjects"] = (
+            await this.userStore.getFromURLWithAuth({
+              url:
+                "rentalobjecttypes/" +
+                selectedReservation.objecttype.id +
+                "/freeobjects",
+            })
+          ).map((x) => {
+            // merge the identifiers for better recognition
+            return {
+              ...x,
+              merged_identifier:
+                selectedReservation.objecttype.prefix_identifier +
+                String(x.internal_identifier),
+            };
+          });
+          selectedReservation["selectableObjects"] =
+            selectedReservation["selectableObjects"].concat(
+              tempselectedObjects
+            );
+          //selected objects are only ids
+          selectedReservation["selectedObjects"] = tempselectedObjects.map(x => x['id']);
+        }
+      );
+
       if (!item.reserver.verified) {
         this.handleDialog.possiblePriorities =
           await this.userStore.getFromURLWithAuth({ url: "priority" });
       }
-      console.log(this.handleDialog.possiblePriorities);
       this.handleDialog.open = true;
     },
     openRentalDialog(item) {
@@ -227,10 +263,18 @@ export default {
           url: "rentals/bulk",
           params: this.handleDialog.reservations,
         })
-        .then(() => {
-          this.handleDialog.open = false;
-          setTimeout(this.updateData, 500);
-        });
+        .then(() => {});
+    },
+    handOutReservations() {
+      //save currently selected objects
+      this.turnReservationsIntoRentals();
+      var reservationids = this.handleDialog.reservations.map(x => x.id)
+      this.userStore
+        .postURLWithAuth({
+          url: "rentals/bulkhandout",
+          params: {reservations: reservationids},
+        })
+        .then(() => {});
     },
     downloadForm() {
       this.userStore.downloadFilledInTemplateWithAuth({
@@ -343,13 +387,17 @@ export default {
         >
           mdi-pencil
         </v-icon>
-        <v-icon v-if="item.raw.extendable"
-        size="small"
-        @click="userStore.postURLWithAuth({
+        <v-icon
+          v-if="item.raw.extendable"
+          size="small"
+          @click="
+            userStore.postURLWithAuth({
               url: 'rentals/' + item.raw.id + '/extend',
             });
-            updateData();">
-            mdi-clock
+            updateData();
+          "
+        >
+          mdi-clock
         </v-icon>
       </template>
       <template v-slot:item.received_back_at="{ item }">
@@ -469,12 +517,6 @@ export default {
             </v-list>
           </v-col>
         </v-row>
-        <v-alert
-          type="error"
-          v-if="reservation.selectedObjects.length > reservation.count"
-        >
-          Zu viele Gegenstände ausgewählt</v-alert
-        >
         <v-select
           v-model="reservation.selectedObjects"
           :items="reservation.selectableObjects"
@@ -483,16 +525,9 @@ export default {
           item-value="id"
         ></v-select>
       </v-card>
-      <div
-        class="text-red"
-        v-if="
-          handleDialog.reservations.filter(
-            (x) => x.count != x.selectedObjects.length
-          ).length != 0
-        "
-      >
+      <v-alert type="warning" v-if="!handleDialog.valid_selection">
         Die ausgewählten Anzahlen passen irgendwo nicht
-      </div>
+      </v-alert>
       <div
         v-if="!handleDialog.reservations[0].reserver.verified"
         class="text-red"
@@ -502,23 +537,16 @@ export default {
       <v-card-actions
         ><v-spacer />
         <!-- enable button if number of selectedObjects equals the count  for each reservation-->
-
-        <v-btn
-          :disabled="
-            handleDialog.reservations.filter(
-              (x) => x.count != x.selectedObjects.length
-            ).length != 0
-          "
-          @click="downloadForm"
+        <v-btn @click="turnReservationsIntoRentals">Speichern</v-btn>
+        <v-btn :disabled="!handleDialog.valid_selection" @click="downloadForm"
           >Download Formular</v-btn
         >
         <v-btn
           :disabled="
-            handleDialog.reservations.filter(
-              (x) => x.count != x.selectedObjects.length
-            ).length != 0 || !handleDialog.reservations[0].reserver.verified
+            !handleDialog.valid_selection ||
+            !handleDialog.reservations[0].reserver.verified
           "
-          @click="turnReservationsIntoRentals"
+          @click="handOutReservations"
           >Verleihen</v-btn
         >
       </v-card-actions></v-card
